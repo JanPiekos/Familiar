@@ -9,6 +9,6 @@ export default defineConfig({
 	},
 	test: {
 		environment: "jsdom",
-		include: ["tests/profile-navigation.test.tsx"],
+		include: ["tests/profile-*.test.tsx"],
 	},
 });

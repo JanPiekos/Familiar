@@ -1,5 +1,5 @@
 import { ScrollShadow } from "@heroui/react";
-import { Search } from "lucide-react";
+import { Search2 as Search2Outline } from "@keyline-icons/react"
 import type React from "react";
 import { useMemo } from "react";
 import { useDataTableFilters } from "@/components/data-table-filter";
@@ -575,7 +575,7 @@ export function FilterBar<TData>({
 				<div className="min-w-32 flex-1">
 					<InputGroup className="w-full">
 						<InputGroupAddon>
-							<Search className="size-4" />
+							<Search2Outline />
 						</InputGroupAddon>
 						<InputGroupInput
 							aria-label={searchPlaceholder}

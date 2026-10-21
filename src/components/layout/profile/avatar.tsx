@@ -52,6 +52,7 @@ export default function UserAvatar({
 		<div className="relative inline-flex shrink-0">
 			<Avatar
 				className={cn(
+					"bg-background",
 					sizeClasses,
 					hasOutline && "ring-6 ring-background",
 					className,
