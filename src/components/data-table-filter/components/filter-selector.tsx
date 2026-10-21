@@ -1,9 +1,6 @@
-import {
-	ArrowRightIcon,
-	ChevronLeft,
-	ChevronRightIcon,
-	FilterIcon,
-} from "lucide-react";
+import { Filter as FilterOutline } from "@keyline-icons/react"
+import { ArrowRight as ArrowRightOutline } from "@keyline-icons/react"
+import { ChevronRight as ChevronRightOutline } from "@keyline-icons/react"
 import React, {
 	isValidElement,
 	memo,
@@ -143,7 +140,7 @@ function FilterSelectorInner<TData>({
 										onSelect={() => setProperty(undefined)}
 										className="cursor-pointer text-muted-foreground font-medium mb-1"
 									>
-										<ChevronLeft className="size-4" />
+										<ChevronRightOutline className="size-4" />
 										{t("back", locale) || "Back"}
 									</CommandItem>
 								)}
@@ -195,7 +192,7 @@ function FilterSelectorInner<TData>({
 					variant="outline"
 					aria-label={t("filter", locale)}
 				>
-					<OutlineFilter data-icon="inline-start" />
+					<FilterOutline />
 					{!compact && t("filter", locale)}
 				</Button>
 			</PopoverTrigger>
@@ -265,7 +262,7 @@ export function FilterableColumn<TData, TType extends ColumnDataType, TVal>({
 					{<column.icon strokeWidth={2.25} className="size-4" />}
 					<span>{column.displayName}</span>
 				</div>
-				<ArrowRightIcon className="size-4 opacity-0 group-aria-selected:opacity-100" />
+				<ArrowRightOutline className="size-4 opacity-0 group-aria-selected:opacity-100" />
 			</div>
 		</CommandItem>
 	);
@@ -347,7 +344,7 @@ function QuickSearchFiltersComponent<TData>({
 											<span className="text-muted-foreground">
 												{column.displayName}
 											</span>
-											<ChevronRightIcon className="size-3.5 text-muted-foreground/75" />
+											<ChevronRightOutline className="size-3.5 text-muted-foreground/75" />
 											<span>
 												{v.label}
 												<sup

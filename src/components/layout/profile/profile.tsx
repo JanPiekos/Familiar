@@ -2,8 +2,6 @@ import { Typography } from "@heroui/react";
 import {
 	useNavigate,
 	useParams,
-	useRouter,
-	useSearch,
 } from "@tanstack/react-router";
 import { Flag, Share, UserLock } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -31,7 +29,7 @@ import { createStaticList } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import type { TUserProfile } from "@/types/user";
 import { TRoles } from "@/types/user/roles";
-import { UserSettingsModal } from "../modal/profile/settings/settings-modal";
+import { useOpenProfileSettings } from "@/hooks/user/use-open-profile-settings";
 import UserAvatar from "./avatar";
 import { ProfileBadge } from "./badge";
 import { ProfileBio } from "./bio";
@@ -293,49 +291,13 @@ export function UserProfileSidebar({
 }) {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
-	const router = useRouter();
+	const handleOpenSettings = useOpenProfileSettings();
 	const { user: currentUser } = useAuth();
 	const isTablet = useIsTablet();
 	const createDirectConversation = usePostConversationDirect();
 	const actionButtonSize = isTablet ? "2xl" : "xl";
 
 	const { locale } = useParams({ strict: false }) as { locale?: string };
-
-	const search = useSearch({ strict: false }) as { settings?: "profile" };
-
-	const settingsOpen = search.settings === "profile";
-
-	const handleOpenSettings = () => {
-		void navigate({
-			to: ".",
-			search: (previous) => ({
-				...previous,
-				settings: "profile",
-			}),
-
-			// Show the standalone settings URL in the adress bar.
-			mask: {
-				to: "/{-$locale}/settings/profile",
-			},
-		});
-	};
-
-	const handleCloseSettings = () => {
-		if (!settingsOpen) return;
-		router.history.back();
-	};
-
-	const handleSettingsOpenChange = (open: boolean) => {
-		if (!open) {
-			handleCloseSettings();
-		}
-	};
-
-	const handleSaveSettings = () => {
-		// TODO: save using the settings API
-		toast.info("Settings saved successfully");
-		handleCloseSettings();
-	};
 
 	const requireAuthentication = (action: "follow" | "message") => {
 		if (currentUser) return true;
@@ -625,14 +587,6 @@ export function UserProfileSidebar({
 				</div>
 			</aside>
 
-			{/* User settings modal */}
-			{isMe && (
-				<UserSettingsModal
-					open={settingsOpen}
-					onOpenChange={handleSettingsOpenChange}
-					onSave={handleSaveSettings}
-				/>
-			)}
 		</>
 	);
 }

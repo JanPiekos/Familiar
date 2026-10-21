@@ -35,9 +35,9 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import {
 	useDeletePortfolioPost,
-	useArtistPortfolioPost,
+	usePortfolioPost,
 } from "@/hooks/portfolio/use-portfolio";
-import { useUserByUsername } from "@/hooks/user/use-user";
+import { useUserById } from "@/hooks/user/use-user";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import { ContentWarningOverlay } from "../../content-warning-overlay";
@@ -60,7 +60,6 @@ interface PortfolioPostPageProps {
 
 function usePortfolioPostController({
 	postId,
-	username,
 	onDeleted,
 }: {
 	postId: string;
@@ -69,18 +68,18 @@ function usePortfolioPostController({
 }) {
 	const { t, i18n } = useTranslation();
 	const { user: currentUser } = useAuth();
-	const { user: profileUser, isPending: isUserPending } = useUserByUsername(
-		username ?? "",
-	);
 	const queryClient = useQueryClient();
 
 	const {
 		data: post,
 		isPending: isPostPending,
 		isError,
-	} = useArtistPortfolioPost(username ?? "", postId);
-
-	const isPending = isPostPending || isUserPending;
+	} = usePortfolioPost(postId);
+	// The post response owns its author identity; a URL username is only navigation context.
+	const { user: profileUser, isPending: isUserPending } = useUserById(
+		post?.userId ?? "",
+	);
+	const isPending = isPostPending || (Boolean(post?.userId) && isUserPending);
 
 	const deletePostMutation = useDeletePortfolioPost();
 
@@ -96,7 +95,7 @@ function usePortfolioPostController({
 	useEffect(() => {
 		setLiked(Boolean(post?.likedByCurrentUser));
 		setBookmarked(Boolean(post?.bookmarkedByCurrentUser));
-	}, [post?.likedByCurrentUser, post?.bookmarkedByCurrentUser]);
+	}, [postId, post?.likedByCurrentUser, post?.bookmarkedByCurrentUser]);
 
 	const images = useMemo(
 		() =>
@@ -141,8 +140,8 @@ function usePortfolioPostController({
 
 	const canManagePost = Boolean(
 		currentUser?.userId &&
-			profileUser?.userId &&
-			currentUser.userId === profileUser.userId,
+			post?.userId &&
+			currentUser.userId === post.userId,
 	);
 
 	const goToPreviousMedia = () => {
@@ -162,6 +161,7 @@ function usePortfolioPostController({
 	};
 
 	const handleDelete = async () => {
+		if (!canManagePost) return;
 		try {
 			await deletePostMutation.mutateAsync(postId);
 

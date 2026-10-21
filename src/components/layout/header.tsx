@@ -1,18 +1,9 @@
+import { Home, Menu, Message } from "@keyline-icons/react"
+import { Home as HomeFill } from "@keyline-icons/react/fill"
 import { Link, useLocation } from "@tanstack/react-router";
 import { ShoppingCart } from "lucide-react";
 import { memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-	OutlineChat,
-	OutlineFileText,
-	OutlineHome,
-	OutlineMenu,
-	OutlineReceipt,
-	SolidChat,
-	SolidFileText,
-	SolidHome,
-	SolidReceipt,
-} from "@/components/icons/icons";
 import { Elevated } from "@/lib/elevated";
 import { localizePath, stripLocaleFromPathname } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -31,6 +22,7 @@ import { BasketDropdown } from "./basket-dropdown";
 import UserDropDown from "./profile/drop-down";
 import User from "./profile/user";
 import CurrencySelect from "./select/currency";
+
 
 function HeaderUserSkeleton() {
 	return (
@@ -79,7 +71,7 @@ export default function Header() {
 
 						<Button variant={"secondary"} size={"icon-xl"} asChild>
 							<Link to={localizePath("/chat", i18n.language) as any}>
-								<OutlineChat />
+								<Message />
 							</Link>
 						</Button>
 						{isPending ? (
@@ -128,7 +120,7 @@ const MobileNav = () => {
 			<NavWrapper className="lg:hidden">
 				<SheetTrigger asChild>
 					<Button variant="ghost" size="icon">
-						<OutlineMenu />
+						<Menu />
 					</Button>
 				</SheetTrigger>
 			</NavWrapper>
@@ -194,7 +186,7 @@ const NavLinks = memo(() => {
 	const getIconState = (path: string, isActive: boolean) => {
 		switch (path) {
 			case "/":
-				return isActive ? <SolidHome /> : <OutlineHome />;
+				return isActive ? <HomeFill /> : <Home />;
 			// case "/roadmap":
 			// 	return isActive ? <SolidReceipt /> : <OutlineReceipt />;
 			// case "/shop":
