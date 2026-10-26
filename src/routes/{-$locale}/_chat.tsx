@@ -14,10 +14,10 @@ export const Route = createFileRoute("/{-$locale}/_chat")({
 
 function ChatLayout() {
 	return (
-		<div className="flex h-dvh flex-col">
-			<Container className="flex h-full flex-1 flex-col">
+		<div className="mobile-dock-layout flex h-dvh flex-col">
+			<Container className="flex min-h-0 flex-1 flex-col">
 				<Header />
-				<main className="flex min-h-0 flex-1 flex-col pt-5 pb-10 px-4">
+				<main className="flex min-h-0 flex-1 flex-col px-4 lg:pt-2 lg:pb-4">
 					<Outlet />
 				</main>
 				<FloatingToolbar />

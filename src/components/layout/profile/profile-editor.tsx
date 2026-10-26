@@ -62,7 +62,7 @@ export function ProfileEditor({
 				username: watchedUsername || "",
 				accentColor: watchedAccentColor || undefined,
 			}) as TUserProfile,
-		[watchedAccentColor, watchedAvatar, watchedDisplayName, watchedUsername],
+		[watchedAccentColor, watchedAvatar, watchedDisplayName, watchedUsername, t],
 	);
 
 	const handleFileChange = (

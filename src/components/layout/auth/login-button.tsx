@@ -7,7 +7,7 @@ export default function LoginButton() {
 	return (
 		<Button>
 			<SolidUser />
-			<span className={"hidden sm:inline-block"}>{t("auth.login")}</span>
+			<span className={"hidden sm:inline-block"}>{t("auth.login.cta")}</span>
 		</Button>
 	);
 }

@@ -13,6 +13,7 @@ import React, {
 	useState,
 	type MutableRefObject,
 } from "react";
+import { useTranslation } from "react-i18next";
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -64,6 +65,7 @@ function Carousel({
 	children,
 	...props
 }: React.ComponentProps<"section"> & CarouselProps) {
+	const { t } = useTranslation();
 	const [carouselRef, api] = useEmblaCarousel(
 		{
 			...opts,
@@ -75,12 +77,15 @@ function Carousel({
 	const [canScrollPrev, setCanScrollPrev] = useState(false);
 	const [canScrollNext, setCanScrollNext] = useState(false);
 
-	const onSelect = useCallback((api: CarouselApi) => {
-		if (!api) return;
+	const onSelect = useCallback(
+		(api: CarouselApi) => {
+			if (!api) return;
 
-		setCanScrollPrev(api.canScrollPrev());
-		setCanScrollNext(api.canScrollNext());
-	}, []);
+			setCanScrollPrev(api.canScrollPrev());
+			setCanScrollNext(api.canScrollNext());
+		},
+		[t],
+	);
 
 	const onSelectRef = useRef(onSelect);
 
@@ -100,11 +105,11 @@ function Carousel({
 
 	const scrollPrev = useCallback(() => {
 		api?.scrollPrev();
-	}, [api]);
+	}, [api, t]);
 
 	const scrollNext = useCallback(() => {
 		api?.scrollNext();
-	}, [api]);
+	}, [api, t]);
 
 	const handleKeyDown = useCallback(
 		(event: React.KeyboardEvent<HTMLElement>) => {
@@ -116,7 +121,7 @@ function Carousel({
 				scrollNext();
 			}
 		},
-		[scrollPrev, scrollNext],
+		[scrollPrev, scrollNext, t],
 	);
 
 	useEffect(() => {
@@ -156,8 +161,8 @@ function Carousel({
 			<section
 				onKeyDownCapture={handleKeyDown}
 				className={cn("relative", className)}
-				aria-roledescription="carousel"
-				aria-label="Carousel"
+				aria-roledescription={t("ui.carousel_2c6160", "carousel")}
+				aria-label={t("ui.carousel", "Carousel")}
 				data-slot="carousel"
 				{...props}
 			>
@@ -192,11 +197,12 @@ function CarouselItem({
 	className,
 	...props
 }: React.ComponentProps<"fieldset">) {
+	const { t } = useTranslation();
 	const { orientation } = useCarousel();
 
 	return (
 		<fieldset
-			aria-roledescription="slide"
+			aria-roledescription={t("ui.slide", "slide")}
 			data-slot="carousel-item"
 			className={cn(
 				"min-w-0 shrink-0 grow-0 basis-full",
@@ -214,6 +220,7 @@ function CarouselPrevious({
 	size = "icon",
 	...props
 }: React.ComponentProps<typeof Button>) {
+	const { t } = useTranslation();
 	const { orientation, scrollPrev, canScrollPrev } = useCarousel();
 
 	return (
@@ -233,7 +240,9 @@ function CarouselPrevious({
 			{...props}
 		>
 			<ArrowLeft />
-			<span className="sr-only">Previous slide</span>
+			<span className="sr-only">
+				{t("ui.previous_slide", "Previous slide")}
+			</span>
 		</Button>
 	);
 }
@@ -244,6 +253,7 @@ function CarouselNext({
 	size = "icon",
 	...props
 }: React.ComponentProps<typeof Button>) {
+	const { t } = useTranslation();
 	const { orientation, scrollNext, canScrollNext } = useCarousel();
 
 	return (
@@ -263,7 +273,7 @@ function CarouselNext({
 			{...props}
 		>
 			<ArrowRight />
-			<span className="sr-only">Next slide</span>
+			<span className="sr-only">{t("ui.next_slide", "Next slide")}</span>
 		</Button>
 	);
 }

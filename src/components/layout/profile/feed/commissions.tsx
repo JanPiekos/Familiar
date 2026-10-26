@@ -64,6 +64,7 @@ import {
 } from "@/types/commissions";
 import type { TUserProfile } from "@/types/user";
 import { BookmarkButton } from "../../bookmark";
+import appI18n from "@/lib/i18n";
 
 interface ProfileCommissionsProps {
 	artist: TUserProfile;
@@ -143,7 +144,8 @@ function getCommissionCategoryId(commission: TCommissionDetailResponse) {
 }
 
 function getCommissionCategoryLabel(commission: TCommissionDetailResponse) {
-	if (!commission.category?.name) return "Uncategorized";
+	if (!commission.category?.name)
+		return appI18n.t("ui.uncategorized", "Uncategorized");
 
 	return commission.category.parentName
 		? `${commission.category.parentName} / ${commission.category.name}`
@@ -431,11 +433,12 @@ function useCommissionFilterGroups({
 	statusOptions: SelectOption[];
 	tagOptions: SelectOption[];
 }) {
+	const { t } = useTranslation();
 	return useMemo<FilterGroup<TCommissionDetailResponse>[]>(
 		() => [
 			{
 				id: "category",
-				label: "Category",
+				label: t("ui.category", "Category"),
 				type: "select",
 				icon: FolderOpen,
 				getItemValue: (commission) => getCommissionCategoryId(commission),
@@ -443,7 +446,7 @@ function useCommissionFilterGroups({
 			},
 			{
 				id: "status",
-				label: "Status",
+				label: t("ui.status", "Status"),
 				type: "select",
 				icon: ListFilterIcon,
 				getItemValue: (commission) => String(commission.commissionStatus),
@@ -451,7 +454,7 @@ function useCommissionFilterGroups({
 			},
 			{
 				id: "tags",
-				label: "Tags",
+				label: t("ui.tags", "Tags"),
 				type: "multiselect",
 				icon: Tag,
 				getItemValue: (commission) => {
@@ -467,13 +470,13 @@ function useCommissionFilterGroups({
 			},
 			{
 				id: "price",
-				label: "Price",
+				label: t("ui.price", "Price"),
 				type: "range",
 				icon: Wallet,
 				getItemValue: (commission) => commission.basePrice,
 			},
 		],
-		[categoryOptions, statusOptions, tagOptions],
+		[categoryOptions, statusOptions, tagOptions, t],
 	);
 }
 
@@ -1020,10 +1023,14 @@ function CommissionReelControls({
 	setCurrentImageIndex: Dispatch<SetStateAction<number>>;
 	setIsAutoPlayPaused: Dispatch<SetStateAction<boolean>>;
 }) {
+	const { t } = useTranslation();
 	return (
 		<>
 			<CommissionImageNavigationButton
-				label={`Previous image for ${commissionTitle}`}
+				label={t("ui.previous_image_for_value0", {
+					defaultValue: "Previous image for {{value0}}",
+					value0: commissionTitle,
+				})}
 				className="left-2"
 				onClick={() =>
 					setCurrentImageIndex((previous) =>
@@ -1035,7 +1042,10 @@ function CommissionReelControls({
 			</CommissionImageNavigationButton>
 
 			<CommissionImageNavigationButton
-				label={`Next image for ${commissionTitle}`}
+				label={t("ui.next_image_for_value0", {
+					defaultValue: "Next image for {{value0}}",
+					value0: commissionTitle,
+				})}
 				className="right-2"
 				onClick={() =>
 					setCurrentImageIndex((previous) =>
@@ -1091,6 +1101,7 @@ function CommissionAutoPlayButton({
 	isAutoPlayPaused: boolean;
 	setIsAutoPlayPaused: Dispatch<SetStateAction<boolean>>;
 }) {
+	const { t } = useTranslation();
 	return (
 		<div className="absolute top-2 left-2 z-20">
 			<Button
@@ -1102,7 +1113,9 @@ function CommissionAutoPlayButton({
 				}}
 			>
 				<span className="sr-only">
-					{isAutoPlayPaused ? "Play auto" : "Pause auto"}
+					{isAutoPlayPaused
+						? t("ui.play_auto", "Play auto")
+						: t("ui.pause_auto", "Pause auto")}
 				</span>
 				{isAutoPlayPaused ? (
 					<Play className="size-4" />
@@ -1380,12 +1393,16 @@ function CommissionFolders({
 	folders: CategoryFolder[];
 	artist: TUserProfile;
 }) {
+	const { t } = useTranslation();
 	if (folders.length === 0) {
 		return (
 			<EmptyPage
 				icon={OutlineFilter}
-				title="Not found"
-				description="No commissions found matching your filters."
+				title={t("ui.not_found", "Not found")}
+				description={t(
+					"ui.no_commissions_found_matching_your_filters",
+					"No commissions found matching your filters.",
+				)}
 			/>
 		);
 	}
@@ -1410,6 +1427,7 @@ function CommissionFolderSection({
 	folder: CategoryFolder;
 	artist: TUserProfile;
 }) {
+	const { t } = useTranslation();
 	return (
 		<section className="space-y-6">
 			<div className="flex items-center gap-2">
@@ -1417,7 +1435,9 @@ function CommissionFolderSection({
 					{folder.label}
 				</h2>
 				<Badge variant="secondary" className="whitespace-nowrap">
-					{folder.isClosed ? "Closed" : formatCommissionStatus(folder.status)}
+					{folder.isClosed
+						? t("ui.closed", "Closed")
+						: formatCommissionStatus(folder.status)}
 				</Badge>
 			</div>
 

@@ -115,7 +115,7 @@ function usePortfolioPostController({
 						Boolean(image.fullSize?.path) || Boolean(image.thumbnail?.path),
 				)
 				.sort((a, b) => (a.position ?? 0) - (b.position ?? 0)),
-		[post?.images],
+		[post?.images, t],
 	);
 
 	useEffect(() => {
@@ -251,6 +251,7 @@ function PostMoreMenuItems({ controller }: { controller: Controller }) {
 		return (
 			<>
 				<DropdownMenuItem
+					disabled
 					onSelect={() => {
 						toast.info(
 							t(
@@ -302,6 +303,7 @@ function PostMoreMenuItems({ controller }: { controller: Controller }) {
 			</DropdownMenuItem>
 			<DropdownMenuSeparator />
 			<DropdownMenuItem
+				disabled
 				variant={"destructive"}
 				onSelect={() => {
 					toast.info(
@@ -405,7 +407,10 @@ function PostMedia({ controller }: { controller: Controller }) {
 								<button
 									key={image.id || index}
 									type="button"
-									aria-label={`Show image ${index + 1}`}
+									aria-label={t("ui.show_image_value0", {
+										defaultValue: "Show image {{value0}}",
+										value0: index + 1,
+									})}
 									className={cn(
 										"size-1.5 rounded-full bg-white/50 transition-all",
 										index === activeMediaIndex && "w-4 bg-white",
@@ -484,6 +489,7 @@ function PostActions({ controller }: { controller: Controller }) {
 			<div className="flex items-center px-2 pt-2">
 				<div className="flex items-center">
 					<Button
+						disabled
 						type="button"
 						variant="ghost"
 						size="icon"
@@ -502,6 +508,7 @@ function PostActions({ controller }: { controller: Controller }) {
 					</Button>
 
 					<Button
+						disabled
 						type="button"
 						variant="ghost"
 						size="icon"
@@ -512,6 +519,7 @@ function PostActions({ controller }: { controller: Controller }) {
 					</Button>
 
 					<Button
+						disabled
 						type="button"
 						variant="ghost"
 						size="icon"
@@ -523,6 +531,7 @@ function PostActions({ controller }: { controller: Controller }) {
 				</div>
 
 				<Button
+					disabled
 					type="button"
 					variant="ghost"
 					size="icon"
@@ -545,10 +554,14 @@ function PostActions({ controller }: { controller: Controller }) {
 
 			<div className="px-4 pb-3">
 				<Typography.Paragraph size="base">
-					{displayedLikeCount.toLocaleString(i18n.language)}{" "}
-					{displayedLikeCount === 1
-						? t("components.portfolio.post.like_count_single", "like")
-						: t("components.portfolio.post.like_count_plural", "likes")}
+					{t(
+						"components.portfolio.post.likes",
+						`${displayedLikeCount.toLocaleString(i18n.language)} ${displayedLikeCount === 1 ? "like" : "likes"}`,
+						{
+							count: displayedLikeCount,
+							formattedCount: displayedLikeCount.toLocaleString(i18n.language),
+						},
+					)}
 				</Typography.Paragraph>
 
 				{createdAt && (
@@ -742,7 +755,7 @@ export function PortfolioPostPage({
 								type="button"
 								variant="secondary"
 								size="icon-xl"
-								aria-label="Back"
+								aria-label={t("ui.back", "Back")}
 								className="absolute left-4 top-4 z-30"
 								onClick={onBack}
 							>
@@ -764,7 +777,7 @@ export function PortfolioPostPage({
 										variant="ghost"
 										size="icon"
 										className="ml-auto rounded-full"
-										aria-label="More"
+										aria-label={t("ui.more", "More")}
 									>
 										<MoreHorizontal className="size-5" />
 									</Button>

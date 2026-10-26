@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { AccountNavigation } from "@/components/layout/account-navigation";
 import { DashboardSidebar } from "@/components/layout/dashboard/sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { detectLocaleFromPathOrParams, setSSRLanguage } from "@/lib/i18n";
@@ -37,11 +38,12 @@ function DashboardLayout() {
 	}
 
 	return (
-		<SidebarProvider>
+		<SidebarProvider className="mobile-dock-layout">
 			<DashboardSidebar />
 			<SidebarInset className="bg-muted/40">
 				<Outlet />
 			</SidebarInset>
+			<AccountNavigation className="lg:hidden" />
 		</SidebarProvider>
 	);
 }

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getUserAccentStylesFromHex } from "@/lib/colors";
 import type { TUserResponse } from "@/types/user";
+import { useTranslation } from "react-i18next";
 
 const imageCache = new Map<string, Promise<void> | true>();
 
@@ -32,11 +33,12 @@ function useImagePreload(src?: string | null) {
 }
 
 function ProfileCover({ user }: { user: TUserResponse }) {
+	const { t } = useTranslation();
 	useImagePreload(user.coverPath);
 
 	const { coverBgStyle } = useMemo(
 		() => getUserAccentStylesFromHex(user.accentColor),
-		[user.accentColor],
+		[user.accentColor, t],
 	);
 
 	return (
@@ -48,7 +50,10 @@ function ProfileCover({ user }: { user: TUserResponse }) {
 			{user.coverPath && (
 				<img
 					src={user.coverPath}
-					alt={`${user.username} cover`}
+					alt={t("ui.value0_cover", {
+						defaultValue: "{{value0}} cover",
+						value0: user.username,
+					})}
 					className="h-full w-full object-cover"
 				/>
 			)}

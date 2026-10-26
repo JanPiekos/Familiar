@@ -11,6 +11,7 @@ import {
 } from "src/components/ui/popover";
 import { Separator } from "src/components/ui/separator";
 import { cn } from "src/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface DataGridColumnFilterProps<TData, TValue> {
 	column?: Column<TData, TValue>;
@@ -66,6 +67,7 @@ function DataGridColumnFilter<TData, TValue>({
 	title,
 	options,
 }: DataGridColumnFilterProps<TData, TValue>) {
+	const { t } = useTranslation();
 	const facets = column?.getFacetedUniqueValues();
 	const selectedValues = new Set(
 		column?.getFilterValue() as string[] | undefined,
@@ -78,11 +80,11 @@ function DataGridColumnFilter<TData, TValue>({
 		return options.filter((option) =>
 			option.label.toLowerCase().includes(searchQuery.toLowerCase()),
 		);
-	}, [options, searchQuery]);
+	}, [options, searchQuery, t]);
 
 	const selectedOptionBadges = useMemo(
 		() => getSelectedOptionBadges(options, selectedValues),
-		[options, selectedValues],
+		[options, selectedValues, t],
 	);
 
 	return (
@@ -106,7 +108,7 @@ function DataGridColumnFilter<TData, TValue>({
 										variant="secondary"
 										className="rounded-sm px-1 font-normal"
 									>
-										{selectedValues.size} selected
+										{selectedValues.size} {t("ui.selected", "selected")}
 									</Badge>
 								) : (
 									selectedOptionBadges
@@ -128,7 +130,7 @@ function DataGridColumnFilter<TData, TValue>({
 				<div className="max-h-[300px] overflow-y-auto">
 					{filteredOptions.length === 0 ? (
 						<div className="text-muted-foreground py-6 text-center text-sm">
-							No results found.
+							{t("ui.no_results_found", "No results found.")}
 						</div>
 					) : (
 						<div className="p-1">
@@ -182,7 +184,7 @@ function DataGridColumnFilter<TData, TValue>({
 									onClick={() => column?.setFilterValue(undefined)}
 									className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center justify-center rounded-sm px-2 py-1.5 text-sm outline-hidden select-none"
 								>
-									Clear filters
+									{t("ui.clear_filters", "Clear filters")}
 								</button>
 							</div>
 						</>

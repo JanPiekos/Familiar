@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import appI18n from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 
 /**
  * The page framing the Lifeline expects.
@@ -39,7 +41,7 @@ export function LifelineShell({
 export function LifelineNav({
 	logo,
 	logoHref = "/",
-	logoLabel = "Home",
+	logoLabel = appI18n.t("ui.home", "Home"),
 	children,
 	className,
 	containerClassName,
@@ -54,6 +56,7 @@ export function LifelineNav({
 	className?: string;
 	containerClassName?: string;
 }) {
+	useTranslation();
 	return (
 		<nav
 			className={cn(

@@ -1,5 +1,6 @@
 import { OutlineArrowLeft } from "@/components/icons/icons";
 import { defineLifeline, type LifelineMilestones } from "@/lib/lifeline-data";
+import appI18n from "@/lib/i18n";
 
 interface RoadmapEntry {
 	id: string;
@@ -12,13 +13,20 @@ const ROADMAP_ENTRIES: RoadmapEntry[] = [
 	{
 		id: "commission-messaging",
 		date: "2026-08-15",
-		title: "Commission Messaging and Progress Updates",
+		get title() {
+			return appI18n.t(
+				"ui.commission_messaging_and_progress_updates",
+				"Commission Messaging and Progress Updates",
+			);
+		},
 		milestone: {
 			id: "commission-messaging",
 			badges: [
 				{
 					icon: OutlineArrowLeft,
-					label: "Messaging",
+					get label() {
+						return appI18n.t("ui.messaging", "Messaging");
+					},
 				},
 			],
 			events: [
@@ -46,13 +54,20 @@ const ROADMAP_ENTRIES: RoadmapEntry[] = [
 	{
 		id: "delivery-revisions",
 		date: "2026-09-15",
-		title: "Delivery and Revision Workflow",
+		get title() {
+			return appI18n.t(
+				"ui.delivery_and_revision_workflow",
+				"Delivery and Revision Workflow",
+			);
+		},
 		milestone: {
 			id: "delivery-revisions",
 			badges: [
 				{
 					icon: OutlineArrowLeft,
-					label: "Delivery",
+					get label() {
+						return appI18n.t("ui.delivery", "Delivery");
+					},
 				},
 			],
 			events: [
@@ -70,13 +85,20 @@ const ROADMAP_ENTRIES: RoadmapEntry[] = [
 	{
 		id: "discovery",
 		date: "2026-10-15",
-		title: "Better Artist and Commission Discovery",
+		get title() {
+			return appI18n.t(
+				"ui.better_artist_and_commission_discovery",
+				"Better Artist and Commission Discovery",
+			);
+		},
 		milestone: {
 			id: "discovery",
 			badges: [
 				{
 					icon: OutlineArrowLeft,
-					label: "Discovery",
+					get label() {
+						return appI18n.t("ui.discovery", "Discovery");
+					},
 				},
 			],
 			events: [
@@ -104,7 +126,12 @@ const ROADMAP_ENTRIES: RoadmapEntry[] = [
 	{
 		id: "reviews-showcases",
 		date: "2026-12-01",
-		title: "Reviews and Completed-Work Showcases",
+		get title() {
+			return appI18n.t(
+				"ui.reviews_and_completed_work_showcases",
+				"Reviews and Completed-Work Showcases",
+			);
+		},
 		milestone: {
 			id: "reviews-showcases",
 			events: [
@@ -116,7 +143,12 @@ const ROADMAP_ENTRIES: RoadmapEntry[] = [
 	{
 		id: "availability-queues",
 		date: "2027-02-01",
-		title: "Artist Availability and Queue Management",
+		get title() {
+			return appI18n.t(
+				"ui.artist_availability_and_queue_management",
+				"Artist Availability and Queue Management",
+			);
+		},
 		milestone: {
 			id: "availability-queues",
 			events: [
@@ -142,13 +174,17 @@ const ROADMAP_ENTRIES: RoadmapEntry[] = [
 	{
 		id: "mobile-experience",
 		date: "2027-04-01",
-		title: "Mobile Experience",
+		get title() {
+			return appI18n.t("ui.mobile_experience", "Mobile Experience");
+		},
 		milestone: {
 			id: "mobile-experience",
 			badges: [
 				{
 					icon: OutlineArrowLeft,
-					label: "Mobile",
+					get label() {
+						return appI18n.t("ui.mobile", "Mobile");
+					},
 				},
 			],
 			events: [
@@ -211,8 +247,10 @@ export function createRoadmapLifeline(locale = "en-US") {
 		name: "Coming next to Familiar",
 		birthYear: 1,
 		endYear: ROADMAP_ENTRIES.length,
-		description:
+		description: appI18n.t(
+			"ui.a_look_at_what_we_are_building_planning_and_exploring_next",
 			"A look at what we are building, planning, and exploring next.",
+		),
 		milestones,
 	});
 

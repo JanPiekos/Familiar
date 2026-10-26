@@ -131,6 +131,7 @@ export const LikeButton = memo(function LikeButton({
 	return (
 		<div className="flex items-center">
 			<Button
+				disabled
 				variant="ghost"
 				size={"icon"}
 				className={cn(
@@ -196,6 +197,7 @@ export const BookmarkButton = memo(function BookmarkButton({
 
 	return (
 		<Button
+			disabled
 			variant="ghost"
 			size="icon-xl"
 			className={cn(

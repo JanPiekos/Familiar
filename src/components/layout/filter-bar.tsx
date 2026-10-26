@@ -28,6 +28,8 @@ import {
 	InputGroupAddon,
 	InputGroupInput,
 } from "../ui/input-group";
+import appI18n from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 
 type FilterOperator = FilterOperators[ColumnDataType];
 
@@ -166,8 +168,8 @@ function normalizeFilterOptions(options: FilterOption[]): ColumnOption[] {
 function normalizeBooleanOptions(options?: FilterOption[]): ColumnOption[] {
 	if (!options?.length) {
 		return [
-			{ label: "Yes", value: "true" },
-			{ label: "No", value: "false" },
+			{ label: appI18n.t("ui.yes", "Yes"), value: "true" },
+			{ label: appI18n.t("ui.no", "No"), value: "false" },
 		];
 	}
 
@@ -449,11 +451,12 @@ export function FilterBar<TData>({
 	onFilterChange,
 	searchQuery = "",
 	onSearchChange,
-	searchPlaceholder = "Search…",
+	searchPlaceholder = appI18n.t("ui.search", "Search…"),
 	onClearAll,
 	endAction,
 	className,
 }: FilterBarProps<TData>) {
+	const { i18n } = useTranslation();
 	const isMobile = useIsMobile();
 	const dtf = useMemo(() => createColumnConfigHelper<TData>(), []);
 
@@ -521,7 +524,7 @@ export function FilterBar<TData>({
 					);
 			}
 		});
-	}, [dtf, groups]);
+	}, [dtf, groups, i18n.resolvedLanguage]);
 
 	const controlledFilters = useMemo<FiltersState>(
 		() => getControlledFilters(groups, values),

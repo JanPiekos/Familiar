@@ -1,5 +1,9 @@
+import {
+	PortfolioEmptyActions,
+	usePublishPortfolioCreation,
+} from "@/components/layout/profile/portfolio-creation";
 import { Typography } from "@heroui/react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
 	ArrowLeft,
 	Edit2,
@@ -8,7 +12,7 @@ import {
 	Tag,
 	Trash2,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type {
 	CatalogResponse,
@@ -18,7 +22,6 @@ import type {
 	CreatePortfolioPostRequest,
 	PortfolioPostResponse,
 } from "@/api/portfolio/posts/post-types";
-import { OutlineFolderAddOuLc, SolidPlus } from "@/components/icons/icons";
 import {
 	FilterBar,
 	type FilterGroup,
@@ -40,7 +43,6 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useIsMobile } from "@/hooks/ui/use-mobile";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -54,6 +56,7 @@ import {
 	useRemovePortfolioPostFromCatalog,
 	useUpdateCatalog,
 } from "@/hooks/portfolio/use-portfolio";
+import { useIsTablet } from "@/hooks/ui/use-mobile";
 import { getLocaleParam } from "@/lib/i18n";
 import { FolderCard } from "./folder-card";
 import { ProfileFeed } from "./profile-feed";
@@ -219,7 +222,8 @@ export function ProfilePortfolio({
 	isCreatingPost = false,
 }: ProfilePortfolioProps) {
 	const locale = RouteLocale();
-	const isMobile = useIsMobile();
+	const isCompact = useIsTablet();
+	const location = useLocation();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 
@@ -238,6 +242,50 @@ export function ProfilePortfolio({
 	const canCreateCatalog = canManageCatalogs && Boolean(onCreateCatalog);
 	const canCreatePost = canCreatePosts && Boolean(onCreatePost);
 	const hasCreateActions = canCreateCatalog || canCreatePost;
+	const openCreation = useCallback(
+		(kind: "post" | "folder") => {
+			if (!isCompact) {
+				if (kind === "post") setCreatePostOpen(true);
+				else setCreateCatalogOpen(true);
+				return;
+			}
+			const returnTo = location.href;
+			void navigate({
+				to:
+					kind === "post"
+						? "/{-$locale}/create/post"
+						: "/{-$locale}/create/folder",
+				params: { locale },
+				search: { returnTo },
+				state: { portfolioCreationFrom: returnTo },
+			});
+		},
+		[isCompact, locale, location.href, navigate],
+	);
+	const creationActions = useMemo(
+		() =>
+			hasCreateActions && username
+				? {
+						username,
+						pathname: location.pathname,
+						onCreatePost: canCreatePost
+							? () => openCreation("post")
+							: undefined,
+						onCreateFolder: canCreateCatalog
+							? () => openCreation("folder")
+							: undefined,
+					}
+				: null,
+		[
+			hasCreateActions,
+			username,
+			location.pathname,
+			canCreatePost,
+			canCreateCatalog,
+			openCreation,
+		],
+	);
+	usePublishPortfolioCreation(creationActions);
 
 	const postsByCatalogId = useMemo(() => {
 		const result = new Map<string, PortfolioPostResponse[]>();
@@ -436,6 +484,25 @@ export function ProfilePortfolio({
 		setSearchQuery("");
 	};
 
+	const hasSearchOrFilters =
+		Boolean(searchQuery.trim()) ||
+		Object.values(filters).some(
+			(filter) => getStringFilterValues(filter.value).length > 0,
+		);
+	const emptyActions =
+		!hasSearchOrFilters && filterSourcePosts.length === 0 && creationActions ? (
+			<PortfolioEmptyActions
+				onCreatePost={creationActions.onCreatePost}
+				onCreateFolder={creationActions.onCreateFolder}
+			/>
+		) : undefined;
+	const emptyDescription = emptyActions
+		? t(
+				"ui.empty_portfolio_owner_description",
+				"Share your first artwork or organize your portfolio with a folder.",
+			)
+		: undefined;
+
 	const handlePostClick = (post: PortfolioPostResponse) => {
 		if (!post.id) return;
 
@@ -529,7 +596,9 @@ export function ProfilePortfolio({
 									<DropdownMenuTrigger asChild>
 										<Button variant="ghost" size="icon">
 											<MoreHorizontal className="size-5" />
-											<span className="sr-only">Manage folder</span>
+											<span className="sr-only">
+												{t("ui.manage_folder", "Manage folder")}
+											</span>
 										</Button>
 									</DropdownMenuTrigger>
 
@@ -638,6 +707,8 @@ export function ProfilePortfolio({
 
 				<ProfileFeed
 					posts={filteredPosts}
+					emptyActions={emptyActions}
+					emptyDescription={emptyDescription}
 					onPostClick={handlePostClick}
 					variant="portfolio"
 					className="lg:mx-0 xl:mx-4"
@@ -677,47 +748,6 @@ export function ProfilePortfolio({
 						"components.portfolio.filters.search_placeholder",
 						"Search portfolio...",
 					)}
-					endAction={
-						hasCreateActions ? (
-							<div className="flex items-center gap-2">
-								{canCreateCatalog && (
-									<Button
-										type="button"
-										size={isMobile ? "icon-xl" : "xl"}
-										variant="secondary"
-										aria-label={t(
-											"components.portfolio.folder.create.title",
-											"New folder",
-										)}
-										onClick={() => setCreateCatalogOpen(true)}
-									>
-										<OutlineFolderAddOuLc data-icon="inline-start" />
-										{!isMobile &&
-											t(
-												"components.portfolio.folder.create.title",
-												"New folder",
-											)}
-									</Button>
-								)}
-
-								{canCreatePost && (
-									<Button
-										size={isMobile ? "icon-xl" : "xl"}
-										type="button"
-										aria-label={t(
-											"components.profile.actions.add_post",
-											"Create post",
-										)}
-										onClick={() => setCreatePostOpen(true)}
-									>
-										<SolidPlus data-icon="inline-start" />
-										{!isMobile &&
-											t("components.profile.actions.add_post", "Create post")}
-									</Button>
-								)}
-							</div>
-						) : undefined
-					}
 				/>
 
 				{showFolders && filteredFolders.length > 0 && (
@@ -760,6 +790,8 @@ export function ProfilePortfolio({
 
 				<ProfileFeed
 					posts={filteredPosts}
+					emptyActions={emptyActions}
+					emptyDescription={emptyDescription}
 					onPostClick={handlePostClick}
 					variant="portfolio"
 					className="lg:mx-0 xl:mx-4"

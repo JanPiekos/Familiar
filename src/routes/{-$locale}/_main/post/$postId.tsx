@@ -1,11 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PortfolioPostPage } from "@/components/layout/modal/portfolio-post";
+import { loadPostSeo } from "@/lib/content-seo";
 
 type PostSearch = {
 	username?: string;
 };
 
 export const Route = createFileRoute("/{-$locale}/_main/post/$postId")({
+	loaderDeps: ({ search }) => ({ username: search.username }),
+	loader: ({ params, deps, context }) =>
+		loadPostSeo(context.queryClient, { ...params, username: deps.username }),
+
 	validateSearch: (search: Record<string, unknown>): PostSearch => ({
 		username: typeof search.username === "string" ? search.username : undefined,
 	}),

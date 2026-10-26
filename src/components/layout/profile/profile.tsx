@@ -154,7 +154,7 @@ export function TabContentSkeleton({ tab = "portfolio" }: { tab?: string }) {
 
 export function UserFeedsSkeleton() {
 	return (
-		<div className="mt-2 flex min-h-0 lg:mt-6 w-full flex-1 flex-col pb-12 lg:pb-24">
+		<div className="mt-2 flex min-h-0 lg:mt-6 w-full flex-1 flex-col pb-4 lg:pb-6">
 			<PortfolioContentSkeleton />
 		</div>
 	);
@@ -195,7 +195,12 @@ function UserProfileMoreMenu({ user }: { user: TUserProfile }) {
 		// TODO: share the profile when the sharing API is available
 		//copy to clipboard
 		navigator.clipboard.writeText(`https://familiar.com/user/${user.username}`);
-		toast.success(`Successfully copied profile link`);
+		toast.success(
+			t(
+				"ui.successfully_copied_profile_link",
+				"Successfully copied profile link",
+			),
+		);
 	};
 
 	return (
@@ -218,11 +223,19 @@ function UserProfileMoreMenu({ user }: { user: TUserProfile }) {
 					{t("components.profile.actions.share_profile", "Share Profile")}
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem onClick={handleReportUser} variant="destructive">
+				<DropdownMenuItem
+					disabled
+					onClick={handleReportUser}
+					variant="destructive"
+				>
 					<Flag />
 					{t("components.profile.actions.report_user", "Report")}
 				</DropdownMenuItem>
-				<DropdownMenuItem variant="destructive" onClick={handleBlockUser}>
+				<DropdownMenuItem
+					disabled
+					variant="destructive"
+					onClick={handleBlockUser}
+				>
 					<UserLock />
 					{t("components.profile.actions.block_user", "Block user")}
 				</DropdownMenuItem>
@@ -383,7 +396,7 @@ export function UserProfileSidebar({
 								<FollowButton
 									isFollowing={false}
 									loading={false}
-									canFollow
+									canFollow={false}
 									onToggle={() => { }}
 									showText
 								/>
@@ -488,6 +501,7 @@ export function UserProfileSidebar({
 
 								{user.roles.includes(TRoles.Artist) && user.isVerified && (
 									<Button
+										disabled
 										type="button"
 										variant="secondary"
 										size={actionButtonSize}
@@ -504,7 +518,7 @@ export function UserProfileSidebar({
 									<FollowButton
 										isFollowing={false}
 										loading={false}
-										canFollow
+										canFollow={false}
 										onToggle={handleFollow}
 										showText
 										size={actionButtonSize}
@@ -526,6 +540,7 @@ export function UserProfileSidebar({
 
 								{user.roles.includes(TRoles.Artist) && user.isVerified && (
 									<Button
+										disabled
 										type="button"
 										variant="secondary"
 										size={actionButtonSize}
@@ -648,7 +663,7 @@ function UserFeeds({
 				</ScrollShadow>
 			</div> */}
 
-			<div className="mt-2 flex min-h-0 lg:mt-6 flex-1 flex-col pb-12 lg:pb-24">
+			<div className="mt-2 flex min-h-0 lg:mt-6 flex-1 flex-col pb-4 lg:pb-6">
 				{children}
 			</div>
 		</div>

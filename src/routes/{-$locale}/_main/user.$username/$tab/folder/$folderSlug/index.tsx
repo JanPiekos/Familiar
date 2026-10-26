@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { ProfilePortfolio } from "@/components/layout/profile/feed/portfolio";
 import {
 	hasArtistPortfolio,
@@ -7,20 +8,23 @@ import {
 import { TabContentSkeleton } from "@/components/layout/profile/profile";
 import { useProfileContent } from "@/hooks/user/use-profile-content";
 import { useUserByUsername } from "@/hooks/user/use-user";
+import { loadFolderSeo } from "@/lib/content-seo";
 import type { TUserProfile } from "@/types/user";
 
 export const Route = createFileRoute(
 	"/{-$locale}/_main/user/$username/$tab/folder/$folderSlug/",
 )({
+	loader: ({ params, context }) => loadFolderSeo(context.queryClient, params),
 	component: RouteComponent,
 });
 
 function RouteComponent() {
+	const { t } = useTranslation();
 	const { username, tab, folderSlug } = Route.useParams();
 	const { user } = useUserByUsername(username);
 
 	if (!user) {
-		return <div>User not found</div>;
+		return <div>{t("ui.user_not_found", "User not found")}</div>;
 	}
 
 	return (
@@ -41,6 +45,7 @@ export function FolderContent({
 	tab: string;
 	folderSlug: string;
 }) {
+	const { t } = useTranslation();
 	const portfolioUnavailable = tab === "portfolio" && !hasArtistPortfolio(user);
 	const {
 		data: content,
@@ -63,7 +68,7 @@ export function FolderContent({
 	if (tab !== "portfolio") {
 		return (
 			<div className="p-4 text-center text-muted-foreground">
-				Folder not found for tab {tab}
+				{t("ui.folder_not_found_for_tab", "Folder not found for tab")} {tab}
 			</div>
 		);
 	}
@@ -77,7 +82,7 @@ export function FolderContent({
 	if (!currentFolder) {
 		return (
 			<div className="p-4 text-center text-muted-foreground">
-				Portfolio folder not found
+				{t("ui.portfolio_folder_not_found", "Portfolio folder not found")}
 			</div>
 		);
 	}

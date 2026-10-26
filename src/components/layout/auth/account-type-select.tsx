@@ -35,7 +35,7 @@ export function AccountTypeSelector({
 			{/* radiogroup container */}
 			<div
 				role="radiogroup"
-				aria-label="Account Type"
+				aria-label={t("ui.account_type", "Account Type")}
 				className={"flex flex-col gap-3"}
 			>
 				{OPTIONS.map((opt) => {

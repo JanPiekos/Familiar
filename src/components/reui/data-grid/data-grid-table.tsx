@@ -27,6 +27,7 @@ import { useDataGrid } from "src/components/reui/data-grid/data-grid";
 import { Checkbox } from "src/components/ui/checkbox";
 import { Spinner } from "src/components/ui/spinner";
 import { cn, createStaticList } from "src/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const headerCellSpacingVariants = cva("", {
 	variants: {
@@ -1097,6 +1098,7 @@ function DataGridTableRenderedRow<TData>({
 }
 
 function DataGridTableEmpty() {
+	const { t } = useTranslation();
 	const { table, props } = useDataGrid();
 	const visibleColumnCount =
 		table.getVisibleLeafColumns().length +
@@ -1108,32 +1110,36 @@ function DataGridTableEmpty() {
 				colSpan={Math.max(visibleColumnCount, 1)}
 				className="text-muted-foreground text-sm py-6 text-center"
 			>
-				{props.emptyMessage || "No data available"}
+				{props.emptyMessage || t("ui.no_data_available", "No data available")}
 			</td>
 		</tr>
 	);
 }
 
 function DataGridTableLoader() {
+	const { t } = useTranslation();
 	const { props } = useDataGrid();
 
 	return (
 		<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
 			<div className="text-muted-foreground bg-card rounded-lg text-sm flex items-center gap-2 border px-4 py-2 leading-none font-medium">
 				<Spinner className="size-5 opacity-60" />
-				{props.loadingMessage || "Loading..."}
+				{props.loadingMessage || t("ui.loading_2553d2", "Loading...")}
 			</div>
 		</div>
 	);
 }
 
 function DataGridTableRowPin<TData>({ row }: { row: Row<TData> }) {
+	const { t } = useTranslation();
 	const isPinned = row.getIsPinned();
 
 	return (
 		<button
 			type="button"
-			aria-label={isPinned ? "Unpin row" : "Pin row"}
+			aria-label={
+				isPinned ? t("ui.unpin_row", "Unpin row") : t("ui.pin_row", "Pin row")
+			}
 			onClick={() => {
 				if (isPinned) {
 					row.pin(false);
@@ -1152,6 +1158,7 @@ function DataGridTableRowPin<TData>({ row }: { row: Row<TData> }) {
 }
 
 function DataGridTableRowSelect<TData>({ row }: { row: Row<TData> }) {
+	const { t } = useTranslation();
 	return (
 		<>
 			<div
@@ -1163,7 +1170,7 @@ function DataGridTableRowSelect<TData>({ row }: { row: Row<TData> }) {
 			<Checkbox
 				checked={row.getIsSelected()}
 				onCheckedChange={(value) => row.toggleSelected(!!value)}
-				aria-label="Select row"
+				aria-label={t("ui.select_row", "Select row")}
 				className="align-[inherit]"
 			/>
 		</>
@@ -1171,6 +1178,7 @@ function DataGridTableRowSelect<TData>({ row }: { row: Row<TData> }) {
 }
 
 function DataGridTableRowSelectAll() {
+	const { t } = useTranslation();
 	const { table, recordCount, isLoading } = useDataGrid();
 
 	const isAllSelected = table.getIsAllPageRowsSelected();
@@ -1183,13 +1191,14 @@ function DataGridTableRowSelectAll() {
 			}
 			disabled={isLoading || recordCount === 0}
 			onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-			aria-label="Select all"
+			aria-label={t("ui.select_all", "Select all")}
 			className="align-[inherit]"
 		/>
 	);
 }
 
 function DataGridTableBodyRows<TData>({ table }: { table: Table<TData> }) {
+	const { t } = useTranslation();
 	const { isLoading, props } = useDataGrid();
 	const pagination = table.getState().pagination;
 	const visibleColumns = table.getVisibleFlatColumns();
@@ -1233,7 +1242,7 @@ function DataGridTableBodyRows<TData>({ table }: { table: Table<TData> }) {
 				<td colSpan={visibleColumns.length} className="p-8">
 					<div className="flex items-center justify-center">
 						<Loader2 className="size-5 animate-spin" />
-						{props.loadingMessage || "Loading..."}
+						{props.loadingMessage || t("ui.loading_2553d2", "Loading...")}
 					</div>
 				</td>
 			</tr>

@@ -2,14 +2,18 @@ import UserAvatar from "@/components/layout/profile/avatar";
 import type { TUserProfile } from "@/types/user";
 import { Surface } from "@heroui/react";
 import { ThumbsUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function DeliveryTab({ artist }: { artist: TUserProfile }) {
+	const { t } = useTranslation();
 	return (
 		<div className="mx-auto flex w-full max-w-[980px] flex-col gap-6 p-5 md:p-6 xl:p-8">
 			<Surface>
 				<p className="mb-5 text-xs text-muted-foreground">
-					This review is now visible to artists when you submit a commission
-					request.
+					{t(
+						"ui.this_review_is_now_visible_to_artists_when_you_submit_a_commission_request",
+						"This review is now visible to artists when you submit a commission request.",
+					)}
 				</p>
 				<div className="rounded-2xl border border-border/70 bg-muted/40 p-4">
 					<div className="mb-3 flex items-center gap-3">
@@ -19,11 +23,11 @@ export function DeliveryTab({ artist }: { artist: TUserProfile }) {
 						<div className="flex items-center gap-2">
 							<ThumbsUp className="size-4 text-emerald-600 dark:text-emerald-400" />
 							<span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-								Recommend
+								{t("ui.recommend", "Recommend")}
 							</span>
 						</div>
 						<span className="ml-auto text-xs text-muted-foreground">
-							Recent
+							{t("ui.recent", "Recent")}
 						</span>
 					</div>
 					<div className="mb-3 flex flex-wrap gap-1.5">
@@ -42,17 +46,23 @@ export function DeliveryTab({ artist }: { artist: TUserProfile }) {
 						))}
 					</div>
 					<button className="text-xs text-violet-600 hover:underline dark:text-violet-400">
-						Difficulties:
+						{t("ui.difficulties", "Difficulties:")}
 					</button>
 					<p className="mt-3 text-xs text-muted-foreground">
-						Anonymize semi-public review
+						{t(
+							"ui.anonymize_semi_public_review",
+							"Anonymize semi-public review",
+						)}
 					</p>
 				</div>
 			</Surface>
 
 			<Surface>
 				<p className="mb-5 text-xs text-muted-foreground">
-					Your feedback helps make the platform safer for everyone.
+					{t(
+						"ui.your_feedback_helps_make_the_platform_safer_for_everyone",
+						"Your feedback helps make the platform safer for everyone.",
+					)}
 				</p>
 				<div className="rounded-2xl border border-border/70 bg-muted/40 p-4">
 					<div className="mb-3 flex items-center gap-2">
@@ -64,7 +74,9 @@ export function DeliveryTab({ artist }: { artist: TUserProfile }) {
 								/>
 							))}
 						</div>
-						<span className="text-xs text-muted-foreground">Recent</span>
+						<span className="text-xs text-muted-foreground">
+							{t("ui.recent", "Recent")}
+						</span>
 						<button className="ml-auto text-muted-foreground hover:text-foreground">
 							<ChevronDown className="size-4" />
 						</button>
@@ -80,7 +92,10 @@ export function DeliveryTab({ artist }: { artist: TUserProfile }) {
 						))}
 					</div>
 					<p className="text-xs text-muted-foreground">
-						Anonymize semi-public review
+						{t(
+							"ui.anonymize_semi_public_review",
+							"Anonymize semi-public review",
+						)}
 					</p>
 				</div>
 			</Surface>

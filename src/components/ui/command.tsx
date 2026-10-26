@@ -11,6 +11,8 @@ import {
 import { cn } from "src/lib/utils";
 import { surfaceClasses } from "@/lib/surface-classes";
 import { SurfaceProvider, useSurface } from "@/lib/surface-context";
+import appI18n from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 
 function Command({
 	className,
@@ -41,8 +43,11 @@ function Command({
 }
 
 function CommandDialog({
-	title = "Command Palette",
-	description = "Search for a command to run...",
+	title = appI18n.t("ui.command_palette", "Command Palette"),
+	description = appI18n.t(
+		"ui.search_for_a_command_to_run",
+		"Search for a command to run...",
+	),
 	children,
 	className,
 	showCloseButton = true,
@@ -53,6 +58,7 @@ function CommandDialog({
 	className?: string;
 	showCloseButton?: boolean;
 }) {
+	useTranslation();
 	return (
 		<Dialog {...props}>
 			<DialogHeader className="sr-only">

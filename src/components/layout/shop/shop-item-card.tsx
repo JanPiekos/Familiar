@@ -27,8 +27,10 @@ import { cn } from "@/lib/utils";
 import type { MockShopItem } from "@/types/shop";
 import { BookmarkButton } from "../bookmark";
 import User from "../profile/user";
+import { useTranslation } from "react-i18next";
 
 export function ShopItemCard({ item }: { item: MockShopItem }) {
+	const { t } = useTranslation();
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [hoverPlaying, setHoverPlaying] = useState(false);
 	const [isAutoPlayPaused, setIsAutoPlayPaused] = useState(false);
@@ -164,7 +166,7 @@ export function ShopItemCard({ item }: { item: MockShopItem }) {
 						)}
 					</div>
 					<div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-						{item.salesCount} sold
+						{item.salesCount} {t("ui.sold", "sold")}
 						<div className="flex items-center gap-0.5 ml-auto">
 							<SolidStar className="size-3 fill-yellow-400 text-yellow-400" />
 							{item.rating.toFixed(1)}
@@ -191,10 +193,14 @@ function ShopReelControls({
 	setCurrentImageIndex: Dispatch<SetStateAction<number>>;
 	setIsAutoPlayPaused: Dispatch<SetStateAction<boolean>>;
 }) {
+	const { t } = useTranslation();
 	return (
 		<div className="opacity-0 transition-opacity duration-300 group-hover:opacity-100">
 			<ShopImageNavigationButton
-				label={`Previous image for ${itemTitle}`}
+				label={t("ui.previous_image_for_value0", {
+					defaultValue: "Previous image for {{value0}}",
+					value0: itemTitle,
+				})}
 				className="left-2"
 				onClick={() =>
 					setCurrentImageIndex((previous) =>
@@ -206,7 +212,10 @@ function ShopReelControls({
 			</ShopImageNavigationButton>
 
 			<ShopImageNavigationButton
-				label={`Next image for ${itemTitle}`}
+				label={t("ui.next_image_for_value0", {
+					defaultValue: "Next image for {{value0}}",
+					value0: itemTitle,
+				})}
 				className="right-2"
 				onClick={() =>
 					setCurrentImageIndex((previous) =>
@@ -263,6 +272,7 @@ function ShopAutoPlayButton({
 	isAutoPlayPaused: boolean;
 	setIsAutoPlayPaused: Dispatch<SetStateAction<boolean>>;
 }) {
+	const { t } = useTranslation();
 	return (
 		<div className="absolute top-2 left-2 z-20">
 			<Button
@@ -275,7 +285,9 @@ function ShopAutoPlayButton({
 				}}
 			>
 				<span className="sr-only">
-					{isAutoPlayPaused ? "Play auto" : "Pause auto"}
+					{isAutoPlayPaused
+						? t("ui.play_auto", "Play auto")
+						: t("ui.pause_auto", "Pause auto")}
 				</span>
 				{isAutoPlayPaused ? (
 					<Play className="size-4" />

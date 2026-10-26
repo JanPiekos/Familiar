@@ -11,7 +11,7 @@ const state = vi.hoisted(() => ({
 }));
 
 vi.mock("@heroui/react", () => ({ Typography: { Paragraph: ({ children }: any) => <p>{children}</p> } }));
-vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (_key: string, fallback: string) => fallback, i18n: { language: "en" } }) }));
+vi.mock("react-i18next", async (importOriginal) => ({ ...await importOriginal<typeof import("react-i18next")>(), useTranslation: () => ({ t: (_key: string, fallback: string) => fallback, i18n: { language: "en" } }) }));
 vi.mock("@/providers/auth", () => ({ useAuth: () => ({ user: { userId: state.viewer, username: state.viewer === "author" ? "real-author" : "viewer" } }) }));
 vi.mock("@/hooks/portfolio/use-portfolio", () => ({
 	usePortfolioPost: (id: string) => { state.postQuery(id); return { data: state.post, isPending: false, isError: false }; },
@@ -36,7 +36,7 @@ vi.mock("@/components/ui/dropdown-menu", () => ({
 	DropdownMenu: ({ children }: any) => <div>{children}</div>,
 	DropdownMenuTrigger: ({ children }: any) => <>{children}</>,
 	DropdownMenuContent: ({ children }: any) => <div>{children}</div>,
-	DropdownMenuItem: ({ children, onSelect }: any) => <button type="button" onClick={onSelect}>{children}</button>,
+	DropdownMenuItem: ({ children, onSelect, disabled }: any) => <button type="button" disabled={disabled} onClick={onSelect}>{children}</button>,
 	DropdownMenuSeparator: () => null,
 }));
 vi.mock("@/hooks/chat/use-chat", () => ({ usePostChatMessage: () => ({ mutateAsync: state.send, isPending: false, error: null }) }));
@@ -62,7 +62,14 @@ describe("post attribution", () => {
 	it("loads a direct post link without a username and allows its actual owner to manage it", () => {
 		state.viewer = "author";
 		renderPost();
-		expect(screen.getByText("Delete post")).toBeTruthy();
+		expect((screen.getByText("Delete post") as HTMLButtonElement).disabled).toBe(false);
+		expect((screen.getByText("Edit post") as HTMLButtonElement).disabled).toBe(true);
+		for (const name of ["Like", "Comment", "Share", "Bookmark"]) {
+			const button = screen.getByRole("button", { name }) as HTMLButtonElement;
+			expect(button.disabled).toBe(true);
+			fireEvent.click(button);
+		}
+		expect(screen.getByText("0 likes")).toBeTruthy();
 		expect(screen.getAllByText("Real author")).toHaveLength(2);
 	});
 });

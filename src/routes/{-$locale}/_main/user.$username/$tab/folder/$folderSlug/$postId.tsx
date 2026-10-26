@@ -3,6 +3,7 @@ import {
 	useLocation,
 	useNavigate,
 } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import {
 	PortfolioPostModal,
 	PortfolioPostPage,
@@ -13,12 +14,15 @@ import {
 } from "@/components/layout/profile/feed/portfolio-unavailable";
 import { useIsMobile } from "@/hooks/ui/use-mobile";
 import { useUserByUsername } from "@/hooks/user/use-user";
+import { loadPostSeo } from "@/lib/content-seo";
 import type { TUserProfile } from "@/types/user";
 import { FolderContent } from "./index";
 
 export const Route = createFileRoute(
 	"/{-$locale}/_main/user/$username/$tab/folder/$folderSlug/$postId",
 )({
+	loader: ({ params, context }) => loadPostSeo(context.queryClient, params),
+
 	component: RouteComponent,
 });
 
@@ -73,6 +77,7 @@ function PostContent({
 	isMobile: boolean;
 	isModal: boolean;
 }) {
+	const { t } = useTranslation();
 	const handleClose = () => {
 		navigate({
 			to: "/{-$locale}/user/$username/$tab/folder/$folderSlug",
@@ -93,7 +98,8 @@ function PostContent({
 				{!isMobile && (
 					<div className="mx-auto w-full max-w-360 md:px-4 lg:px-6 mb-12 border-t pt-8">
 						<h2 className="text-xl font-semibold mb-6">
-							More from {user.username} in folder
+							{t("ui.more_from", "More from")} {user.username}{" "}
+							{t("ui.in_folder", "in folder")}
 						</h2>
 						<FolderContent user={user} tab={tab} folderSlug={folderSlug} />
 					</div>

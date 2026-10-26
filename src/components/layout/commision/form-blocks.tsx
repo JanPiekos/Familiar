@@ -45,6 +45,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import appI18n from "@/lib/i18n";
 
 export interface Option {
 	id: string;
@@ -80,10 +82,11 @@ export function StaticNumberInput({
 	required,
 	className,
 	disabled = false,
-	placeholder = "Enter a number",
+	placeholder = appI18n.t("ui.enter_a_number", "Enter a number"),
 	min,
 	max,
 }: StaticFormBlockProps) {
+	const { t } = useTranslation();
 	const [value, setValue] = React.useState<number | undefined>(undefined);
 
 	const { isInvalid, errorMessage } = React.useMemo(() => {
@@ -118,7 +121,9 @@ export function StaticNumberInput({
 				>
 					<span className="flex-1 w-full">{label}</span>
 					{required && (
-						<span className="w-fit text-destructive">Required *</span>
+						<span className="w-fit text-destructive">
+							{t("ui.required", "Required *")}
+						</span>
 					)}
 				</FieldLabel>
 			</div>
@@ -152,6 +157,7 @@ export function StaticDateInput({
 	minDate,
 	maxDate,
 }: StaticFormBlockProps) {
+	const { t } = useTranslation();
 	const [open, setOpen] = React.useState(false);
 	const [date, setDate] = React.useState<Date | undefined>(undefined);
 	const [month, setMonth] = React.useState<Date | undefined>(date);
@@ -201,7 +207,9 @@ export function StaticDateInput({
 				>
 					<span className="flex-1 w-full">{label}</span>
 					{required && (
-						<span className="w-fit text-destructive">Required *</span>
+						<span className="w-fit text-destructive">
+							{t("ui.required", "Required *")}
+						</span>
 					)}
 				</FieldLabel>
 			</div>
@@ -232,11 +240,13 @@ export function StaticDateInput({
 								type="button"
 								variant="ghost"
 								size="icon-xs"
-								aria-label="Select date"
+								aria-label={t("ui.select_date", "Select date")}
 								disabled={disabled}
 							>
 								<CalendarIcon />
-								<span className="sr-only">Select date</span>
+								<span className="sr-only">
+									{t("ui.select_date", "Select date")}
+								</span>
 							</InputGroupButton>
 						</PopoverTrigger>
 						<PopoverContent
@@ -276,15 +286,18 @@ export function StaticInput({
 	required,
 	className,
 	disabled = false,
-	placeholder = "Your answer",
+	placeholder = appI18n.t("ui.your_answer", "Your answer"),
 }: StaticFormBlockProps) {
+	const { t } = useTranslation();
 	return (
 		<FieldSet className={className}>
 			<div className="flex items-center justify-between">
 				<FieldLabel className="w-full justify-between">
 					<span className="flex-1 w-full">{label}</span>
 					{required && (
-						<span className="w-fit text-destructive">Required *</span>
+						<span className="w-fit text-destructive">
+							{t("ui.required", "Required *")}
+						</span>
 					)}
 				</FieldLabel>
 			</div>
@@ -302,15 +315,18 @@ export function StaticTextarea({
 	required,
 	className,
 	disabled = false,
-	placeholder = "Your answer",
+	placeholder = appI18n.t("ui.your_answer", "Your answer"),
 }: StaticFormBlockProps) {
+	const { t } = useTranslation();
 	return (
 		<FieldSet className={className}>
 			<div className="flex items-center justify-between">
 				<FieldLabel className="w-full justify-between">
 					<span className="flex-1 w-full">{label}</span>
 					{required && (
-						<span className="w-fit text-destructive">Required *</span>
+						<span className="w-fit text-destructive">
+							{t("ui.required", "Required *")}
+						</span>
 					)}
 				</FieldLabel>
 			</div>
@@ -335,6 +351,7 @@ export function StaticRadioGroup({
 	disabled = false,
 	currencyCode = "USD",
 }: StaticFormBlockProps) {
+	const { t } = useTranslation();
 	const [value, setValue] = React.useState<string | undefined>(undefined);
 
 	return (
@@ -342,9 +359,13 @@ export function StaticRadioGroup({
 			<div className="flex items-center justify-between">
 				<FieldLabel className="w-full justify-between">
 					<span className="flex-1 w-full">{label}</span>
-					<span className="text-muted-foreground/70 text-xs">(Choose 1)</span>
+					<span className="text-muted-foreground/70 text-xs">
+						{t("ui.choose_1", "(Choose 1)")}
+					</span>
 					{required && (
-						<span className="w-fit text-destructive">Required *</span>
+						<span className="w-fit text-destructive">
+							{t("ui.required", "Required *")}
+						</span>
 					)}
 				</FieldLabel>
 			</div>
@@ -390,14 +411,14 @@ export function StaticRadioGroup({
 										<span className="ml-2 whitespace-nowrap text-muted-foreground text-xs">
 											{option.price > 0
 												? `+${currencyCode} ${option.price.toFixed(2)}`
-												: "Free"}
+												: t("ui.free", "Free")}
 										</span>
 									)}
 									{option.pricePercentage !== undefined && (
 										<span className="ml-2 whitespace-nowrap text-muted-foreground text-xs">
 											{option.pricePercentage > 0
 												? `+${option.pricePercentage}%`
-												: "Free"}
+												: t("ui.free", "Free")}
 										</span>
 									)}
 								</div>
@@ -425,6 +446,7 @@ export function FormSelect<T extends FieldValues>({
 	className,
 	currencyCode = "USD",
 }: FormBlockProps<T>) {
+	const { t } = useTranslation();
 	return (
 		<Controller
 			control={control}
@@ -435,14 +457,18 @@ export function FormSelect<T extends FieldValues>({
 						<FieldLabel className="w-full justify-between">
 							<span className="flex-1 w-full">{label}</span>
 							{required && (
-								<span className="w-fit text-destructive">Required *</span>
+								<span className="w-fit text-destructive">
+									{t("ui.required", "Required *")}
+								</span>
 							)}
 						</FieldLabel>
 					</div>
 					{description && <FieldDescription>{description}</FieldDescription>}
 					<Select onValueChange={field.onChange} defaultValue={field.value}>
 						<SelectTrigger className="h-10 w-full">
-							<SelectValue placeholder="Select an option" />
+							<SelectValue
+								placeholder={t("ui.select_an_option", "Select an option")}
+							/>
 						</SelectTrigger>
 						<SelectContent>
 							{options.map((opt) => {
@@ -488,13 +514,16 @@ export function StaticCheckboxGroup({
 	disabled = false,
 	currencyCode = "USD",
 }: StaticFormBlockProps) {
+	const { t } = useTranslation();
 	return (
 		<FieldSet className={className}>
 			<div className="flex items-center justify-between">
 				<FieldLabel className="w-full justify-between">
 					<span className="flex-1 w-full">{label}</span>
 					{required && (
-						<span className="w-fit text-destructive">Required *</span>
+						<span className="w-fit text-destructive">
+							{t("ui.required", "Required *")}
+						</span>
 					)}
 				</FieldLabel>
 			</div>
@@ -537,15 +566,15 @@ export function StaticCheckboxGroup({
 									</FieldLabel>
 									<span className="whitespace-nowrap text-muted-foreground text-xs">
 										{isIncluded
-											? "Included"
+											? t("ui.included", "Included")
 											: option.pricePercentage !== undefined
 												? option.pricePercentage > 0
 													? `+${option.pricePercentage}%`
-													: "Free"
+													: t("ui.free", "Free")
 												: option.price !== undefined
 													? option.price > 0
 														? `+${currencyCode} ${option.price.toFixed(2)}`
-														: "Free"
+														: t("ui.free", "Free")
 													: ""}
 									</span>
 								</div>
@@ -567,20 +596,25 @@ export function StaticSelect({
 	disabled = false,
 	currencyCode = "USD",
 }: StaticFormBlockProps) {
+	const { t } = useTranslation();
 	return (
 		<FieldSet className={className}>
 			<div className="flex items-center justify-between">
 				<FieldLabel className="w-full justify-between">
 					<span className="flex-1 w-full">{label}</span>
 					{required && (
-						<span className="w-fit text-destructive">Required *</span>
+						<span className="w-fit text-destructive">
+							{t("ui.required", "Required *")}
+						</span>
 					)}
 				</FieldLabel>
 			</div>
 			{description && <FieldDescription>{description}</FieldDescription>}
 			<Select disabled={disabled}>
 				<SelectTrigger className="h-10 w-full">
-					<SelectValue placeholder="Select an option" />
+					<SelectValue
+						placeholder={t("ui.select_an_option", "Select an option")}
+					/>
 				</SelectTrigger>
 				<SelectContent>
 					{options.map((opt) => {
@@ -633,6 +667,7 @@ export function FormRadioGroup<T extends FieldValues>({
 	otherFieldName,
 	currencyCode = "USD",
 }: FormBlockProps<T>) {
+	const { t } = useTranslation();
 	return (
 		<Controller
 			control={control}
@@ -644,10 +679,12 @@ export function FormRadioGroup<T extends FieldValues>({
 							<span className="flex-1 w-full">{label}</span>
 							{/* TODO: add translation */}
 							<span className="text-muted-foreground/70 text-xs">
-								(Choose 1)
+								{t("ui.choose_1", "(Choose 1)")}
 							</span>
 							{required && (
-								<span className="w-fit text-destructive">Required *</span>
+								<span className="w-fit text-destructive">
+									{t("ui.required", "Required *")}
+								</span>
 							)}
 						</FieldLabel>
 					</div>
@@ -692,14 +729,14 @@ export function FormRadioGroup<T extends FieldValues>({
 												<span className="ml-2 whitespace-nowrap text-muted-foreground text-xs">
 													{option.price > 0
 														? `+${currencyCode} ${option.price.toFixed(2)}`
-														: "Free"}
+														: t("ui.free", "Free")}
 												</span>
 											)}
 											{option.pricePercentage !== undefined && (
 												<span className="ml-2 whitespace-nowrap text-muted-foreground text-xs">
 													{option.pricePercentage > 0
 														? `+${option.pricePercentage}%`
-														: "Free"}
+														: t("ui.free", "Free")}
 												</span>
 											)}
 										</div>
@@ -717,7 +754,10 @@ export function FormRadioGroup<T extends FieldValues>({
 												name={otherFieldName}
 												render={({ field: otherField }) => (
 													<Input
-														placeholder="Please specify..."
+														placeholder={t(
+															"ui.please_specify",
+															"Please specify...",
+														)}
 														className="mt-1 h-10 border-transparent bg-secondary/20 focus:border-primary"
 														{...otherField}
 													/>
@@ -746,6 +786,7 @@ export function FormCheckboxGroup<T extends FieldValues>({
 	otherFieldName,
 	currencyCode = "USD",
 }: FormBlockProps<T>) {
+	const { t } = useTranslation();
 	return (
 		<Controller
 			control={control}
@@ -760,7 +801,9 @@ export function FormCheckboxGroup<T extends FieldValues>({
 								<span className="flex-1 w-full">{label}</span>
 								{/* TODO: add translation */}
 								{required && (
-									<span className="w-fit text-destructive">Required *</span>
+									<span className="w-fit text-destructive">
+										{t("ui.required", "Required *")}
+									</span>
 								)}
 							</FieldLabel>
 						</div>
@@ -819,15 +862,15 @@ export function FormCheckboxGroup<T extends FieldValues>({
 												</FieldLabel>
 												<span className="whitespace-nowrap text-muted-foreground text-xs">
 													{isIncluded
-														? "Included"
+														? t("ui.included", "Included")
 														: option.pricePercentage !== undefined
 															? option.pricePercentage > 0
 																? `+${option.pricePercentage}%`
-																: "Free"
+																: t("ui.free", "Free")
 															: option.price !== undefined
 																? option.price > 0
 																	? `+${currencyCode} ${option.price.toFixed(2)}`
-																	: "Free"
+																	: t("ui.free", "Free")
 																: ""}
 												</span>
 											</div>
@@ -843,7 +886,10 @@ export function FormCheckboxGroup<T extends FieldValues>({
 														name={otherFieldName}
 														render={({ field: otherField }) => (
 															<Input
-																placeholder="Please specify..."
+																placeholder={t(
+																	"ui.please_specify",
+																	"Please specify...",
+																)}
 																className="h-10 border-transparent bg-secondary/20 focus:border-primary"
 																{...otherField}
 															/>

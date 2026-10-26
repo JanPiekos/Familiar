@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useIsTablet } from "@/hooks/ui/use-mobile";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import appI18n from "@/lib/i18n";
 
 interface UniversalModalLayoutProps {
 	open: boolean;
@@ -67,7 +69,7 @@ export function UniversalModalLayout({
 	detailsContent,
 	detailsHeaderContent,
 	detailsFooterContent,
-	title = "Details",
+	title = appI18n.t("ui.details", "Details"),
 	initialFocus = "default",
 	showBookmark = false,
 	isBookmarked = false,
@@ -77,6 +79,7 @@ export function UniversalModalLayout({
 	moreMenuContent,
 	mediaAspectRatio,
 }: UniversalModalLayoutProps) {
+	const { t } = useTranslation();
 	const isTablet = useIsTablet();
 	const contentRef = useRef<HTMLDivElement>(null);
 	const handleOpenAutoFocus = useCallback(
@@ -85,7 +88,7 @@ export function UniversalModalLayout({
 			event.preventDefault();
 			contentRef.current?.focus({ preventScroll: true });
 		},
-		[initialFocus],
+		[initialFocus, t],
 	);
 
 	const { active: bookmarked, handleAction } = useLocalAction({
@@ -124,7 +127,7 @@ export function UniversalModalLayout({
 
 			setDetectedMediaAspectRatio(width / height);
 		},
-		[],
+		[t],
 	);
 
 	const safeMediaAspectRatio = Number.isFinite(detectedMediaAspectRatio)
@@ -137,7 +140,7 @@ export function UniversalModalLayout({
 			handleAction();
 			onBookmark?.(event);
 		},
-		[handleAction, onBookmark],
+		[handleAction, onBookmark, t],
 	);
 
 	const moreAction = moreMenuContent ? (
@@ -146,7 +149,7 @@ export function UniversalModalLayout({
 				<Button
 					variant="ghost"
 					size="icon"
-					aria-label="More options"
+					aria-label={t("ui.more_options", "More options")}
 					className="rounded-full"
 				>
 					<OutlineMore />
@@ -169,7 +172,7 @@ export function UniversalModalLayout({
 					<DrawerTitle className="sr-only">{title}</DrawerTitle>
 
 					<DrawerDescription className="sr-only">
-						View details
+						{t("ui.view_details", "View details")}
 					</DrawerDescription>
 
 					<div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-xl">
@@ -177,7 +180,7 @@ export function UniversalModalLayout({
 							<Button
 								variant="ghost"
 								size="icon"
-								aria-label="Close"
+								aria-label={t("ui.close", "Close")}
 								className="rounded-full"
 								onClick={() => onOpenChange(false)}
 							>
@@ -189,10 +192,13 @@ export function UniversalModalLayout({
 							<div className="flex shrink-0 items-center gap-1">
 								{showBookmark && (
 									<Button
+										disabled
 										variant="ghost"
 										size="icon"
 										aria-label={
-											bookmarked ? "Remove bookmark" : "Save bookmark"
+											bookmarked
+												? t("ui.remove_bookmark", "Remove bookmark")
+												: t("ui.save_bookmark", "Save bookmark")
 										}
 										className={cn(
 											"rounded-full",
@@ -243,7 +249,7 @@ export function UniversalModalLayout({
 				<Button
 					variant="ghost"
 					size="icon"
-					aria-label="Close"
+					aria-label={t("ui.close", "Close")}
 					className="fixed right-4 top-4 z-60 rounded-full text-white hover:bg-white/15 hover:text-white"
 					onClick={() => onOpenChange(false)}
 				>
@@ -276,7 +282,9 @@ export function UniversalModalLayout({
 			>
 				<DialogTitle className="sr-only">{title}</DialogTitle>
 
-				<DialogDescription className="sr-only">View details</DialogDescription>
+				<DialogDescription className="sr-only">
+					{t("ui.view_details", "View details")}
+				</DialogDescription>
 
 				{/* Dynamic media section */}
 				<section
@@ -323,10 +331,13 @@ export function UniversalModalLayout({
 							<div className="flex shrink-0 items-center gap-1">
 								{showBookmark && (
 									<Button
+										disabled
 										variant="ghost"
 										size="icon"
 										aria-label={
-											bookmarked ? "Remove bookmark" : "Save bookmark"
+											bookmarked
+												? t("ui.remove_bookmark", "Remove bookmark")
+												: t("ui.save_bookmark", "Save bookmark")
 										}
 										className={cn(
 											"rounded-full",

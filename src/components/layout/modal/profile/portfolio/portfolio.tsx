@@ -1,12 +1,31 @@
-import { type FormEvent, useEffect, useId, useState } from "react";
+import {
+	type FormEvent,
+	type ReactNode,
+	useEffect,
+	useId,
+	useRef,
+	useState,
+} from "react";
+import { useTranslation } from "react-i18next";
 import type {
 	CatalogResponse,
 	CreateCatalogRequest,
 	UpdateCatalogRequest,
 } from "@/api/portfolio/catalogs/catalog-types";
-import { OutlineFolder, OutlineFolderAddOuLc } from "@/components/icons/icons";
-import { UniversalModalLayout } from "@/components/layout/modal/universal-modal-layout";
+import {
+	OutlineClose,
+	OutlineFolder,
+	OutlineFolderAddOuLc,
+} from "@/components/icons/icons";
+import { CreationPageLayout } from "@/components/layout/creation-page-layout";
+import { FolderCard } from "@/components/layout/profile/feed/folder-card";
 import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import {
 	Field,
 	FieldDescription,
@@ -21,6 +40,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 
 interface CreateCatalogModalProps {
+	layout?: "dialog" | "page";
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	onCreateCatalog: (data: CreateCatalogRequest) => Promise<CatalogResponse>;
@@ -28,11 +48,13 @@ interface CreateCatalogModalProps {
 }
 
 export function CreateCatalogModal({
+	layout = "dialog",
 	open,
 	onOpenChange,
 	onCreateCatalog,
 	isCreating,
 }: CreateCatalogModalProps) {
+	const { t } = useTranslation();
 	const formId = useId();
 	const nameInputId = useId();
 	const descriptionInputId = useId();
@@ -82,42 +104,33 @@ export function CreateCatalogModal({
 			setSubmitError(
 				error instanceof Error
 					? error.message
-					: "The folder could not be created.",
+					: t("ui.folder_create_failed", "The folder could not be created."),
 			);
 		}
 	}
 
 	return (
-		<UniversalModalLayout
+		<CatalogModalLayout
+			layout={layout}
 			open={open}
 			onOpenChange={onOpenChange}
-			initialFocus="content"
-			title="Create portfolio folder"
-			mediaClassName="bg-muted/30"
+			title={t("ui.create_folder", "Create folder")}
+			isBusy={isCreating}
 			mediaContent={<CatalogPreview name={name} description={description} />}
-			detailsHeaderContent={
-				<div className="min-w-0">
-					<h2 className="truncate text-sm font-semibold">Create folder</h2>
-
-					<p className="truncate text-xs text-muted-foreground">
-						New portfolio catalog
-					</p>
-				</div>
-			}
+			description={t(
+				"ui.group_related_portfolio_posts_into_one_catalog",
+				"Group related portfolio posts into one catalog.",
+			)}
 			detailsContent={
 				<form
 					id={formId}
-					className="flex flex-col gap-6 p-6"
+					className="flex min-w-0 flex-col gap-6 p-5 sm:p-6"
 					onSubmit={handleSubmit}
 				>
-					<p className="text-pretty text-sm text-muted-foreground">
-						Group related portfolio posts into one catalog.
-					</p>
-
 					<FieldGroup>
 						<Field data-invalid={nameInvalid || undefined}>
-							<FieldLabel htmlFor={nameInputId} className="uppercase">
-								Folder name *
+							<FieldLabel htmlFor={nameInputId}>
+								{t("ui.folder_name", "Folder name *")}
 							</FieldLabel>
 
 							<InputGroup
@@ -132,36 +145,46 @@ export function CreateCatalogModal({
 									disabled={isCreating}
 									aria-invalid={nameInvalid || undefined}
 									aria-describedby={nameDescriptionId}
-									placeholder="Character illustrations"
+									placeholder={t(
+										"ui.character_illustrations",
+										"Character illustrations",
+									)}
 									onChange={(event) => setName(event.target.value)}
 								/>
 							</InputGroup>
 
 							<FieldDescription id={nameDescriptionId}>
 								{nameInvalid
-									? "Folder name is required."
-									: "Maximum 100 characters."}
+									? t("ui.folder_name_is_required", "Folder name is required.")
+									: t("ui.maximum_100_characters", "Maximum 100 characters.")}
 							</FieldDescription>
 						</Field>
 
 						<Field>
-							<FieldLabel htmlFor={descriptionInputId} className="uppercase">
-								Description
+							<FieldLabel htmlFor={descriptionInputId}>
+								{t("ui.description", "Description")}
 							</FieldLabel>
 
 							<InputGroup className="rounded-xl">
 								<InputGroupTextArea
+									className="min-h-28 resize-y"
 									id={descriptionInputId}
 									value={description}
-									rows={5}
+									rows={4}
 									disabled={isCreating}
-									placeholder="A selected collection of finished character artwork."
+									placeholder={t(
+										"ui.a_selected_collection_of_finished_character_artwork",
+										"A selected collection of finished character artwork.",
+									)}
 									onChange={(event) => setDescription(event.target.value)}
 								/>
 							</InputGroup>
 
 							<FieldDescription>
-								Optional. You can edit this later.
+								{t(
+									"ui.optional_you_can_edit_this_later",
+									"Optional. You can edit this later.",
+								)}
 							</FieldDescription>
 						</Field>
 					</FieldGroup>
@@ -178,17 +201,19 @@ export function CreateCatalogModal({
 				</form>
 			}
 			detailsFooterContent={
-				<div className="flex justify-end gap-2 p-4">
+				<div className="flex items-center justify-end gap-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
 					<Button
+						size="xl"
 						type="button"
 						variant="outline"
 						disabled={isCreating}
 						onClick={() => onOpenChange(false)}
 					>
-						Cancel
+						{t("ui.cancel", "Cancel")}
 					</Button>
 
 					<Button
+						size="xl"
 						type="submit"
 						form={formId}
 						disabled={isCreating || !trimmedName}
@@ -197,13 +222,17 @@ export function CreateCatalogModal({
 						{isCreating ? (
 							<Spinner data-icon="inline-start" />
 						) : (
-							<OutlineFolderAddOuLc
-								data-icon="inline-start"
-								aria-hidden="true"
-							/>
+							<span aria-hidden="true" data-icon="inline-start">
+								<OutlineFolderAddOuLc
+									data-icon="inline-start"
+									aria-hidden="true"
+								/>
+							</span>
 						)}
 
-						{isCreating ? "Creating..." : "Create folder"}
+						{isCreating
+							? t("ui.creating", "Creating...")
+							: t("ui.create_folder", "Create folder")}
 					</Button>
 				</div>
 			}
@@ -229,6 +258,7 @@ export function RenameCatalogModal({
 	onRenameCatalog,
 	isRenaming,
 }: RenameCatalogModalProps) {
+	const { t } = useTranslation();
 	const formId = useId();
 	const nameInputId = useId();
 	const descriptionInputId = useId();
@@ -247,6 +277,7 @@ export function RenameCatalogModal({
 
 	const nameInvalid = submitted && trimmedName.length === 0;
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Switching folders must reset the draft even when their saved text matches.
 	useEffect(() => {
 		if (!open) {
 			return;
@@ -288,42 +319,32 @@ export function RenameCatalogModal({
 			setSubmitError(
 				error instanceof Error
 					? error.message
-					: "The folder could not be renamed.",
+					: t("ui.folder_rename_failed", "The folder could not be renamed."),
 			);
 		}
 	}
 
 	return (
-		<UniversalModalLayout
+		<CatalogModalLayout
 			open={open}
 			onOpenChange={onOpenChange}
-			title="Rename portfolio folder"
-			initialFocus="content"
-			mediaClassName="bg-muted/30"
+			title={t("ui.rename_folder", "Rename folder")}
+			isBusy={isRenaming}
 			mediaContent={<CatalogPreview name={name} description={description} />}
-			detailsHeaderContent={
-				<div className="min-w-0">
-					<h2 className="truncate text-sm font-semibold">Rename folder</h2>
-
-					<p className="truncate text-xs text-muted-foreground">
-						{catalog.name}
-					</p>
-				</div>
-			}
+			description={t(
+				"ui.update_the_name_and_description_of_this_portfolio_catalog",
+				"Update the name and description of this portfolio catalog.",
+			)}
 			detailsContent={
 				<form
 					id={formId}
-					className="flex flex-col gap-6 p-6"
+					className="flex min-w-0 flex-col gap-6 p-5 sm:p-6"
 					onSubmit={handleSubmit}
 				>
-					<p className="text-pretty text-sm text-muted-foreground">
-						Update the name and description of this portfolio catalog.
-					</p>
-
 					<FieldGroup>
 						<Field data-invalid={nameInvalid || undefined}>
-							<FieldLabel htmlFor={nameInputId} className="uppercase">
-								Folder name
+							<FieldLabel htmlFor={nameInputId}>
+								{t("ui.folder_name_898add", "Folder name")}
 							</FieldLabel>
 
 							<InputGroup
@@ -338,36 +359,46 @@ export function RenameCatalogModal({
 									disabled={isRenaming}
 									aria-invalid={nameInvalid || undefined}
 									aria-describedby={nameDescriptionId}
-									placeholder="Character illustrations"
+									placeholder={t(
+										"ui.character_illustrations",
+										"Character illustrations",
+									)}
 									onChange={(event) => setName(event.target.value)}
 								/>
 							</InputGroup>
 
 							<FieldDescription id={nameDescriptionId}>
 								{nameInvalid
-									? "Folder name is required."
-									: "Maximum 100 characters."}
+									? t("ui.folder_name_is_required", "Folder name is required.")
+									: t("ui.maximum_100_characters", "Maximum 100 characters.")}
 							</FieldDescription>
 						</Field>
 
 						<Field>
-							<FieldLabel htmlFor={descriptionInputId} className="uppercase">
-								Description
+							<FieldLabel htmlFor={descriptionInputId}>
+								{t("ui.description", "Description")}
 							</FieldLabel>
 
 							<InputGroup className="rounded-xl">
 								<InputGroupTextArea
+									className="min-h-28 resize-y"
 									id={descriptionInputId}
 									value={description}
-									rows={5}
+									rows={4}
 									disabled={isRenaming}
-									placeholder="A selected collection of finished character artwork."
+									placeholder={t(
+										"ui.a_selected_collection_of_finished_character_artwork",
+										"A selected collection of finished character artwork.",
+									)}
 									onChange={(event) => setDescription(event.target.value)}
 								/>
 							</InputGroup>
 
 							<FieldDescription>
-								Optional. Leave this empty to remove the current description.
+								{t(
+									"ui.optional_leave_this_empty_to_remove_the_current_description",
+									"Optional. Leave this empty to remove the current description.",
+								)}
 							</FieldDescription>
 						</Field>
 					</FieldGroup>
@@ -384,17 +415,19 @@ export function RenameCatalogModal({
 				</form>
 			}
 			detailsFooterContent={
-				<div className="flex justify-end gap-2 p-4">
+				<div className="flex items-center justify-end gap-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
 					<Button
+						size="xl"
 						type="button"
 						variant="outline"
 						disabled={isRenaming}
 						onClick={() => onOpenChange(false)}
 					>
-						Cancel
+						{t("ui.cancel", "Cancel")}
 					</Button>
 
 					<Button
+						size="xl"
 						type="submit"
 						form={formId}
 						disabled={isRenaming || !trimmedName}
@@ -403,10 +436,14 @@ export function RenameCatalogModal({
 						{isRenaming ? (
 							<Spinner data-icon="inline-start" />
 						) : (
-							<OutlineFolder data-icon="inline-start" aria-hidden="true" />
+							<span aria-hidden="true" data-icon="inline-start">
+								<OutlineFolder data-icon="inline-start" aria-hidden="true" />
+							</span>
 						)}
 
-						{isRenaming ? "Renaming..." : "Save changes"}
+						{isRenaming
+							? t("ui.renaming", "Renaming...")
+							: t("ui.save_changes", "Save changes")}
 					</Button>
 				</div>
 			}
@@ -420,39 +457,110 @@ interface CatalogPreviewProps {
 }
 
 function CatalogPreview({ name, description }: CatalogPreviewProps) {
-	const trimmedName = name.trim();
-	const trimmedDescription = description.trim();
-
+	const { t } = useTranslation();
 	return (
-		<div className="flex min-h-64 size-full items-center justify-center p-8">
-			<div className="relative aspect-4/3 w-full max-w-sm">
-				<div className="absolute inset-x-0 bottom-0 h-[90%] rounded-2xl rounded-tl-md bg-muted ring-1 ring-border">
-					<div className="absolute -top-3 left-0 h-6 w-[42%] rounded-t-xl bg-muted ring-1 ring-border" />
-
-					<div className="absolute -top-px left-px h-3 w-[calc(42%-2px)] bg-muted" />
-				</div>
-
-				<div className="absolute inset-x-0 bottom-0 flex h-[84%] flex-col justify-end overflow-hidden rounded-2xl bg-card p-4 ring-1 ring-border">
-					<div className="absolute inset-0 flex items-center justify-center bg-muted/30">
-						<OutlineFolder
-							aria-hidden="true"
-							className="size-14 text-muted-foreground/50"
-						/>
-					</div>
-
-					<div className="relative flex min-w-0 flex-col gap-1">
-						<h3 className="line-clamp-2 text-pretty font-semibold">
-							{trimmedName || "New portfolio folder"}
-						</h3>
-
-						{trimmedDescription && (
-							<p className="line-clamp-2 text-pretty text-xs text-muted-foreground">
-								{trimmedDescription}
-							</p>
-						)}
-					</div>
-				</div>
-			</div>
+		<div className="mx-auto w-full max-w-40 sm:max-w-52">
+			<p className="mb-4 text-xs font-medium tracking-wide text-muted-foreground">
+				{t("ui.folder_preview", "Preview")}
+			</p>
+			<FolderCard
+				folder={{
+					id: "folder-preview",
+					name:
+						name.trim() || t("ui.new_portfolio_folder", "New portfolio folder"),
+					description: description.trim() || undefined,
+				}}
+				contentWarnings={[]}
+			/>
 		</div>
+	);
+}
+
+interface CatalogModalLayoutProps {
+	layout?: "dialog" | "page";
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	title: string;
+	description: string;
+	isBusy: boolean;
+	mediaContent: ReactNode;
+	detailsContent: ReactNode;
+	detailsFooterContent: ReactNode;
+}
+
+function CatalogModalLayout({
+	layout = "dialog",
+	open,
+	onOpenChange,
+	title,
+	description,
+	isBusy,
+	mediaContent,
+	detailsContent,
+	detailsFooterContent,
+}: CatalogModalLayoutProps) {
+	const { t } = useTranslation();
+	const contentRef = useRef<HTMLDivElement>(null);
+	const handleOpenChange = (nextOpen: boolean) => {
+		if (!isBusy) onOpenChange(nextOpen);
+	};
+	if (layout === "page") {
+		return open ? (
+			<CreationPageLayout
+				title={title}
+				description={description}
+				onBack={() => handleOpenChange(false)}
+				isBusy={isBusy}
+				footer={detailsFooterContent}
+			>
+				{detailsContent}
+				<aside className="border-t bg-surface-1 px-4 py-5">
+					{mediaContent}
+				</aside>
+			</CreationPageLayout>
+		) : null;
+	}
+	return (
+		<Dialog open={open} onOpenChange={handleOpenChange}>
+			<DialogContent
+				ref={contentRef}
+				tabIndex={-1}
+				showCloseButton={false}
+				onOpenAutoFocus={(event) => {
+					event.preventDefault();
+					contentRef.current?.focus({ preventScroll: true });
+				}}
+				className="flex max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-3xl flex-col gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-3xl"
+			>
+				<header className="flex shrink-0 items-start gap-4 border-b p-5 sm:p-6">
+					<div className="min-w-0 flex-1 space-y-2">
+						<DialogTitle className="leading-snug">{title}</DialogTitle>
+						<DialogDescription className="text-pretty leading-relaxed">
+							{description}
+						</DialogDescription>
+					</div>
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon-xl"
+						className="-mt-1 -mr-2 shrink-0"
+						disabled={isBusy}
+						aria-label={t("ui.close", "Close")}
+						onClick={() => handleOpenChange(false)}
+					>
+						<OutlineClose aria-hidden="true" />
+					</Button>
+				</header>
+				<div className="min-h-0 overflow-y-auto overscroll-contain sm:grid sm:grid-cols-[16rem_minmax(0,1fr)]">
+					<div className="border-b bg-surface-1 px-6 py-5 sm:flex sm:items-center sm:border-r sm:border-b-0 sm:p-6">
+						{mediaContent}
+					</div>
+					{detailsContent}
+				</div>
+				<footer className="shrink-0 border-t bg-background">
+					{detailsFooterContent}
+				</footer>
+			</DialogContent>
+		</Dialog>
 	);
 }
