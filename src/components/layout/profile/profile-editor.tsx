@@ -62,12 +62,7 @@ export function ProfileEditor({
 				username: watchedUsername || "",
 				accentColor: watchedAccentColor || undefined,
 			}) as TUserProfile,
-		[
-			watchedAccentColor,
-			watchedAvatar,
-			watchedDisplayName,
-			watchedUsername,
-		],
+		[watchedAccentColor, watchedAvatar, watchedDisplayName, watchedUsername],
 	);
 
 	const handleFileChange = (
@@ -96,11 +91,7 @@ export function ProfileEditor({
 			<div className="relative w-full overflow-hidden">
 				<div className="relative h-40 w-full overflow-hidden rounded-3xl bg-surface-3 shadow-none! sm:h-44 lg:h-48">
 					{watchedCover ? (
-						<img
-							src={watchedCover}
-							alt=""
-							className="size-full object-cover"
-						/>
+						<img src={watchedCover} alt="" className="size-full object-cover" />
 					) : (
 						<div className="flex size-full items-center justify-center text-xs text-muted-foreground/50">
 							{t("settings.profile.no_cover", "No cover image")}
@@ -161,6 +152,7 @@ export function ProfileEditor({
 						/>
 
 						<label
+							style={{ boxShadow: "none" }}
 							htmlFor={avatarUploadId}
 							aria-label={t(
 								"settings.profile.change_avatar",
@@ -168,7 +160,7 @@ export function ProfileEditor({
 							)}
 							className={cn(
 								buttonVariants({ size: "icon", variant: "secondary" }),
-								"absolute -bottom-1 -right-1 bg-surface-3 ring-3 ring-surface-3 hover:bg-surface-3/90",
+								"absolute -bottom-1 -right-1 bg-surface-3 hover:bg-surface-3/90",
 							)}
 						>
 							<OutlineEdit />
@@ -188,10 +180,7 @@ export function ProfileEditor({
 						{watchedDisplayName ||
 							t("settings.profile.display_name", "Display name")}
 					</Typography.Paragraph>
-					<Typography.Paragraph
-						size="xs"
-						className="text-muted-foreground!"
-					>
+					<Typography.Paragraph size="xs" className="text-muted-foreground!">
 						@{watchedUsername || t("settings.profile.username", "username")}
 					</Typography.Paragraph>
 				</div>
@@ -243,10 +232,7 @@ export function ProfileEditor({
 										<OutlineAt />
 									</InputGroupAddon>
 									<InputGroupInput
-										placeholder={t(
-											"auth.username.placeholder",
-											"Username",
-										)}
+										placeholder={t("auth.username.placeholder", "Username")}
 										{...field}
 									/>
 								</InputGroup>

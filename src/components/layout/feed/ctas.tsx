@@ -203,9 +203,7 @@ export const BookmarkButton = memo(function BookmarkButton({
 					? "hover:bg-white/12 hover:text-white dark:text-white"
 					: "hover:bg-primary/10 hover:text-primary",
 				bookmarked
-					? isOverlay
-						? "text-white hover:bg-white/10"
-						: "bg-neutral-900 text-white hover:bg-neutral-800 hover:text-white dark:bg-white/15 dark:hover:bg-white/20"
+					? "text-white hover:bg-white/10"
 					: isOverlay
 						? "text-accent drop-shadow-[0_1px_10px_rgba(0,0,0,0.75)]"
 						: "text-muted-foreground",

@@ -155,16 +155,7 @@ export function UniversalModalLayout({
 
 			<DropdownMenuContent align="end">{moreMenuContent}</DropdownMenuContent>
 		</DropdownMenu>
-	) : (
-		<Button
-			variant="ghost"
-			size="icon"
-			aria-label="More options"
-			className="rounded-full"
-		>
-			<OutlineMore />
-		</Button>
-	);
+	) : null;
 
 	if (isTablet) {
 		return (
@@ -203,7 +194,7 @@ export function UniversalModalLayout({
 										aria-label={
 											bookmarked ? "Remove bookmark" : "Save bookmark"
 										}
-										className={cn("rounded-full", bookmarked && "bg-neutral-900 text-white hover:bg-neutral-800 hover:text-white dark:bg-white/15 dark:hover:bg-white/20")}
+										className={cn("rounded-full", bookmarked && "text-primary")}
 										onClick={handleBookmarkClick}
 									>
 										{bookmarked ? <SolidBookmark /> : <OutlineBookmark />}
@@ -322,25 +313,29 @@ export function UniversalModalLayout({
 						"border-l bg-background",
 					)}
 				>
-					<header className="flex min-h-15 shrink-0 items-center gap-3 border-b px-4 py-2">
-						<div className="min-w-0 flex-1">{detailsHeaderContent}</div>
+					{(detailsHeaderContent || showBookmark || moreAction) && (
+						<header className="flex min-h-15 shrink-0 items-center gap-3 border-b px-4 py-2">
+							<div className="min-w-0 flex-1">{detailsHeaderContent}</div>
 
-						<div className="flex shrink-0 items-center gap-1">
-							{showBookmark && (
-								<Button
-									variant="ghost"
-									size="icon"
-									aria-label={bookmarked ? "Remove bookmark" : "Save bookmark"}
-									className={cn("rounded-full", bookmarked && "bg-neutral-900 text-white hover:bg-neutral-800 hover:text-white dark:bg-white/15 dark:hover:bg-white/20")}
-									onClick={handleBookmarkClick}
-								>
-									{bookmarked ? <SolidBookmark /> : <OutlineBookmark />}
-								</Button>
-							)}
+							<div className="flex shrink-0 items-center gap-1">
+								{showBookmark && (
+									<Button
+										variant="ghost"
+										size="icon"
+										aria-label={
+											bookmarked ? "Remove bookmark" : "Save bookmark"
+										}
+										className={cn("rounded-full", bookmarked && "text-primary")}
+										onClick={handleBookmarkClick}
+									>
+										{bookmarked ? <SolidBookmark /> : <OutlineBookmark />}
+									</Button>
+								)}
 
-							{moreAction}
-						</div>
-					</header>
+								{moreAction}
+							</div>
+						</header>
+					)}
 
 					<div
 						className={cn(

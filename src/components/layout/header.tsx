@@ -1,9 +1,18 @@
-import { Home, Menu, Message } from "@keyline-icons/react"
-import { Home as HomeFill } from "@keyline-icons/react/fill"
 import { Link, useLocation } from "@tanstack/react-router";
 import { ShoppingCart } from "lucide-react";
 import { memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+	OutlineChat,
+	OutlineFileText,
+	OutlineHome,
+	OutlineMenu,
+	OutlineReceipt,
+	SolidChat,
+	SolidFileText,
+	SolidHome,
+	SolidReceipt,
+} from "@/components/icons/icons";
 import { Elevated } from "@/lib/elevated";
 import { localizePath, stripLocaleFromPathname } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -17,12 +26,11 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "../ui/sheet";
-import { Skeleton } from "../ui/skeleton";
 import { BasketDropdown } from "./basket-dropdown";
 import UserDropDown from "./profile/drop-down";
 import User from "./profile/user";
 import CurrencySelect from "./select/currency";
-
+import { Skeleton } from "../ui/skeleton";
 
 function HeaderUserSkeleton() {
 	return (
@@ -71,7 +79,7 @@ export default function Header() {
 
 						<Button variant={"secondary"} size={"icon-xl"} asChild>
 							<Link to={localizePath("/chat", i18n.language) as any}>
-								<Message />
+								<OutlineChat />
 							</Link>
 						</Button>
 						{isPending ? (
@@ -120,7 +128,7 @@ const MobileNav = () => {
 			<NavWrapper className="lg:hidden">
 				<SheetTrigger asChild>
 					<Button variant="ghost" size="icon">
-						<Menu />
+						<OutlineMenu />
 					</Button>
 				</SheetTrigger>
 			</NavWrapper>
@@ -186,13 +194,13 @@ const NavLinks = memo(() => {
 	const getIconState = (path: string, isActive: boolean) => {
 		switch (path) {
 			case "/":
-				return isActive ? <HomeFill /> : <Home />;
+				return isActive ? <SolidHome /> : <OutlineHome />;
 			// case "/roadmap":
 			// 	return isActive ? <SolidReceipt /> : <OutlineReceipt />;
-			// case "/shop":
-			// 	return isActive ? <SolidReceipt /> : <OutlineReceipt />;
-			// case "/blog":
-			// 	return isActive ? <SolidFileText /> : <OutlineFileText />;
+			case "/shop":
+				return isActive ? <SolidReceipt /> : <OutlineReceipt />;
+			case "/blog":
+				return isActive ? <SolidFileText /> : <OutlineFileText />;
 			// case "/chat":
 			// 	return isActive ? <SolidChat /> : <OutlineChat />;
 			default:
@@ -203,7 +211,7 @@ const NavLinks = memo(() => {
 	const navigationLinks = [
 		{ path: "/", label: t("header.navigation.home", "Home") },
 		// { path: "/roadmap", label: t("footer.navigation.roadmap", "Roadmap") },
-		// { path: "/shop", label: t("header.navigation.shop", "Shop") },
+		{ path: "/shop", label: t("header.navigation.shop", "Shop") },
 		// { path: "/chat", label: t("header.navigation.messages", "Messages") },
 		// { path: "/blog", label: t("header.navigation.blog") },
 		// { path: "/users", label: t("header.navigation.users") },

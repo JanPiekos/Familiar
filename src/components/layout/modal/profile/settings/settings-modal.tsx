@@ -26,6 +26,7 @@ import {
 	useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { useUpdateProfile } from "@/hooks/user/use-update-profile";
 import {
 	OutlineCheck,
 	OutlineChevronDown,
@@ -240,7 +241,9 @@ const EMPTY_PROFILE_VALUES: ProfileEditorValues = {
 	accent_color: "",
 };
 
-function getProfileEditorValues(user?: TUserResponse | null): ProfileEditorValues {
+function getProfileEditorValues(
+	user?: TUserResponse | null,
+): ProfileEditorValues {
 	if (!user) {
 		return EMPTY_PROFILE_VALUES;
 	}
@@ -279,10 +282,7 @@ export function UserSettingsModal({
 							variant="secondary"
 							size="icon-xl"
 							className="rounded-full bg-background ring-1 ring-border"
-							aria-label={t(
-								"settings.dialog.close",
-								"Close settings dialog",
-							)}
+							aria-label={t("settings.dialog.close", "Close settings dialog")}
 						>
 							<X aria-hidden="true" />
 						</Button>
@@ -327,7 +327,7 @@ export function UserSettingsPanel({
 	onSave,
 }: UserSettingsPanelProps) {
 	const { t } = useTranslation();
-	const { user } = useAuth();
+	const { user, authEmail } = useAuth();
 	const navigation = useMemo(() => getSettingsNavigation(t), [t]);
 	const [activeSection, setActiveSection] =
 		useState<SettingsSection>("profile");
@@ -335,7 +335,15 @@ export function UserSettingsPanel({
 		() => getProfileEditorValues(user),
 		[user],
 	);
-	const accountEmail = (user as { email?: string } | null | undefined)?.email ?? "";
+	const accountEmail = authEmail ?? "";
+	const updateProfile = useUpdateProfile();
+	const saveProfile = async (values: ProfileEditorValues, initialValues: ProfileEditorValues) => {
+		const saved = await updateProfile.mutateAsync({
+			values,
+			initialValues,
+		});
+		return saved ? getProfileEditorValues(saved) : null;
+	};
 
 	const activeItem =
 		navigation.find((item) => item.id === activeSection) ?? navigation[0];
@@ -380,6 +388,7 @@ export function UserSettingsPanel({
 										<SidebarMenuItem key={item.id}>
 											<SidebarMenuButton
 												type="button"
+												disabled={updateProfile.isPending}
 												isActive={isActive}
 												tooltip={item.name}
 												className="h-auto items-center py-2.5"
@@ -458,6 +467,7 @@ export function UserSettingsPanel({
 							section={activeSection}
 							profileInitialValues={profileInitialValues}
 							accountEmail={accountEmail}
+							onProfileSubmit={saveProfile}
 							onSave={onSave}
 						/>
 					</div>
@@ -470,6 +480,7 @@ export function UserSettingsPanel({
 							type="button"
 							variant="outline"
 							className="min-w-0 flex-1 sm:flex-none"
+							disabled={updateProfile.isPending}
 							onClick={onCancel}
 						>
 							{t("common.cancel", "Cancel")}
@@ -480,9 +491,13 @@ export function UserSettingsPanel({
 						size="responsive-xl"
 						type="submit"
 						form={`${activeSection}-settings-form`}
+						disabled={updateProfile.isPending}
+						aria-busy={updateProfile.isPending}
 						className="min-w-0 flex-1 sm:flex-none"
 					>
-						{t("common.save_changes", "Save changes")}
+						{updateProfile.isPending
+							? t("settings.profile.saving", "Saving profile…")
+							: t("common.save_changes", "Save changes")}
 					</Button>
 				</footer>
 			</main>
@@ -494,11 +509,13 @@ function SettingsSectionContent({
 	section,
 	profileInitialValues,
 	accountEmail,
+	onProfileSubmit,
 	onSave,
 }: {
 	section: SettingsSection;
 	profileInitialValues: ProfileEditorValues;
 	accountEmail: string;
+	onProfileSubmit: ProfileSettingsProps["onSubmit"];
 	onSave?: () => void;
 }) {
 	switch (section) {
@@ -506,7 +523,7 @@ function SettingsSectionContent({
 			return (
 				<ProfileSettings
 					initialValues={profileInitialValues}
-					onSubmit={() => onSave?.()}
+					onSubmit={onProfileSubmit}
 				/>
 			);
 
@@ -538,7 +555,10 @@ function SettingsSectionContent({
 
 interface ProfileSettingsProps {
 	initialValues?: ProfileEditorValues;
-	onSubmit?: (values: ProfileEditorValues) => void;
+	onSubmit?: (
+		values: ProfileEditorValues,
+		initialValues: ProfileEditorValues,
+	) => void | ProfileEditorValues | null | Promise<void | ProfileEditorValues | null>;
 }
 
 export function ProfileSettings({
@@ -633,11 +653,7 @@ function AccountSettings({
 				>
 					<FieldGroup>
 						<Field>
-							<Button
-								type="button"
-								variant="secondary"
-								size="responsive-xl"
-							>
+							<Button type="button" variant="secondary" size="responsive-xl">
 								<KeyRound data-icon="inline-start" />
 								{t("settings.account.password.change", "Change password")}
 							</Button>
@@ -654,11 +670,7 @@ function AccountSettings({
 				>
 					<FieldGroup>
 						<Field>
-							<Button
-								type="button"
-								variant="secondary"
-								size="responsive-xl"
-							>
+							<Button type="button" variant="secondary" size="responsive-xl">
 								<LogOut data-icon="inline-start" />
 								{t(
 									"settings.account.sessions.sign_out_others",
@@ -854,10 +866,7 @@ function NotificationSettings({
 		},
 		{
 			name: "newFollowers",
-			title: t(
-				"settings.notifications.new_followers.title",
-				"New followers",
-			),
+			title: t("settings.notifications.new_followers.title", "New followers"),
 			description: t(
 				"settings.notifications.new_followers.description",
 				"Notify me when somebody follows my profile.",
@@ -865,10 +874,7 @@ function NotificationSettings({
 		},
 		{
 			name: "emailNotifications",
-			title: t(
-				"settings.notifications.email.title",
-				"Email notifications",
-			),
+			title: t("settings.notifications.email.title", "Email notifications"),
 			description: t(
 				"settings.notifications.email.description",
 				"Send important notifications to my email.",
@@ -946,10 +952,7 @@ function PrivacySettings({
 		},
 		{
 			name: "showOnlineStatus",
-			title: t(
-				"settings.privacy.online_status.title",
-				"Show online status",
-			),
+			title: t("settings.privacy.online_status.title", "Show online status"),
 			description: t(
 				"settings.privacy.online_status.description",
 				"Allow other users to see when you are active.",
@@ -957,10 +960,7 @@ function PrivacySettings({
 		},
 		{
 			name: "showLikedPosts",
-			title: t(
-				"settings.privacy.liked_posts.title",
-				"Show liked posts",
-			),
+			title: t("settings.privacy.liked_posts.title", "Show liked posts"),
 			description: t(
 				"settings.privacy.liked_posts.description",
 				"Display your liked posts on your profile.",
@@ -968,10 +968,7 @@ function PrivacySettings({
 		},
 		{
 			name: "allowSearchEngines",
-			title: t(
-				"settings.privacy.search_engines.title",
-				"Allow search engines",
-			),
+			title: t("settings.privacy.search_engines.title", "Allow search engines"),
 			description: t(
 				"settings.privacy.search_engines.description",
 				"Allow external search engines to index your profile.",
@@ -1013,10 +1010,7 @@ function PrivacySettings({
 		>
 			<div className="flex flex-col gap-6">
 				<SettingsCard
-					title={t(
-						"settings.privacy.visibility.title",
-						"Profile visibility",
-					)}
+					title={t("settings.privacy.visibility.title", "Profile visibility")}
 					description={t(
 						"settings.privacy.visibility.description",
 						"Control who can see your profile and activity.",
@@ -1240,7 +1234,10 @@ function SettingsLanguageSelect() {
 			>
 				<Command>
 					<CommandInput
-						placeholder={t("components.language_select.search", "Search language")}
+						placeholder={t(
+							"components.language_select.search",
+							"Search language",
+						)}
 					/>
 					<CommandList>
 						<CommandEmpty>
@@ -1263,7 +1260,10 @@ function SettingsLanguageSelect() {
 										);
 									}}
 								>
-									<span className="mr-2 text-lg leading-none" aria-hidden="true">
+									<span
+										className="mr-2 text-lg leading-none"
+										aria-hidden="true"
+									>
 										{language.flag}
 									</span>
 									{language.label}
@@ -1386,10 +1386,7 @@ function AccessibilitySettings({
 	const preferences = [
 		{
 			name: "reduceMotion",
-			title: t(
-				"settings.accessibility.reduce_motion.title",
-				"Reduce motion",
-			),
+			title: t("settings.accessibility.reduce_motion.title", "Reduce motion"),
 			description: t(
 				"settings.accessibility.reduce_motion.description",
 				"Reduce interface animations and transitions.",
@@ -1397,10 +1394,7 @@ function AccessibilitySettings({
 		},
 		{
 			name: "highContrast",
-			title: t(
-				"settings.accessibility.high_contrast.title",
-				"High contrast",
-			),
+			title: t("settings.accessibility.high_contrast.title", "High contrast"),
 			description: t(
 				"settings.accessibility.high_contrast.description",
 				"Increase contrast between interface elements.",

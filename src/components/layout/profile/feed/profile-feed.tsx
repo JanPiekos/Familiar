@@ -5,7 +5,7 @@ import type {
 	PortfolioPostImageResponse,
 	PortfolioPostResponse,
 } from "@/api/portfolio/posts/post-types";
-import { FolderPlus as FolderPlusOutline } from "@keyline-icons/react"
+import { OutlineFolderAddOuLc } from "@/components/icons/icons";
 import { EmptyPage } from "@/components/layout/empty-page";
 import { usePortfolioImageBuckets } from "@/hooks/portfolio/use-portfolio-image-buckets";
 import { useBento } from "@/hooks/ui/use-bento";
@@ -293,7 +293,7 @@ export function ProfileFeed({
 
 	const emptyState = (
 		<EmptyPage
-			icon={FolderPlusOutline}
+			icon={OutlineFolderAddOuLc}
 			title={t("components.profile.portfolio.empty.title", "No posts yet.")}
 			description={t(
 				"components.profile.portfolio.empty.description",

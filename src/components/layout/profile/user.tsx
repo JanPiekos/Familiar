@@ -1,8 +1,16 @@
-import { BracketArrowLeft as LogoutOutline, Settings as SettingsOutline, User as UserOutline } from "@keyline-icons/react"
 import {
 	Link,
+	useNavigate,
+	useRouter,
+	useSearch,
 } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
+import { toast } from "sonner";
+import {
+	OutlineLogout,
+	OutlineSettings,
+	OutlineUser,
+} from "@/components/icons/icons";
 import { Button } from "@/components/ui/button";
 import {
 	Drawer,
@@ -19,12 +27,12 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useIsTablet } from "@/hooks/ui/use-mobile";
+import { useIsMobile, useIsTablet } from "@/hooks/ui/use-mobile";
 import { getLocaleParam, localizePath } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import type { UserIdentity } from "@/types/user";
-import { useOpenProfileSettings } from "@/hooks/user/use-open-profile-settings";
+import { UserSettingsModal } from "../modal/profile/settings/settings-modal";
 import UserAvatar from "./avatar";
 
 type UserButtonContentProps = {
@@ -156,16 +164,55 @@ export default function User({
 		username: "unknown",
 	};
 	const { logout } = useAuth();
-	const openProfileSettings = useOpenProfileSettings();
+	const navigate = useNavigate();
+	const router = useRouter();
+	const isMobile = useIsMobile();
 	const isTablet = useIsTablet();
 	const [internalOpen, setInternalOpen] = useState(false);
 	const locale = getLocaleParam(document.documentElement.lang);
+	const search = useSearch({ strict: false }) as { settings?: "profile" };
+	const settingsOpen = search.settings === "profile";
 	const open = openProp ?? internalOpen;
 	const setOpen = onOpenChange ?? setInternalOpen;
 
 	const handleOpenSettings = () => {
 		setOpen(false);
-		openProfileSettings();
+
+		if (isMobile) {
+			void navigate({
+				to: "/{-$locale}/settings/profile",
+				params: { locale },
+			});
+			return;
+		}
+
+		void navigate({
+			to: ".",
+			search: (previous) => ({
+				...previous,
+				settings: "profile",
+			}),
+			mask: {
+				to: "/{-$locale}/settings/profile",
+			},
+		});
+	};
+
+	const handleCloseSettings = () => {
+		if (settingsOpen) {
+			router.history.back();
+		}
+	};
+
+	const handleSettingsOpenChange = (nextOpen: boolean) => {
+		if (!nextOpen) {
+			handleCloseSettings();
+		}
+	};
+
+	const handleSaveSettings = () => {
+		toast.info("Settings saved successfully");
+		handleCloseSettings();
 	};
 
 	const triggerClassName = cn(
@@ -195,7 +242,7 @@ export default function User({
 	const menuItems = [
 		{
 			label: "Profile",
-			icon: <UserOutline />,
+			icon: <OutlineUser />,
 			to: localizePath(`/user/${resolvedUser.username || ""}`, locale),
 		},
 	];
@@ -221,7 +268,7 @@ export default function User({
 
 			<div className="flex flex-col gap-1 p-1">
 				<Button variant="ghost" size="xl" onClick={handleOpenSettings}>
-					<SettingsOutline />
+					<OutlineSettings />
 					<span>Settings</span>
 				</Button>
 			</div>
@@ -236,11 +283,19 @@ export default function User({
 						setOpen(false);
 					}}
 				>
-					<LogoutOutline className="size-4" />
+					<OutlineLogout className="size-4" />
 					<span>Logout</span>
 				</Button>
 			</div>
 		</>
+	);
+
+	const settingsModal = isMobile ? null : (
+		<UserSettingsModal
+			open={settingsOpen}
+			onOpenChange={handleSettingsOpenChange}
+			onSave={handleSaveSettings}
+		/>
 	);
 
 	if (!isDropdown) {
@@ -289,7 +344,7 @@ export default function User({
 						<DropdownMenuSeparator />
 
 						<DropdownMenuItem onSelect={handleOpenSettings}>
-							<SettingsOutline />
+							<OutlineSettings />
 							Settings
 						</DropdownMenuItem>
 
@@ -302,12 +357,13 @@ export default function User({
 								setOpen(false);
 							}}
 						>
-							<LogoutOutline />
+							<OutlineLogout />
 							Logout
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 
+				{settingsModal}
 			</>
 		);
 	}
@@ -329,6 +385,7 @@ export default function User({
 				</DrawerContent>
 			</Drawer>
 
+			{settingsModal}
 		</>
 	);
 }

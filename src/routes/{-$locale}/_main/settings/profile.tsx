@@ -7,16 +7,9 @@ export const Route = createFileRoute("/{-$locale}/_main/settings/profile")({
 });
 
 function RouteComponent() {
-	const handleSave = () => {
-		// TODO: Connect this to the settings API.
-	};
-
 	return (
 		<Elevated offset={1} className="flex min-h-0 flex-1 rounded-3xl">
-			<UserSettingsPanel
-				// className="min-h-[calc(100dvh-4rem)] w-full"
-				onSave={handleSave}
-			/>
+			<UserSettingsPanel />
 		</Elevated>
 	);
 }

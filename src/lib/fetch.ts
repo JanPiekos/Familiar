@@ -9,6 +9,7 @@ type ApiParams =
 type ApiFetchInit = RequestInit & {
 	params?: ApiParams;
 	withAuth?: boolean;
+	apiVersion?: "v1";
 };
 
 export class ApiFetchError extends Error {
@@ -18,7 +19,8 @@ export class ApiFetchError extends Error {
 
 	constructor(response: Response, body: string) {
 		super(
-			`Request failed: ${response.status} ${response.statusText}${body ? ` - ${body}` : ""
+			`Request failed: ${response.status} ${response.statusText}${
+				body ? ` - ${body}` : ""
 			}`,
 		);
 		this.name = "ApiFetchError";
@@ -78,9 +80,7 @@ function appendParams(url: string, params?: ApiParams) {
 	return `${url}${separator}${queryString}`;
 }
 
-function isFormDataBody(
-	body: BodyInit | null | undefined,
-): body is FormData {
+function isFormDataBody(body: BodyInit | null | undefined): body is FormData {
 	return typeof FormData !== "undefined" && body instanceof FormData;
 }
 
@@ -108,10 +108,7 @@ function shouldSetJsonContentType(body: BodyInit | null | undefined) {
 		return false;
 	}
 
-	if (
-		typeof ReadableStream !== "undefined" &&
-		body instanceof ReadableStream
-	) {
+	if (typeof ReadableStream !== "undefined" && body instanceof ReadableStream) {
 		return false;
 	}
 
@@ -119,7 +116,9 @@ function shouldSetJsonContentType(body: BodyInit | null | undefined) {
 }
 
 function isJsonContentType(contentType: string) {
-	return contentType.includes("application/json") || contentType.includes("+json");
+	return (
+		contentType.includes("application/json") || contentType.includes("+json")
+	);
 }
 
 async function readErrorBody(response: Response, isJson: boolean) {
@@ -138,10 +137,13 @@ export async function apiFetch<T = unknown>(
 	path: string,
 	init: ApiFetchInit = {},
 ): Promise<T> {
-	const { params, withAuth = true, ...fetchInit } = init;
+	const { params, withAuth = true, apiVersion, ...fetchInit } = init;
 	const accessToken = withAuth ? await getAccessToken() : null;
 	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-	const baseUrl = getApiBaseUrl();
+	const configuredBaseUrl = getApiBaseUrl();
+	const baseUrl = apiVersion
+		? `${configuredBaseUrl.replace(/\/api(?:\/v\d+)?$/, "")}/api/${apiVersion}`
+		: configuredBaseUrl;
 	const rawUrl = baseUrl ? `${baseUrl}${normalizedPath}` : normalizedPath;
 	const url = appendParams(rawUrl, params);
 	const headers = new Headers(fetchInit.headers);

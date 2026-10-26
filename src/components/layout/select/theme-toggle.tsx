@@ -1,10 +1,13 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Sun as SunOutline } from "@keyline-icons/react"
-import { Moon as MoonOutline } from "@keyline-icons/react"
-import { Monitor as MonitorOutline } from "@keyline-icons/react"
-import { ChevronDown as ChevronDownOutline } from "@keyline-icons/react"
-import { Check as CheckOutline } from "@keyline-icons/react"
+import {
+	OutlineCheck,
+	OutlineChevronDown,
+	OutlineChevronRight,
+	OutlineClearNight,
+	OutlineMonitor,
+	OutlineSunny,
+} from "@/components/icons/icons";
 import { Button } from "@/components/ui/button";
 import {
 	Command,
@@ -17,6 +20,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import { Elevated } from "@/lib/elevated";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/providers/theme";
 
@@ -29,22 +33,22 @@ export default function ThemeToggle() {
 		{
 			value: "light",
 			label: t("components.theme_switcher.light", "Light"),
-			icon: SunOutline,
+			icon: OutlineSunny,
 		},
 		{
 			value: "dark",
 			label: t("components.theme_switcher.dark", "Dark"),
-			icon: MoonOutline,
+			icon: OutlineClearNight,
 		},
 		{
 			value: "oled",
 			label: t("components.theme_switcher.oled", "OLED"),
-			icon: MoonOutline,
+			icon: OutlineClearNight,
 		},
 		{
 			value: "system",
 			label: t("components.theme_switcher.system", "System"),
-			icon: MonitorOutline,
+			icon: OutlineMonitor,
 		},
 	] as const;
 
@@ -71,10 +75,10 @@ export default function ThemeToggle() {
 					) : (
 						t("components.theme_switcher.toggle", "Toggle theme")
 					)}
-					<ChevronDownOutline className="ml-auto size-4" />
+					<OutlineChevronDown className="ml-auto size-4" />
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent align="end" className="w-37.5 p-0 overflow-hidden">
+			<PopoverContent align="end" className="w-[150px] p-0 overflow-hidden">
 				<Command>
 					<CommandList id="theme-options">
 						<CommandGroup>
@@ -89,7 +93,7 @@ export default function ThemeToggle() {
 								>
 									<theme.icon />
 									{theme.label}
-									<CheckOutline
+									<OutlineCheck
 										className={cn(
 											"ml-auto size-4",
 											userTheme === theme.value ? "opacity-100" : "opacity-0",
