@@ -8,7 +8,6 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Analytics } from "@vercel/analytics/react";
-import { RoutedUserSettings } from "@/components/layout/modal/profile/settings/routed-user-settings";
 import { Toaster } from "@/components/ui/sonner";
 import TanStackQueryDevtools from "@/integrations/tanstack-query/devtools";
 import i18n, { setSSRLanguage } from "@/lib/i18n";
@@ -84,7 +83,6 @@ function RootDocument() {
 								<CurrencyProvider>
 									<Toaster />
 									<Outlet />
-									<RoutedUserSettings />
 									<TanStackDevtools
 										config={{
 											position: "bottom-right",

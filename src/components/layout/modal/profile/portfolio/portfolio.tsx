@@ -14,6 +14,11 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+	InputGroup,
+	InputGroupInput,
+	InputGroupTextArea,
+} from "@/components/ui/input-group";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -113,19 +118,26 @@ export function CreateCatalogModal({
 
 					<FieldGroup>
 						<Field data-invalid={nameInvalid || undefined}>
-							<FieldLabel htmlFor={nameInputId}>Folder name</FieldLabel>
+							<FieldLabel htmlFor={nameInputId} className="uppercase">
+								Folder name *
+							</FieldLabel>
 
-							<Input
-								id={nameInputId}
-								value={name}
-								maxLength={100}
-								required
-								disabled={isCreating}
-								aria-invalid={nameInvalid || undefined}
-								aria-describedby={nameDescriptionId}
-								placeholder="Character illustrations"
-								onChange={(event) => setName(event.target.value)}
-							/>
+							<InputGroup
+								className="h-12"
+								data-invalid={nameInvalid || undefined}
+							>
+								<InputGroupInput
+									id={nameInputId}
+									value={name}
+									maxLength={100}
+									required
+									disabled={isCreating}
+									aria-invalid={nameInvalid || undefined}
+									aria-describedby={nameDescriptionId}
+									placeholder="Character illustrations"
+									onChange={(event) => setName(event.target.value)}
+								/>
+							</InputGroup>
 
 							<FieldDescription id={nameDescriptionId}>
 								{nameInvalid
@@ -135,16 +147,20 @@ export function CreateCatalogModal({
 						</Field>
 
 						<Field>
-							<FieldLabel htmlFor={descriptionInputId}>Description</FieldLabel>
+							<FieldLabel htmlFor={descriptionInputId} className="uppercase">
+								Description
+							</FieldLabel>
 
-							<Textarea
-								id={descriptionInputId}
-								value={description}
-								rows={5}
-								disabled={isCreating}
-								placeholder="A selected collection of finished character artwork."
-								onChange={(event) => setDescription(event.target.value)}
-							/>
+							<InputGroup className="rounded-xl">
+								<InputGroupTextArea
+									id={descriptionInputId}
+									value={description}
+									rows={5}
+									disabled={isCreating}
+									placeholder="A selected collection of finished character artwork."
+									onChange={(event) => setDescription(event.target.value)}
+								/>
+							</InputGroup>
 
 							<FieldDescription>
 								Optional. You can edit this later.

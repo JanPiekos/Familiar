@@ -1,4 +1,13 @@
 const pl = {
+	settings: {
+		profile: {
+			no_changes: "Brak zmian do zapisania.",
+			saving: "Zapisywanie profilu…",
+			saved: "Zmiany profilu zostały zapisane.",
+			validation_failed: "Popraw zaznaczone pola przed zapisaniem.",
+			save_failed: "Nie udało się zapisać zmian profilu. Spróbuj ponownie.",
+		},
+	},
 	seo: {
 		defaults: {
 			title: "Familiar",

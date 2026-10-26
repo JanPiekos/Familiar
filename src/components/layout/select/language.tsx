@@ -1,8 +1,10 @@
 import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Check as CheckOutline } from "@keyline-icons/react";
-import { ChevronDown as ChevronDownOutline } from "@keyline-icons/react";
+import {
+	OutlineCheck,
+	OutlineChevronDown,
+} from "@/components/icons/icons";
 import { Button } from "@/components/ui/button";
 import {
 	Command,
@@ -74,7 +76,7 @@ export default function LanguageSelect() {
 					) : (
 						t("components.language_switcher.select", "Select language")
 					)}
-					<ChevronDownOutline data-icon="inline-end" />
+					<OutlineChevronDown data-icon="inline-end" />
 				</Button>
 			</PopoverTrigger>
 
@@ -112,7 +114,7 @@ export default function LanguageSelect() {
 										{language.flag}
 									</span>
 									{language.label}
-									<CheckOutline
+									<OutlineCheck
 										className={cn(
 											"ml-auto",
 											i18n.language.startsWith(language.value)

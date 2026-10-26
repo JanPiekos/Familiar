@@ -22,3 +22,19 @@ export async function getUserByUsername(username: string) {
 export async function getCurrentUser() {
 	return apiFetch<TUserResponse>(`users/me`);
 }
+
+// UpdateProfileRequest from the v1 OpenAPI contract. Null means unchanged.
+export interface UpdateProfileRequest {
+	bio?: string;
+	avatarMultimediaId?: string;
+	coverMultimediaId?: string;
+	socials?: Record<string, string>;
+}
+
+export function updateMyProfile(input: UpdateProfileRequest) {
+	return apiFetch<TUserResponse>("users/me", {
+		apiVersion: "v1",
+		method: "PATCH",
+		body: JSON.stringify(input),
+	});
+}

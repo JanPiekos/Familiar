@@ -19,9 +19,6 @@ import type {
 	PortfolioPostResponse,
 } from "@/api/portfolio/posts/post-types";
 import { OutlineFolderAddOuLc, SolidPlus } from "@/components/icons/icons";
-import { FolderPlus as FolderPlusOutline } from "@keyline-icons/react"
-import { Plus as PlusOutline } from "@keyline-icons/react"
-
 import {
 	FilterBar,
 	type FilterGroup,
@@ -608,13 +605,13 @@ export function ProfilePortfolio({
 											>
 												{deleteCatalogMutation.isPending
 													? t(
-														"components.portfolio.folder.delete.deleting",
-														"Deleting...",
-													)
+															"components.portfolio.folder.delete.deleting",
+															"Deleting...",
+														)
 													: t(
-														"components.portfolio.folder.delete.confirm",
-														"Delete",
-													)}
+															"components.portfolio.folder.delete.confirm",
+															"Delete",
+														)}
 											</AlertDialogAction>
 										</AlertDialogFooter>
 									</AlertDialogContent>
@@ -694,7 +691,7 @@ export function ProfilePortfolio({
 										)}
 										onClick={() => setCreateCatalogOpen(true)}
 									>
-										<FolderPlusOutline />
+										<OutlineFolderAddOuLc data-icon="inline-start" />
 										{!isMobile &&
 											t(
 												"components.portfolio.folder.create.title",
@@ -713,7 +710,7 @@ export function ProfilePortfolio({
 										)}
 										onClick={() => setCreatePostOpen(true)}
 									>
-										<PlusOutline />
+										<SolidPlus data-icon="inline-start" />
 										{!isMobile &&
 											t("components.profile.actions.add_post", "Create post")}
 									</Button>

@@ -1,4 +1,13 @@
 const en = {
+	settings: {
+		profile: {
+			no_changes: "No changes to save.",
+			saving: "Saving profile…",
+			saved: "Profile changes saved.",
+			validation_failed: "Please correct the highlighted fields before saving.",
+			save_failed: "Your profile changes could not be saved. Please try again.",
+		},
+	},
 	seo: {
 		defaults: {
 			title: "Familiar",

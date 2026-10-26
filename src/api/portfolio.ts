@@ -23,6 +23,23 @@ export async function getPortfolioPostsByUserId(
 				(post) => post.authorId === userId,
 			);
 
+			// If we didn't find any posts and it's an unknown ID, let's map the 'draconek_mock_id' posts
+			// to this user ID so we have some fallback data for testing
+			if (userPosts.length === 0 && userId !== "u1" && userId !== "u2") {
+				const fallbackPosts = MOCK_PORTFOLIO_POSTS.filter(
+					(post) => post.authorId === "draconek_mock_id",
+				).map((post) => ({
+					...post,
+					authorId: userId,
+					author: {
+						...post.author,
+						userId: userId,
+					},
+				}));
+				resolve(fallbackPosts);
+				return;
+			}
+
 			resolve(userPosts);
 		}, 600);
 	});

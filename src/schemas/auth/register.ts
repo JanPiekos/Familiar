@@ -3,6 +3,7 @@ import z from "zod";
 import { REGISTRATION_SOCIAL_PLATFORMS } from "@/api/auth/auth-types";
 import { accountTypes } from "@/types/auth/schema/accounts";
 import { email } from ".";
+import { profileFieldsSchema } from "@/schemas/user/profile";
 
 const password = z.string().min(6, "Password must be at least 6 characters.");
 
@@ -27,21 +28,6 @@ const inviteKey = z
 	.string()
 	.regex(/^FAM-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{3}$/, "Invalid invite key.")
 	.or(z.literal(""));
-
-const username = z
-	.string()
-	.trim()
-	.refine(
-		(value) => value.length === 0 || /^[a-zA-Z0-9_]{3,32}$/.test(value),
-		"Username must be 3-32 characters and contain only letters, numbers, and underscores.",
-	);
-
-const displayName = z
-	.string()
-	.trim()
-	.max(100, "Display name must be at most 100 characters.");
-
-const bio = z.string().trim().max(150, "Bio must be at most 150 characters.");
 
 const socialValue = z.string().trim().min(1, "Social link is required.");
 
@@ -72,9 +58,7 @@ const registerBase = z.object({
 	password,
 	confirm_password: password,
 	invite_key: inviteKey,
-	username,
-	display_name: displayName,
-	bio,
+	...profileFieldsSchema.shape,
 	socials,
 	avatar: imageFile,
 	cover: imageFile,

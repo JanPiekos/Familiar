@@ -22,7 +22,7 @@ function normalizeUserSocials(
 	);
 }
 
-function toUserProfile(user: TUserResponse): TUserProfile {
+export function toUserProfile(user: TUserResponse): TUserProfile {
 	return {
 		userId: user.userId,
 		username: user.username,
