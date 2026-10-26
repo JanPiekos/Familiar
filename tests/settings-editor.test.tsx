@@ -13,6 +13,23 @@ function editor(onSubmit: () => Promise<void>) {
 }
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 describe("profile settings Save feedback", () => {
+ it.each(["Second saved bio", "Old bio"])("saves a second bio edit (%s) against the confirmed baseline", async (nextBio) => {
+  const first = { ...initialValues, bio: "First saved bio" };
+  const second = { ...initialValues, bio: nextBio };
+  const submit = vi.fn().mockResolvedValueOnce(first).mockResolvedValueOnce(second);
+  const { rerender } = editor(submit);
+  fireEvent.change(screen.getByLabelText("Bio"), { target: { value: first.bio } });
+  fireEvent.click(screen.getByText("Save changes"));
+  await waitFor(() => expect(toast.success).toHaveBeenCalledTimes(1));
+  rerender(<><SettingsProfileEditor initialValues={first} onSubmit={submit} /><button type="submit" form="profile-settings-form">Save changes</button></>);
+  fireEvent.change(screen.getByLabelText("Bio"), { target: { value: second.bio } });
+  fireEvent.click(screen.getByText("Save changes"));
+  await waitFor(() => expect(toast.success).toHaveBeenCalledTimes(2));
+  expect(submit).toHaveBeenNthCalledWith(1, first, initialValues);
+  expect(submit).toHaveBeenNthCalledWith(2, second, first);
+  expect(toast.info).not.toHaveBeenCalled();
+ });
+
  it("submits from the external footer button, shows loading, then success only when resolved", async () => {
   let resolve!: () => void;
   const submit = vi.fn(() => new Promise<void>((done) => { resolve = done; }));

@@ -1,4 +1,9 @@
-import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
+import {
+	useLocation,
+	useNavigate,
+	useParams,
+	useSearch,
+} from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useIsMobile } from "@/hooks/ui/use-mobile";
 import { useAuth } from "@/providers/auth";
@@ -11,7 +16,10 @@ export function RoutedUserSettings() {
 	const { locale } = useParams({ strict: false }) as { locale?: string };
 	const { user } = useAuth();
 	const isMobile = useIsMobile();
-	const open = Boolean(user) && search.settings === "profile";
+	const pathname = useLocation({ select: (location) => location.pathname });
+	const isSettingsPage = /\/settings\/profile\/?$/.test(pathname);
+	const open =
+		Boolean(user) && search.settings === "profile" && !isSettingsPage;
 
 	useEffect(() => {
 		if (open && isMobile) {
@@ -36,7 +44,9 @@ export function RoutedUserSettings() {
 	return (
 		<UserSettingsModal
 			open
-			onOpenChange={(nextOpen) => { if (!nextOpen) close(); }}
+			onOpenChange={(nextOpen) => {
+				if (!nextOpen) close();
+			}}
 			onSave={close}
 		/>
 	);

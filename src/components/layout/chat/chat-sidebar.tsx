@@ -1,5 +1,5 @@
 import { Skeleton as BoneyardSkeleton } from "boneyard-js/react";
-import { Search } from "lucide-react";
+import { Inbox, MessageCircle, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { OutlineUser } from "@/components/icons/icons";
 import { EmptyPage } from "@/components/layout/empty-page";
@@ -211,7 +211,7 @@ export function ChatSidebar({
 	return (
 		<aside
 			className={cn(
-				"flex min-h-0 w-full shrink-0 flex-col border-r md:w-80 lg:w-96",
+				"flex min-h-0 w-full shrink-0 flex-col border-r md:w-20 lg:w-96",
 				activeConversationId ? "hidden md:flex" : "flex",
 			)}
 		>
@@ -220,8 +220,8 @@ export function ChatSidebar({
 				onValueChange={(value) => setActiveTab(value as ChatSidebarTab)}
 				className="min-h-0 flex-1 gap-0"
 			>
-				<div className="flex flex-col gap-3 p-5 pb-2">
-					<InputGroup>
+				<div className="flex flex-col gap-3 p-5 pb-2 md:px-2 lg:px-5">
+					<InputGroup className="md:hidden lg:flex">
 						<InputGroupAddon align="inline-start">
 							<Search />
 						</InputGroupAddon>
@@ -233,7 +233,7 @@ export function ChatSidebar({
 						/>
 					</InputGroup>
 
-					<TabsList className="w-full">
+					<TabsList className="w-full md:h-auto md:flex-col lg:h-9 lg:flex-row">
 						{chatSidebarTabs.map((tab) => {
 							const count =
 								tab.value === "requests"
@@ -241,9 +241,26 @@ export function ChatSidebar({
 									: directConversations.length;
 
 							return (
-								<TabsTrigger key={tab.value} value={tab.value}>
-									<span>{tab.label}</span>
-									<span className="text-xs text-muted-foreground">{count}</span>
+								<TabsTrigger
+									key={tab.value}
+									value={tab.value}
+									title={tab.label}
+									className="md:h-9 md:w-full md:py-2 lg:h-full lg:w-auto"
+								>
+									<span
+										className="hidden md:block lg:hidden"
+										aria-hidden="true"
+									>
+										{tab.value === "direct" ? (
+											<MessageCircle className="size-4" />
+										) : (
+											<Inbox className="size-4" />
+										)}
+									</span>
+									<span className="md:sr-only lg:not-sr-only">{tab.label}</span>
+									<span className="text-xs text-muted-foreground md:hidden lg:inline">
+										{count}
+									</span>
 								</TabsTrigger>
 							);
 						})}

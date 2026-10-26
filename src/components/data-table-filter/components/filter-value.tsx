@@ -1100,35 +1100,11 @@ export function FilterValueNumberController<TData>({
 		return [Number(init[0] ?? 0), Number(init[1] ?? init[0] ?? 0)];
 	});
 
-	const isInitialized = useRef(false);
-	const boundsRef = useRef<[number, number]>([0, 0]);
-
 	const [sliderMin, sliderMax] = useMemo(() => {
-		let min = minMax && minMax[0] !== undefined ? Number(minMax[0]) : 0;
-		let max = minMax && minMax[1] !== undefined ? Number(minMax[1]) : 0;
-
-		if (isNaN(min)) min = 0;
-		if (isNaN(max)) max = 0;
-
-		min = Math.min(min, values[0]);
-		max = Math.max(max, values[1] ?? values[0]);
-
-		if (min === max) {
-			max = min + 100;
-		}
-
-		if (!isInitialized.current) {
-			boundsRef.current = [min, max];
-			isInitialized.current = true;
-		} else {
-			boundsRef.current = [
-				Math.min(boundsRef.current[0], min),
-				Math.max(boundsRef.current[1], max),
-			];
-		}
-
-		return boundsRef.current;
-	}, [minMax, values]);
+		const min = Number(minMax?.[0] ?? 0);
+		const max = Number(minMax?.[1] ?? 0);
+		return [Number.isFinite(min) ? min : 0, Number.isFinite(max) ? max : 0];
+	}, [minMax]);
 
 	// TODO: Add accessibility hold to add remove numbers / InputGroupNumberInput
 
@@ -1265,6 +1241,7 @@ export function FilterValueNumberController<TData>({
 											onValueChange={(value) => changeNumber(value)}
 											min={sliderMin}
 											max={sliderMax}
+											disabled={sliderMin === sliderMax}
 											step={1}
 											aria-orientation="horizontal"
 										/>
@@ -1292,6 +1269,7 @@ export function FilterValueNumberController<TData>({
 											onValueChange={changeNumber}
 											min={sliderMin}
 											max={sliderMax}
+											disabled={sliderMin === sliderMax}
 											step={1}
 											aria-orientation="horizontal"
 										/>

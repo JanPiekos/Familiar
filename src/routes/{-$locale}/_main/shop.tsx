@@ -1,4 +1,4 @@
-import { ScrollShadow, Typography } from "@heroui/react";
+import { Typography } from "@heroui/react";
 import {
 	createFileRoute,
 	Outlet,
@@ -27,8 +27,8 @@ import {
 } from "@/components/layout/filter-bar";
 import { CategoryCard } from "@/components/layout/shop/category-card";
 import { ShopItemCard } from "@/components/layout/shop/shop-item-card";
-import { useShopItems } from "@/hooks/shop";
 import { useCommissionCategories } from "@/hooks/commissions/use-commissions";
+import { useShopItems } from "@/hooks/shop";
 import i18n, { stripLocaleFromPathname } from "@/lib/i18n";
 import { getSeoLinks, seo } from "@/lib/seo";
 import type { MockShopItem } from "@/types/shop";
@@ -194,7 +194,7 @@ function ShopPage() {
 					</div>
 
 					<FilterBar
-						data={filteredItems}
+						data={items ?? []}
 						groups={filterGroups}
 						values={filterValues}
 						className="px-5 lg:px-0"

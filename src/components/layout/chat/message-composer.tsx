@@ -100,10 +100,12 @@ export function MessageComposer({
 			return;
 		}
 
-		await sendMessage.mutateAsync({
-			body,
-			files,
-		});
+		try {
+			await sendMessage.mutateAsync({ body, files });
+		} catch {
+			// Keep the draft and attachments so the user can retry.
+			return;
+		}
 
 		form.reset({ body: "" });
 		setFiles([]);

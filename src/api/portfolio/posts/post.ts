@@ -132,6 +132,25 @@ export async function getPortfolioPost(postId: string) {
 }
 
 export async function getArtistPortfolioPost(username: string, postId: string) {
+	// The detail response does not include an author and currently accepts unrelated
+	// usernames. Verify membership before attributing a post to the requested artist.
+	let page = 0;
+	while (true) {
+		const posts = await getArtistPortfolioPosts(username, { page, size: 100 });
+		if (posts.content?.some((post) => post.id === postId)) break;
+		if (
+			!posts.content?.length ||
+			posts.last === true ||
+			(posts.totalPages !== undefined && page + 1 >= posts.totalPages) ||
+			(posts.last === undefined &&
+				posts.totalPages === undefined &&
+				posts.content.length < 100)
+		) {
+			throw new Error("Post not found in this artist's portfolio");
+		}
+		page += 1;
+	}
+
 	return apiFetch<PortfolioPostResponse>(
 		`portfolio/artists/${encodeURIComponent(username)}/posts/${postId}`,
 	);

@@ -105,7 +105,7 @@ function SvgFavicon({
 
 function normalizeColor(value?: string | null) {
     return value && HEX_COLOR_PATTERN.test(value)
-        ? value
+        ? value.slice(0, value.length <= 5 ? 4 : 7)
         : DEFAULT_BACKGROUND;
 }
 

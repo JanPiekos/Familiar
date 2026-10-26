@@ -1,6 +1,13 @@
 import { Typography } from "@heroui/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Copy, Edit2, Flag, MoreHorizontal, Trash2 } from "lucide-react";
+import {
+	ArrowLeft,
+	Copy,
+	Edit2,
+	Flag,
+	MoreHorizontal,
+	Trash2,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -41,7 +48,6 @@ import { useUserByUsername } from "@/hooks/user/use-user";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import { ContentWarningOverlay } from "../../content-warning-overlay";
-import UserAvatar from "../../profile/avatar";
 import User from "../../profile/user";
 
 interface PortfolioPostModalProps {
@@ -69,18 +75,21 @@ function usePortfolioPostController({
 }) {
 	const { t, i18n } = useTranslation();
 	const { user: currentUser } = useAuth();
-	const { user: profileUser, isPending: isUserPending } = useUserByUsername(
-		username ?? "",
-	);
 	const queryClient = useQueryClient();
+	const requestedUsername = username || currentUser?.username || "";
 
 	const {
 		data: post,
 		isPending: isPostPending,
-		isError,
-	} = useArtistPortfolioPost(username ?? "", postId);
+		isError: isPostError,
+	} = useArtistPortfolioPost(requestedUsername, postId);
+	const { user: profileUser, isPending: isUserPending } = useUserByUsername(
+		post ? requestedUsername : "",
+	);
 
-	const isPending = isPostPending || isUserPending;
+	const isError = isPostError || !requestedUsername;
+	const isPending =
+		!isError && (isPostPending || Boolean(post && isUserPending));
 
 	const deletePostMutation = useDeletePortfolioPost();
 
@@ -140,7 +149,9 @@ function usePortfolioPostController({
 			: null;
 
 	const canManagePost = Boolean(
-		currentUser?.userId &&
+		post &&
+			!isError &&
+			currentUser?.userId &&
 			profileUser?.userId &&
 			currentUser.userId === profileUser.userId,
 	);
@@ -233,7 +244,8 @@ function PostHeader({ controller }: { controller: Controller }) {
 }
 
 function PostMoreMenuItems({ controller }: { controller: Controller }) {
-	const { t, canManagePost, setDeleteDialogOpen, post, profileUser } = controller;
+	const { t, canManagePost, setDeleteDialogOpen, post, profileUser } =
+		controller;
 
 	if (canManagePost) {
 		return (
@@ -269,40 +281,40 @@ function PostMoreMenuItems({ controller }: { controller: Controller }) {
 
 	return (
 		<>
-		<DropdownMenuItem
-			onSelect={() => {
-				navigator.clipboard.writeText(
-					`${window.location.origin}/${profileUser?.username}/portfolio/${post?.id}`,
-				);
-				toast.success(
-					t(
-						"components.portfolio.post.manage.copy_link_success",
-						"Link copied to clipboard",
-					),
-				);
-				// 		"Report feature coming soon!",
-				// 	),
-				// );
-			}}
-		>
-			<Copy className="size-4" />
-			{t("components.portfolio.post.manage.copy_link", "Copy link")}
-		</DropdownMenuItem>
-		<DropdownMenuSeparator />
-		<DropdownMenuItem
-			variant={"destructive"}
-			onSelect={() => {
-				toast.info(
-					t(
-						"components.portfolio.post.report_coming_soon",
-						"Report feature coming soon!",
-					),
-				);
-			}}
-		>
-			<Flag className="size-4" />
-			{t("components.portfolio.post.manage.report", "Report post")}
-		</DropdownMenuItem>
+			<DropdownMenuItem
+				onSelect={() => {
+					navigator.clipboard.writeText(
+						`${window.location.origin}/user/${encodeURIComponent(profileUser?.username ?? "")}/portfolio/${post?.id}`,
+					);
+					toast.success(
+						t(
+							"components.portfolio.post.manage.copy_link_success",
+							"Link copied to clipboard",
+						),
+					);
+					// 		"Report feature coming soon!",
+					// 	),
+					// );
+				}}
+			>
+				<Copy className="size-4" />
+				{t("components.portfolio.post.manage.copy_link", "Copy link")}
+			</DropdownMenuItem>
+			<DropdownMenuSeparator />
+			<DropdownMenuItem
+				variant={"destructive"}
+				onSelect={() => {
+					toast.info(
+						t(
+							"components.portfolio.post.report_coming_soon",
+							"Report feature coming soon!",
+						),
+					);
+				}}
+			>
+				<Flag className="size-4" />
+				{t("components.portfolio.post.manage.report", "Report post")}
+			</DropdownMenuItem>
 		</>
 	);
 }

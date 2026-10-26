@@ -194,7 +194,10 @@ export function UniversalModalLayout({
 										aria-label={
 											bookmarked ? "Remove bookmark" : "Save bookmark"
 										}
-										className={cn("rounded-full", bookmarked && "text-primary")}
+										className={cn(
+											"rounded-full",
+											bookmarked && "text-foreground",
+										)}
 										onClick={handleBookmarkClick}
 									>
 										{bookmarked ? <SolidBookmark /> : <OutlineBookmark />}
@@ -325,7 +328,10 @@ export function UniversalModalLayout({
 										aria-label={
 											bookmarked ? "Remove bookmark" : "Save bookmark"
 										}
-										className={cn("rounded-full", bookmarked && "text-primary")}
+										className={cn(
+											"rounded-full",
+											bookmarked && "text-foreground",
+										)}
 										onClick={handleBookmarkClick}
 									>
 										{bookmarked ? <SolidBookmark /> : <OutlineBookmark />}

@@ -1,10 +1,5 @@
 import { Typography } from "@heroui/react";
-import {
-	useNavigate,
-	useParams,
-	useRouter,
-	useSearch,
-} from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { Flag, Share, UserLock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -31,7 +26,6 @@ import { createStaticList } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import type { TUserProfile } from "@/types/user";
 import { TRoles } from "@/types/user/roles";
-import { UserSettingsModal } from "../modal/profile/settings/settings-modal";
 import UserAvatar from "./avatar";
 import { ProfileBadge } from "./badge";
 import { ProfileBio } from "./bio";
@@ -293,17 +287,12 @@ export function UserProfileSidebar({
 }) {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
-	const router = useRouter();
 	const { user: currentUser } = useAuth();
 	const isTablet = useIsTablet();
 	const createDirectConversation = usePostConversationDirect();
 	const actionButtonSize = isTablet ? "2xl" : "xl";
 
 	const { locale } = useParams({ strict: false }) as { locale?: string };
-
-	const search = useSearch({ strict: false }) as { settings?: "profile" };
-
-	const settingsOpen = search.settings === "profile";
 
 	const handleOpenSettings = () => {
 		void navigate({
@@ -316,25 +305,10 @@ export function UserProfileSidebar({
 			// Show the standalone settings URL in the adress bar.
 			mask: {
 				to: "/{-$locale}/settings/profile",
+				params: { locale },
+				unmaskOnReload: true,
 			},
 		});
-	};
-
-	const handleCloseSettings = () => {
-		if (!settingsOpen) return;
-		router.history.back();
-	};
-
-	const handleSettingsOpenChange = (open: boolean) => {
-		if (!open) {
-			handleCloseSettings();
-		}
-	};
-
-	const handleSaveSettings = () => {
-		// TODO: save using the settings API
-		toast.info("Settings saved successfully");
-		handleCloseSettings();
 	};
 
 	const requireAuthentication = (action: "follow" | "message") => {
@@ -624,15 +598,6 @@ export function UserProfileSidebar({
 					<ProfileSocials socials={user.socials} />
 				</div>
 			</aside>
-
-			{/* User settings modal */}
-			{isMe && (
-				<UserSettingsModal
-					open={settingsOpen}
-					onOpenChange={handleSettingsOpenChange}
-					onSave={handleSaveSettings}
-				/>
-			)}
 		</>
 	);
 }

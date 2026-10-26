@@ -1,11 +1,5 @@
-import {
-	Link,
-	useNavigate,
-	useRouter,
-	useSearch,
-} from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
-import { toast } from "sonner";
 import {
 	OutlineLogout,
 	OutlineSettings,
@@ -32,7 +26,6 @@ import { getLocaleParam, localizePath } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import type { UserIdentity } from "@/types/user";
-import { UserSettingsModal } from "../modal/profile/settings/settings-modal";
 import UserAvatar from "./avatar";
 
 type UserButtonContentProps = {
@@ -165,13 +158,10 @@ export default function User({
 	};
 	const { logout } = useAuth();
 	const navigate = useNavigate();
-	const router = useRouter();
 	const isMobile = useIsMobile();
 	const isTablet = useIsTablet();
 	const [internalOpen, setInternalOpen] = useState(false);
 	const locale = getLocaleParam(document.documentElement.lang);
-	const search = useSearch({ strict: false }) as { settings?: "profile" };
-	const settingsOpen = search.settings === "profile";
 	const open = openProp ?? internalOpen;
 	const setOpen = onOpenChange ?? setInternalOpen;
 
@@ -194,25 +184,10 @@ export default function User({
 			}),
 			mask: {
 				to: "/{-$locale}/settings/profile",
+				params: { locale },
+				unmaskOnReload: true,
 			},
 		});
-	};
-
-	const handleCloseSettings = () => {
-		if (settingsOpen) {
-			router.history.back();
-		}
-	};
-
-	const handleSettingsOpenChange = (nextOpen: boolean) => {
-		if (!nextOpen) {
-			handleCloseSettings();
-		}
-	};
-
-	const handleSaveSettings = () => {
-		toast.info("Settings saved successfully");
-		handleCloseSettings();
 	};
 
 	const triggerClassName = cn(
@@ -252,11 +227,7 @@ export default function User({
 			<div className="flex flex-col gap-1 p-1">
 				{menuItems.map((item) => (
 					<Button key={item.label} variant="ghost" size="xl" asChild>
-						<Link
-							to={item.to}
-							preload={false}
-							onClick={() => setOpen(false)}
-						>
+						<Link to={item.to} preload={false} onClick={() => setOpen(false)}>
 							{item.icon}
 							<span>{item.label}</span>
 						</Link>
@@ -288,14 +259,6 @@ export default function User({
 				</Button>
 			</div>
 		</>
-	);
-
-	const settingsModal = isMobile ? null : (
-		<UserSettingsModal
-			open={settingsOpen}
-			onOpenChange={handleSettingsOpenChange}
-			onSave={handleSaveSettings}
-		/>
 	);
 
 	if (!isDropdown) {
@@ -362,8 +325,6 @@ export default function User({
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
-
-				{settingsModal}
 			</>
 		);
 	}
@@ -384,8 +345,6 @@ export default function User({
 					<div className="pb-4">{menuItemsContent}</div>
 				</DrawerContent>
 			</Drawer>
-
-			{settingsModal}
 		</>
 	);
 }

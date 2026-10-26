@@ -1,47 +1,55 @@
 import {
+	queryOptions,
 	useMutation,
 	useQuery,
 	useQueryClient,
-	queryOptions,
 } from "@tanstack/react-query";
+import { waitForMediaJob } from "@/api/media/media";
 import {
-	getMyPortfolioPosts,
-	getArtistPortfolioPosts,
-	getArtistPortfolioPost,
-	getPortfolioPost,
-	getArtistCatalogPosts,
-	createPortfolioPost,
-	updatePortfolioPost,
-	deletePortfolioPost,
-	reorderMyPortfolioPosts,
-	uploadPortfolioPostMedia,
-	deletePortfolioPostImage,
-	reorderPortfolioPostImages,
-	addPortfolioPostToCatalog,
-	removePortfolioPostFromCatalog,
-} from "@/api/portfolio/posts/post";
-import {
-	getMyCatalogs,
-	getArtistCatalogs,
-	createCatalog,
-	updateCatalog,
-	deleteCatalog,
-	reorderMyCatalogs,
 	assignCatalogCover,
+	createCatalog,
+	deleteCatalog,
+	getArtistCatalogs,
+	getMyCatalogs,
+	reorderMyCatalogs,
+	updateCatalog,
 } from "@/api/portfolio/catalogs/catalog";
 import type {
-	CreatePortfolioPostRequest,
-	UpdatePortfolioPostRequest,
-	ReorderRequest,
-	ReorderPostImagesRequest,
-	PostPageableParams,
-} from "@/api/portfolio/posts/post-types";
-import type {
-	CreateCatalogRequest,
-	UpdateCatalogRequest,
 	AssignCoverRequest,
+	CreateCatalogRequest,
 	ReorderCatalogsRequest,
+	UpdateCatalogRequest,
 } from "@/api/portfolio/catalogs/catalog-types";
+import {
+	addPortfolioPostToCatalog,
+	createPortfolioPost,
+	deletePortfolioPost,
+	deletePortfolioPostImage,
+	getArtistCatalogPosts,
+	getArtistPortfolioPost,
+	getArtistPortfolioPosts,
+	getMyPortfolioPosts,
+	getPortfolioPost,
+	removePortfolioPostFromCatalog,
+	reorderMyPortfolioPosts,
+	reorderPortfolioPostImages,
+	updatePortfolioPost,
+	uploadPortfolioPostMedia,
+} from "@/api/portfolio/posts/post";
+import type {
+	CreatePortfolioPostRequest,
+	PostPageableParams,
+	ReorderPostImagesRequest,
+	ReorderRequest,
+	UpdatePortfolioPostRequest,
+} from "@/api/portfolio/posts/post-types";
+
+function invalidatePortfolio(queryClient: ReturnType<typeof useQueryClient>) {
+	return Promise.all([
+		queryClient.invalidateQueries({ queryKey: ["portfolio"] }),
+		queryClient.invalidateQueries({ queryKey: ["profile-content"] }),
+	]);
+}
 
 // ------------------------------------------------------------------
 // Portfolio Posts Queries
@@ -166,10 +174,7 @@ export function useCreatePortfolioPost() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (data: CreatePortfolioPostRequest) => createPortfolioPost(data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "me", "posts"] });
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "artist"] });
-		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }
 
@@ -183,13 +188,7 @@ export function useUpdatePortfolioPost() {
 			postId: string;
 			data: UpdatePortfolioPostRequest;
 		}) => updatePortfolioPost(postId, data),
-		onSuccess: (_, { postId }) => {
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "me", "posts"] });
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "artist"] });
-			queryClient.invalidateQueries({
-				queryKey: ["portfolio", "post", postId],
-			});
-		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }
 
@@ -197,10 +196,7 @@ export function useDeletePortfolioPost() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (postId: string) => deletePortfolioPost(postId),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "me", "posts"] });
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "artist"] });
-		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }
 
@@ -208,23 +204,21 @@ export function useReorderMyPortfolioPosts() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (data: ReorderRequest) => reorderMyPortfolioPosts(data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "me", "posts"] });
-		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }
 
 export function useUploadPortfolioPostMedia() {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: ({ postId, file }: { postId: string; file: File }) =>
-			uploadPortfolioPostMedia(postId, file),
-		onSuccess: (_, { postId }) => {
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "me", "posts"] });
-			queryClient.invalidateQueries({
-				queryKey: ["portfolio", "post", postId],
-			});
+		mutationFn: async ({ postId, file }: { postId: string; file: File }) => {
+			const job = await uploadPortfolioPostMedia(postId, file);
+			if (job.jobId) {
+				await waitForMediaJob(job.jobId);
+			}
+			return job;
 		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }
 
@@ -233,12 +227,7 @@ export function useDeletePortfolioPostImage() {
 	return useMutation({
 		mutationFn: ({ postId, imageId }: { postId: string; imageId: string }) =>
 			deletePortfolioPostImage(postId, imageId),
-		onSuccess: (_, { postId }) => {
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "me", "posts"] });
-			queryClient.invalidateQueries({
-				queryKey: ["portfolio", "post", postId],
-			});
-		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }
 
@@ -252,12 +241,7 @@ export function useReorderPortfolioPostImages() {
 			postId: string;
 			data: ReorderPostImagesRequest;
 		}) => reorderPortfolioPostImages(postId, data),
-		onSuccess: (_, { postId }) => {
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "me", "posts"] });
-			queryClient.invalidateQueries({
-				queryKey: ["portfolio", "post", postId],
-			});
-		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }
 
@@ -271,15 +255,7 @@ export function useAddPortfolioPostToCatalog() {
 			postId: string;
 			catalogId: string;
 		}) => addPortfolioPostToCatalog(postId, catalogId),
-		onSuccess: (_, { postId, catalogId }) => {
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "me", "posts"] });
-			queryClient.invalidateQueries({
-				queryKey: ["portfolio", "post", postId],
-			});
-			queryClient.invalidateQueries({
-				queryKey: ["portfolio", "artist", "catalog", catalogId],
-			});
-		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }
 
@@ -293,15 +269,7 @@ export function useRemovePortfolioPostFromCatalog() {
 			postId: string;
 			catalogId: string;
 		}) => removePortfolioPostFromCatalog(postId, catalogId),
-		onSuccess: (_, { postId, catalogId }) => {
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "me", "posts"] });
-			queryClient.invalidateQueries({
-				queryKey: ["portfolio", "post", postId],
-			});
-			queryClient.invalidateQueries({
-				queryKey: ["portfolio", "artist", "catalog", catalogId],
-			});
-		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }
 
@@ -313,12 +281,7 @@ export function useCreateCatalog() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (data: CreateCatalogRequest) => createCatalog(data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ["portfolio", "me", "catalogs"],
-			});
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "artist"] });
-		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }
 
@@ -332,12 +295,7 @@ export function useUpdateCatalog() {
 			catalogId: string;
 			data: UpdateCatalogRequest;
 		}) => updateCatalog(catalogId, data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ["portfolio", "me", "catalogs"],
-			});
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "artist"] });
-		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }
 
@@ -345,12 +303,7 @@ export function useDeleteCatalog() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (catalogId: string) => deleteCatalog(catalogId),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ["portfolio", "me", "catalogs"],
-			});
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "artist"] });
-		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }
 
@@ -358,11 +311,7 @@ export function useReorderMyCatalogs() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (data: ReorderCatalogsRequest) => reorderMyCatalogs(data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ["portfolio", "me", "catalogs"],
-			});
-		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }
 
@@ -376,11 +325,6 @@ export function useAssignCatalogCover() {
 			catalogId: string;
 			data: AssignCoverRequest;
 		}) => assignCatalogCover(catalogId, data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ["portfolio", "me", "catalogs"],
-			});
-			queryClient.invalidateQueries({ queryKey: ["portfolio", "artist"] });
-		},
+		onSuccess: () => invalidatePortfolio(queryClient),
 	});
 }

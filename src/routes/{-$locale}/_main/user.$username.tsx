@@ -12,6 +12,7 @@ import { t } from "i18next";
 
 import { OutlineUser } from "@/components/icons/icons";
 import { EmptyPage } from "@/components/layout/empty-page";
+import { AvatarFavicon } from "@/components/layout/profile/avatar-favicon";
 import { FacehashFavicon } from "@/components/layout/profile/facehash-favicon";
 import { ProfileCommissions } from "@/components/layout/profile/feed/commissions";
 import { ProfilePortfolio } from "@/components/layout/profile/feed/portfolio";
@@ -43,10 +44,6 @@ function getProfileFaviconUrl(
 	user: ProfileFaviconUser,
 	fallbackUsername: string,
 ) {
-	if (user.avatarPath) {
-		return user.avatarPath;
-	}
-
 	const search = new URLSearchParams({
 		name:
 			user.displayName?.trim() ||
@@ -55,8 +52,12 @@ function getProfileFaviconUrl(
 			fallbackUsername,
 		size: "64",
 		// Change this whenever the generated SVG implementation changes.
-		v: "facehash-4",
+		v: "facehash-5",
 	});
+
+	if (user.avatarPath) {
+		search.set("image", user.avatarPath);
+	}
 
 	if (user.accentColor) {
 		search.set("color", user.accentColor);
@@ -86,14 +87,12 @@ export const Route = createFileRoute("/{-$locale}/_main/user/$username")({
 			throw notFound();
 		}
 
-		const isFacehashFavicon = !user.avatarPath;
 		const faviconUrl = getProfileFaviconUrl(user, params.username);
 
 		return {
 			user,
 			username: params.username,
 			faviconUrl,
-			isFacehashFavicon,
 			seo: {
 				title: i18n.t("seo.profile.title", {
 					username: params.username,
@@ -118,12 +117,8 @@ export const Route = createFileRoute("/{-$locale}/_main/user/$username")({
 						{
 							rel: "icon" as const,
 							href: loaderData.faviconUrl,
-							...(loaderData.isFacehashFavicon
-								? {
-										type: "image/svg+xml",
-										sizes: "any",
-									}
-								: {}),
+							type: "image/svg+xml",
+							sizes: "any",
 						},
 					]
 				: []),
@@ -207,7 +202,7 @@ export function DefaultPortfolioTabContent({ username }: { username: string }) {
 // FIXME: when user is not logged in and opens a portfolio detail page,
 // there is no creator information.
 function RouteComponent() {
-	const { user, username } = Route.useLoaderData();
+	const { user, username, faviconUrl } = Route.useLoaderData();
 
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -218,7 +213,7 @@ function RouteComponent() {
 		shouldThrow: false,
 		select: (match) => match.params.tab,
 	});
-	const fallbackFavicon = !user.avatarPath ? (
+	const profileFavicon = !user.avatarPath ? (
 		<FacehashFavicon
 			name={
 				user.displayName?.trim() ||
@@ -228,7 +223,7 @@ function RouteComponent() {
 			}
 			backgroundColor={user.accentColor}
 		/>
-	) : null;
+	) : <AvatarFavicon src={faviconUrl} />;
 
 	const activeTab = routeTab ?? "portfolio";
 	const hasPortfolio = hasArtistPortfolio(user);
@@ -246,7 +241,7 @@ function RouteComponent() {
 	if (isAnyPostRoute && (!isModal || isMobile)) {
 		return (
 			<>
-				{fallbackFavicon}
+				{profileFavicon}
 				<Outlet />
 			</>
 		);
@@ -254,7 +249,7 @@ function RouteComponent() {
 
 	return (
 		<>
-			{fallbackFavicon}
+			{profileFavicon}
 			<UserProfile
 				user={user}
 				activeTab={activeTab}
