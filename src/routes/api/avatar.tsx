@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { stringHash } from "facehash";
+import { createUploadedAvatarSvg } from "@/lib/avatar-favicon.server";
 
 const DEFAULT_BACKGROUND = "#d1d5db";
 
@@ -89,7 +90,7 @@ function normalizeColor(value: string | null) {
         return DEFAULT_BACKGROUND;
     }
 
-    return value;
+    return value.slice(0, value.length <= 5 ? 4 : 7);
 }
 
 function getForegroundColor(background: string) {
@@ -206,12 +207,27 @@ function createFacehashSvg({
 export const Route = createFileRoute("/api/avatar")({
     server: {
         handlers: {
-            GET: ({ request }) => {
+            GET: async ({ request }) => {
                 const url = new URL(request.url);
                 const name = url.searchParams.get("name")?.trim();
 
                 if (!name) {
                     return new Response("Missing name", { status: 400 });
+                }
+
+                const image = url.searchParams.get("image");
+                let imageFailed = false;
+                if (image) {
+                    try {
+                        const svg = await createUploadedAvatarSvg(image, parseSize(url.searchParams.get("size")));
+                        return new Response(svg, { headers: {
+                            "Content-Type": "image/svg+xml; charset=utf-8",
+                            "Cache-Control": "public, max-age=86400",
+                            "X-Content-Type-Options": "nosniff",
+                        } });
+                    } catch {
+                        imageFailed = true;
+                    }
                 }
 
                 const svg = createFacehashSvg({
@@ -223,7 +239,7 @@ export const Route = createFileRoute("/api/avatar")({
                 return new Response(svg, {
                     headers: {
                         "Content-Type": "image/svg+xml; charset=utf-8",
-                        "Cache-Control": import.meta.env.DEV
+                        "Cache-Control": import.meta.env.DEV || imageFailed
                             ? "no-store"
                             : "public, max-age=31536000, immutable",
                     },

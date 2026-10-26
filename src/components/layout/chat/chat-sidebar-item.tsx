@@ -1,5 +1,5 @@
 import { Calligraph } from "calligraph";
-import User from "@/components/layout/profile/user";
+import UserAvatar from "@/components/layout/profile/avatar";
 import { cn } from "@/lib/utils";
 import { formatMessageTime, getConversationUser } from "./helpers";
 import type { ChatSidebarItemProps } from "./types";
@@ -26,32 +26,34 @@ export function ChatSidebarItem({
 				}
 			}}
 			aria-current={isActive ? "true" : undefined}
+			aria-label={`${user.displayName || user.username}, ${unreadCount} unread messages`}
+			title={user.displayName || user.username}
 			className={cn(
-				"group/user-btn flex w-full cursor-pointer items-center gap-3 rounded-2xl p-3 text-left transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+				"group/user-btn relative flex w-full cursor-pointer items-center gap-3 rounded-2xl p-3 md:p-2 lg:p-3 text-left transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]",
 				isActive
 					? "bg-accent text-accent-foreground"
 					: "text-foreground hover:bg-accent/12",
 			)}
 		>
 			<div className="pointer-events-none flex w-full justify-between gap-3">
-				<User
-					user={user}
-					avatarSize="lg"
-					description={lastMessage}
-					status={isActive ? "active" : undefined}
-					nonDropdownButtonClassName="!opacity-100"
-					// avatarBadgeClassName={cn(
-					// 	"transition-colors",
-					// 	isActive
-					// 		? "!border-accent"
-					// 		: "!border-background group-hover/user-btn:!border-accent/12",
-					// )}
-				/>
-
-				<div className="flex flex-col items-end justify-between py-1.5 flex-1">
+				<UserAvatar user={user} size="lg" />
+				<div className="min-w-0 flex-1 self-center md:hidden lg:block">
+					<p className="truncate text-sm font-medium">
+						{user.displayName || user.username}
+					</p>
+					<p
+						className={cn(
+							"mt-0.5 truncate text-xs",
+							isActive ? "text-accent-foreground/80" : "text-muted-foreground",
+						)}
+					>
+						{lastMessage}
+					</p>
+				</div>
+				<div className="flex shrink-0 flex-col items-end justify-between py-1.5 md:absolute md:right-0 md:top-0 md:py-0 lg:static lg:py-1.5">
 					<span
 						className={cn(
-							"text-xs",
+							"text-xs md:hidden lg:inline",
 							isActive ? "text-accent-foreground/80" : "text-muted-foreground",
 						)}
 					>

@@ -7,6 +7,8 @@ import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 
 const config = defineConfig({
+	// Keep app dependencies separate from temporary Vite previews.
+	cacheDir: "node_modules/.vite/familiar",
 	plugins: [
 		devtools(),
 		tailwindcss(),
@@ -22,6 +24,7 @@ const config = defineConfig({
 		chunkSizeWarningLimit: 2000,
 	},
 	optimizeDeps: {
+		include: ["@hookform/resolvers/zod", "react-hook-form", "zod", "zod/v4"],
 		exclude: [
 			"@tanstack/start-server-core",
 			"@tanstack/react-start",

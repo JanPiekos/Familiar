@@ -12,15 +12,15 @@ const state = vi.hoisted(() => ({
 
 vi.mock("@heroui/react", () => ({ Typography: { Paragraph: ({ children }: any) => <p>{children}</p> } }));
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (_key: string, fallback: string) => fallback, i18n: { language: "en" } }) }));
-vi.mock("@/providers/auth", () => ({ useAuth: () => ({ user: { userId: state.viewer } }) }));
+vi.mock("@/providers/auth", () => ({ useAuth: () => ({ user: { userId: state.viewer, username: state.viewer === "author" ? "real-author" : "viewer" } }) }));
 vi.mock("@/hooks/portfolio/use-portfolio", () => ({
 	usePortfolioPost: (id: string) => { state.postQuery(id); return { data: state.post, isPending: false, isError: false }; },
-	useArtistPortfolioPost: () => ({ data: state.post, isPending: false, isError: false }),
+	useArtistPortfolioPost: (username: string, id: string) => { state.postQuery(username, id); return { data: username === "real-author" ? state.post : undefined, isPending: false, isError: username !== "real-author" }; },
 	useDeletePortfolioPost: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 vi.mock("@/hooks/user/use-user", () => ({
 	useUserById: (id: string) => { state.authorQuery(id); return { user: { userId: id, username: "real-author", displayName: "Real author" }, isPending: false }; },
-	useUserByUsername: (username: string) => ({ user: { userId: username, username, displayName: username }, isPending: false }),
+	useUserByUsername: (username: string) => ({ user: username ? { userId: "author", username, displayName: "Real author" } : undefined, isPending: false }),
 }));
 vi.mock("@/components/icons/icons", () => ({
 	OutlineBookmark: () => null, OutlineChat: () => null,
@@ -52,11 +52,11 @@ beforeEach(() => { vi.clearAllMocks(); state.viewer = "viewer"; });
 afterEach(cleanup);
 
 describe("post attribution", () => {
-	it("uses the stored author even when a link names the signed-in viewer", () => {
+	it("does not attribute a post to a username that failed portfolio verification", () => {
 		renderPost("viewer");
-		expect(state.postQuery).toHaveBeenCalledWith("post-1");
-		expect(state.authorQuery).toHaveBeenCalledWith("author");
-		expect(screen.getAllByText("Real author")).toHaveLength(2);
+		expect(state.postQuery).toHaveBeenCalledWith("viewer", "post-1");
+		expect(screen.queryByText("Original artwork")).toBeNull();
+		expect(screen.queryByText("Real author")).toBeNull();
 		expect(screen.queryByText("Delete post")).toBeNull();
 	});
 	it("loads a direct post link without a username and allows its actual owner to manage it", () => {
