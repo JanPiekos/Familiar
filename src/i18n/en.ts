@@ -11,12 +11,12 @@ const en = {
 	seo: {
 		defaults: {
 			title: "Familiar",
-			description: "Your art looks $t(meta.app_name)",
+			description: "Familiar art",
 			keywords: "art, familiar, commission",
 		},
 		home: {
 			title: "Home",
-			description: "Your art looks $t(meta.app_name)",
+			description: "Familiar art",
 		},
 		profile: {
 			title: "Profile (@{{username}})",

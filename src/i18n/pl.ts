@@ -11,12 +11,12 @@ const pl = {
 	seo: {
 		defaults: {
 			title: "Familiar",
-			description: "Twoja twórczość wygląda Znajomo",
+			description: "Familiar art",
 			keywords: "sztuka, familiar, zlecenia",
 		},
 		home: {
 			title: "Strona główna",
-			description: "Twoja twórczość wygląda Znajomo",
+			description: "Familiar art",
 		},
 		profile: {
 			title: "Profil (@{{username}})",
