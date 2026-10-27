@@ -1,4 +1,87 @@
 const en = {
+	error_preview: {
+		title: "Error page preview",
+		description: "Choose an example to see the error screen.",
+		type: "Error type",
+		hint: "These are simulated examples. Retry doesn't contact the server.",
+		retried:
+			"Preview complete. A real error page would retry loading your content.",
+	},
+	error_pages: {
+		status: "Error {{status}}",
+		connection: "Connection problem",
+		page_update: "Page update",
+		unexpected: "Unexpected error",
+		retry: "Try again",
+		retrying: "Trying again…",
+		reload: "Reload page",
+		home: "Back to home",
+		back: "Go back",
+		sign_in: "Sign in",
+		not_found: {
+			title: "This page couldn't be found",
+			description:
+				"The link may be incorrect, or this page may have been moved or removed.",
+			hint: "Check the address, or head back home to find what you're looking for.",
+		},
+		unauthorized: {
+			title: "Please sign in to continue",
+			description:
+				"Your session may have expired, or this page requires an account.",
+			hint: "Sign in to your Familiar account, then open this page again.",
+		},
+		forbidden: {
+			title: "You don't have access to this page",
+			description:
+				"This content may be private, or your account may not have permission to view it.",
+			hint: "Check that you're signed in to the right account, or return to a public page.",
+		},
+		rate_limit: {
+			title: "Let's take a short break",
+			description: "Familiar has received too many requests in a short time.",
+			hint: "Please wait a little before trying again.",
+		},
+		timeout: {
+			title: "This is taking longer than expected",
+			description:
+				"The service didn't respond in time, so we couldn't finish loading this page.",
+			hint: "Wait a moment, then try again. The service may be busy.",
+		},
+		unavailable: {
+			title: "Familiar is temporarily unavailable",
+			description:
+				"One of the services we need isn't responding, so we can't load this page right now.",
+			hint: "This is a service connection problem. Please try again in a few minutes.",
+		},
+		server: {
+			title: "Something went wrong on the server",
+			description:
+				"The server couldn't complete your request. Please try again in a moment.",
+			hint: "If this keeps happening, come back a little later.",
+		},
+		request: {
+			title: "We couldn't complete that request",
+			description: "Familiar couldn't process the request for this page.",
+			hint: "Check the address, or return home and open the page again.",
+		},
+		network: {
+			title: "We couldn't connect to Familiar",
+			description:
+				"Your connection may be offline, or the service may be unavailable.",
+			hint: "Check your internet connection, then try again.",
+		},
+		update: {
+			title: "This page needs a refresh",
+			description:
+				"Part of the page couldn't be loaded. A newer version of Familiar may be available.",
+			hint: "Reload the page to download the latest version. If that doesn't help, try again later.",
+		},
+		unknown: {
+			title: "We couldn't load this page",
+			description: "Something unexpected happened while opening this page.",
+			hint: "Try again, or return home and come back to this page later.",
+		},
+	},
 	settings: {
 		profile: {
 			edit_avatar: "Edit profile picture",
@@ -234,6 +317,10 @@ const en = {
 		},
 	},
 	seo: {
+		error_preview: {
+			title: "Error page preview",
+			description: "Preview Familiar's error screens and recovery actions.",
+		},
 		auth: {
 			title: "Account access",
 			description:

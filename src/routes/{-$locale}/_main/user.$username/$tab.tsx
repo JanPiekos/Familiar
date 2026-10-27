@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { OutlineReceipt } from "@/components/icons/icons";
+import { ErrorPage } from "@/components/layout/error-page";
 import { EmptyPage } from "@/components/layout/empty-page";
 import { ProfileCharacters } from "@/components/layout/profile/feed/characters";
 import { ProfilePortfolio } from "@/components/layout/profile/feed/portfolio";
@@ -71,6 +72,7 @@ export function UserFeedContent({
 		isPending,
 		isError,
 		error,
+		refetch,
 		isCurrentUser,
 		createCatalog,
 		isCreatingCatalog,
@@ -91,21 +93,7 @@ export function UserFeedContent({
 	}
 
 	if (isError) {
-		return (
-			<div className="flex min-h-64 flex-col items-center justify-center gap-2 p-6 text-center">
-				<h2 className="font-semibold">
-					{t(
-						"ui.could_not_load_profile_content",
-						"Could not load profile content",
-					)}
-				</h2>
-				<p className="max-w-md text-sm text-muted-foreground">
-					{error instanceof Error
-						? error.message
-						: t("ui.an_unknown_error_occurred", "An unknown error occurred.")}
-				</p>
-			</div>
-		);
+		return <ErrorPage error={error} compact onRetry={() => refetch()} />;
 	}
 
 	switch (tab) {

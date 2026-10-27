@@ -1,6 +1,5 @@
 import {
 	createFileRoute,
-	Link,
 	notFound,
 	Outlet,
 	redirect,
@@ -8,10 +7,8 @@ import {
 	useMatch,
 	useNavigate,
 } from "@tanstack/react-router";
-import { t } from "i18next";
 
-import { OutlineUser } from "@/components/icons/icons";
-import { EmptyPage } from "@/components/layout/empty-page";
+import { RouteNotFoundPage } from "@/components/layout/error-page";
 import { ProfileCommissions } from "@/components/layout/profile/feed/commissions";
 import { ProfilePortfolio } from "@/components/layout/profile/feed/portfolio";
 import {
@@ -22,12 +19,12 @@ import UserProfile, {
 	TabContentSkeleton,
 	UserProfileSkeleton,
 } from "@/components/layout/profile/profile";
-import { Button } from "@/components/ui/button";
 import { useProfileCommissions } from "@/hooks/commissions/use-commissions";
 import { useIsMobile } from "@/hooks/ui/use-mobile";
 import { useProfileContent } from "@/hooks/user/use-profile-content";
 import { userByUsernameQueryOptions } from "@/hooks/user/use-user";
 import i18n from "@/lib/i18n";
+import { getErrorStatus } from "@/lib/page-error";
 
 type ProfileFaviconUser = {
 	avatarPath?: string | null;
@@ -76,9 +73,12 @@ export const Route = createFileRoute("/{-$locale}/_main/user/$username")({
 		}
 	},
 	loader: async ({ params, context }) => {
-		const user = await context.queryClient.ensureQueryData(
-			userByUsernameQueryOptions(params.username),
-		);
+		const user = await context.queryClient
+			.ensureQueryData(userByUsernameQueryOptions(params.username))
+			.catch((error: unknown) => {
+				if (getErrorStatus(error) === 404) throw notFound();
+				throw error;
+			});
 
 		if (!user) {
 			throw notFound();
@@ -102,30 +102,9 @@ export const Route = createFileRoute("/{-$locale}/_main/user/$username")({
 	},
 
 	pendingComponent: UserProfileSkeleton,
-	notFoundComponent: UserNotFoundComponent,
+	notFoundComponent: RouteNotFoundPage,
 	component: RouteComponent,
 });
-
-function UserNotFoundComponent() {
-	const { username } = Route.useParams();
-
-	return (
-		<div className="flex min-h-screen flex-1 flex-col items-center justify-center p-8 text-center">
-			<EmptyPage
-				icon={OutlineUser}
-				title={t(
-					"states.empty.user_not_found",
-					`User "${username}" was not found`,
-				)}
-				description={t("states.empty.user_not_found_description")}
-			>
-				<Button asChild size="2xl">
-					<Link to="/{-$locale}">{t("states.empty.back_to_home")}</Link>
-				</Button>
-			</EmptyPage>
-		</div>
-	);
-}
 
 export function DefaultProfileTabContent({
 	username: _username,

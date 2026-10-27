@@ -1,8 +1,10 @@
 import i18n, { resolveLocale } from "@/lib/i18n";
+import { getPageError } from "@/lib/page-error";
 import { getSeoLinks, seo } from "@/lib/seo";
 import type { Meta } from "@/types/seo";
 
 export const ROUTE_SEO = {
+	"/{-$locale}/error-preview": { key: "error_preview", private: true },
 	"/{-$locale}/_main": { key: "home" },
 	"/{-$locale}/_main/": { key: "home" },
 	"/{-$locale}/_main/auth": { key: "auth", private: true },
@@ -74,6 +76,10 @@ type SeoMatch = {
 	pathname?: string;
 	params?: Record<string, string | undefined>;
 	loaderData?: unknown;
+	status?: string;
+	error?: unknown;
+	globalNotFound?: boolean;
+	_notFound?: boolean;
 };
 export type PageSeoData = Partial<Meta> & { canonicalPath?: string };
 type ProfileSeoUser = {
@@ -101,6 +107,30 @@ export function getRouteSeo(matches: readonly SeoMatch[]) {
 	const params = leaf?.params ?? {};
 	const locale = resolveLocale(params.locale);
 	const t = i18n.getFixedT(locale);
+
+	const failed = matches.find(
+		(match) =>
+			match.status === "error" ||
+			match.status === "notFound" ||
+			match.globalNotFound ||
+			match._notFound,
+	);
+	if (failed) {
+		const issue = getPageError(
+			failed.status === "error" ? failed.error : { status: 404 },
+		);
+		const path = leaf?.pathname ?? "/";
+		return {
+			meta: seo({
+				title: t(`error_pages.${issue.kind}.title`),
+				description: t(`error_pages.${issue.kind}.description`),
+				pathname: path,
+				locale,
+				noIndex: true,
+			}),
+			links: getSeoLinks(path, locale),
+		};
+	}
 	const recipe = ROUTE_SEO[leaf?.routeId as keyof typeof ROUTE_SEO];
 	let key = recipe?.key ?? "defaults";
 	const username = params.username ?? "";

@@ -1,4 +1,87 @@
 const pl = {
+	error_preview: {
+		title: "Podgląd stron błędów",
+		description: "Wybierz przykład, aby zobaczyć stronę błędu.",
+		type: "Rodzaj błędu",
+		hint: "To symulowane przykłady. Ponawianie nie wysyła żądania do serwera.",
+		retried:
+			"Podgląd zakończony. Prawdziwa strona błędu ponownie wczytałaby treść.",
+	},
+	error_pages: {
+		status: "Błąd {{status}}",
+		connection: "Problem z połączeniem",
+		page_update: "Aktualizacja strony",
+		unexpected: "Nieoczekiwany błąd",
+		retry: "Spróbuj ponownie",
+		retrying: "Ponawianie…",
+		reload: "Odśwież stronę",
+		home: "Strona główna",
+		back: "Wróć",
+		sign_in: "Zaloguj się",
+		not_found: {
+			title: "Nie udało się znaleźć tej strony",
+			description:
+				"Link może być nieprawidłowy albo strona została przeniesiona lub usunięta.",
+			hint: "Sprawdź adres lub wróć na stronę główną, aby znaleźć to, czego szukasz.",
+		},
+		unauthorized: {
+			title: "Zaloguj się, aby kontynuować",
+			description:
+				"Twoja sesja mogła wygasnąć albo ta strona wymaga posiadania konta.",
+			hint: "Zaloguj się na swoje konto Familiar, a następnie otwórz tę stronę ponownie.",
+		},
+		forbidden: {
+			title: "Nie masz dostępu do tej strony",
+			description:
+				"Ta treść może być prywatna albo Twoje konto nie ma uprawnień do jej wyświetlenia.",
+			hint: "Sprawdź, czy korzystasz z właściwego konta, lub wróć na publiczną stronę.",
+		},
+		rate_limit: {
+			title: "Czas na krótką przerwę",
+			description: "Familiar otrzymał zbyt wiele żądań w krótkim czasie.",
+			hint: "Odczekaj chwilę, zanim spróbujesz ponownie.",
+		},
+		timeout: {
+			title: "To trwa dłużej niż zwykle",
+			description:
+				"Usługa nie odpowiedziała na czas, więc nie udało się załadować strony.",
+			hint: "Poczekaj chwilę i spróbuj ponownie. Usługa może być przeciążona.",
+		},
+		unavailable: {
+			title: "Familiar jest chwilowo niedostępny",
+			description:
+				"Jedna z potrzebnych usług nie odpowiada, więc nie możemy teraz załadować tej strony.",
+			hint: "Wystąpił problem z połączeniem z usługą. Spróbuj ponownie za kilka minut.",
+		},
+		server: {
+			title: "Wystąpił problem po stronie serwera",
+			description:
+				"Serwer nie mógł wykonać Twojego żądania. Spróbuj ponownie za chwilę.",
+			hint: "Jeśli problem się powtarza, wróć nieco później.",
+		},
+		request: {
+			title: "Nie udało się wykonać tego żądania",
+			description: "Familiar nie mógł przetworzyć żądania otwarcia tej strony.",
+			hint: "Sprawdź adres lub wróć na stronę główną i otwórz stronę ponownie.",
+		},
+		network: {
+			title: "Nie udało się połączyć z Familiar",
+			description:
+				"Twoje połączenie z internetem lub usługa mogą być niedostępne.",
+			hint: "Sprawdź połączenie z internetem i spróbuj ponownie.",
+		},
+		update: {
+			title: "Ta strona wymaga odświeżenia",
+			description:
+				"Nie udało się załadować części strony. Może być dostępna nowsza wersja Familiar.",
+			hint: "Odśwież stronę, aby pobrać najnowszą wersję. Jeśli to nie pomoże, spróbuj ponownie później.",
+		},
+		unknown: {
+			title: "Nie udało się załadować strony",
+			description: "Podczas otwierania strony wystąpił nieoczekiwany problem.",
+			hint: "Spróbuj ponownie lub wróć na stronę główną i otwórz tę stronę później.",
+		},
+	},
 	settings: {
 		profile: {
 			edit_avatar: "Edytuj zdjęcie profilowe",
@@ -240,6 +323,10 @@ const pl = {
 		},
 	},
 	seo: {
+		error_preview: {
+			title: "Podgląd stron błędów",
+			description: "Zobacz strony błędów Familiar i dostępne działania.",
+		},
 		auth: {
 			title: "Dostęp do konta",
 			description:

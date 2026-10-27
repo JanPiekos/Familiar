@@ -1,5 +1,6 @@
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
+import { RouteErrorPage } from "@/components/layout/error-page";
 import { getQueryClient } from "@/providers/query-client";
 import { routeTree } from "./routeTree.gen";
 
@@ -12,6 +13,7 @@ export function getRouter() {
 		},
 		trailingSlash: "preserve",
 		scrollRestoration: true,
+		defaultErrorComponent: RouteErrorPage,
 		defaultPreload: "intent",
 		defaultPreloadStaleTime: 0,
 	});
