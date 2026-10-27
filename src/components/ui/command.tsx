@@ -1,6 +1,7 @@
 import { Command as CommandPrimitive } from "cmdk";
 import { SearchIcon } from "lucide-react";
 import type * as React from "react";
+import { useTranslation } from "react-i18next";
 import {
 	Dialog,
 	DialogContent,
@@ -9,10 +10,13 @@ import {
 	DialogTitle,
 } from "src/components/ui/dialog";
 import { cn } from "src/lib/utils";
-import { surfaceClasses } from "@/lib/surface-classes";
-import { SurfaceProvider, useSurface } from "@/lib/surface-context";
 import appI18n from "@/lib/i18n";
-import { useTranslation } from "react-i18next";
+import { surfaceClasses } from "@/lib/surface-classes";
+import { useSurface } from "@/lib/surface-context";
+import {
+	MENU_ITEM_LAYOUT_CLASS_NAME,
+	MENU_SEARCH_HEIGHT_CLASS_NAME,
+} from "./menu-styles";
 
 function Command({
 	className,
@@ -69,9 +73,7 @@ function CommandDialog({
 				className={cn("overflow-hidden p-0", className)}
 				showCloseButton={showCloseButton}
 			>
-				<Command className="**:[[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 **:[[cmdk-input]]:h-12 **:[[cmdk-item]]:px-2 **:[[cmdk-item]]:py-2 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 [&_[cmdk-list]_[cmdk-item]:first-child]:rounded-t-sm">
-					{children}
-				</Command>
+				<Command>{children}</Command>
 			</DialogContent>
 		</Dialog>
 	);
@@ -84,13 +86,16 @@ function CommandInput({
 	return (
 		<div
 			data-slot="command-input-wrapper"
-			className="flex h-9 items-center gap-2 border-b px-3 peer"
+			className={cn(
+				"flex shrink-0 items-center gap-2 border-b px-4 peer",
+				MENU_SEARCH_HEIGHT_CLASS_NAME,
+			)}
 		>
 			<SearchIcon className="size-4 shrink-0 opacity-50" />
 			<CommandPrimitive.Input
 				data-slot="command-input"
 				className={cn(
-					"placeholder:text-muted-foreground flex h-10 w-full rounded-lg bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+					"placeholder:text-muted-foreground flex h-full min-w-0 flex-1 rounded-lg bg-transparent py-0 text-sm leading-5 outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
 					className,
 				)}
 				{...props}
@@ -177,8 +182,9 @@ function CommandItem({
 		<CommandPrimitive.Item
 			data-slot="command-item"
 			className={cn(
+				MENU_ITEM_LAYOUT_CLASS_NAME,
 				"data-[selected=true]:bg-black/6 dark:data-[selected=true]:bg-white/6",
-				"data-[selected=true]:text-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+				"data-[selected=true]:text-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center rounded-lg outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 				"data-[selected=true]:shadow-none",
 				className,
 			)}

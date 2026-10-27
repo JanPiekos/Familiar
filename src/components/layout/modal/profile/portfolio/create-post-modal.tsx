@@ -1,6 +1,5 @@
-import { ScrollShadow, Typography } from "@heroui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, Upload, X } from "lucide-react";
+import { ChevronDown, ImagePlus, X } from "lucide-react";
 import {
 	type FormEvent,
 	type ReactNode,
@@ -11,7 +10,6 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { getCommissionCategories } from "@/api/commisions/categories";
 import { getTags } from "@/api/commisions/index";
 import type { CatalogResponse } from "@/api/portfolio/catalogs/catalog-types";
 import type {
@@ -19,10 +17,10 @@ import type {
 	PortfolioPostResponse,
 } from "@/api/portfolio/posts/post-types";
 import { OutlineClose, OutlinePlus } from "@/components/icons/icons";
+import { CreationDialogLayout } from "@/components/layout/creation-dialog-layout";
 import { CreationPageLayout } from "@/components/layout/creation-page-layout";
-import { UniversalModalLayout } from "@/components/layout/modal/universal-modal-layout";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Command,
@@ -92,6 +90,7 @@ function MultiSelectPopover({
 				<button
 					type="button"
 					role="combobox"
+					aria-label={title}
 					aria-expanded={open}
 					className="border-input data-placeholder:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 dark:hover:bg-input/50 flex min-h-12 w-full items-center justify-between gap-2 rounded-full border bg-transparent px-3 py-2 text-sm text-primary transition-[color] outline-none hover:bg-transparent focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
 				>
@@ -192,6 +191,7 @@ export function CreatePostModal({
 	const formId = useId();
 	const submitLock = useRef(false);
 	const previewUrls = useRef(new Set<string>());
+	const fileInput = useRef<HTMLInputElement>(null);
 	const isPage = layout === "page";
 	const submitErrorId = useId();
 
@@ -228,12 +228,7 @@ export function CreatePostModal({
 		queryFn: () => getTags(true),
 	});
 
-	// Fetch categories from API
-	const { data: allCategories = [] } = useQuery({
-		queryKey: ["commission-categories"],
-		queryFn: () => getCommissionCategories(),
-	});
-
+	const availableTags = allTags.filter((tag) => !tag.hasContentWarning);
 	const availableCWs = allTags.filter((tag) => tag.hasContentWarning);
 
 	useEffect(() => {
@@ -311,8 +306,9 @@ export function CreatePostModal({
 				title: trimmedTitle,
 				description: description.trim() || undefined,
 				visibility,
-				tags: selectedTags, // using category ids or tag ids, the API expects strings. If they are strings like "fantasy", we map to their names. Let's use their names as tags
-				contentWarnings: selectedContentWarnings,
+				tagIds: Array.from(
+					new Set([...selectedTags, ...selectedContentWarnings]),
+				),
 				catalogIds: selectedCatalogs,
 			});
 
@@ -357,99 +353,143 @@ export function CreatePostModal({
 	}
 
 	const mediaContent = (
-		<div
+		<section
 			className={cn(
-				"flex size-full min-h-0 flex-col gap-4 p-6",
-				isPage && "h-auto p-4",
+				"flex min-h-0 flex-col gap-4",
+				isPage ? "p-4" : "p-5 sm:p-6 md:h-full",
 			)}
 		>
 			<div className="flex shrink-0 items-center justify-between gap-3">
-				<Typography.Heading level={4}>
-					{t("components.portfolio.post.create.media.title", "IMAGES")}
-				</Typography.Heading>
-				<label
-					className={cn(
-						buttonVariants({ variant: "secondary", size: "xl" }),
-						"cursor-pointer focus-within:ring-3 focus-within:ring-ring/50",
+				<div className="min-w-0">
+					<h2 className="text-sm font-semibold">
+						{t("components.portfolio.post.create.media.title", "Images")}
+					</h2>
+					{imageFiles.length > 0 && (
+						<p
+							className="mt-1 text-xs text-muted-foreground"
+							aria-live="polite"
+						>
+							{t("components.portfolio.post.create.media.selected", {
+								count: imageFiles.length,
+							})}
+						</p>
 					)}
+				</div>
+				<Button
+					type="button"
+					variant="secondary"
+					size="xl"
+					disabled={isBusy}
+					onClick={() => fileInput.current?.click()}
 				>
-					<span aria-hidden="true" data-icon="inline-start">
-						<OutlinePlus />
-					</span>
+					<OutlinePlus aria-hidden="true" />
 					{t("components.portfolio.post.create.media.upload", "Add images")}
-					<input
-						type="file"
-						disabled={isBusy}
-						className="hidden"
-						accept="image/*"
-						multiple
-						onChange={handleImageChange}
-					/>
-				</label>
+				</Button>
+				<input
+					ref={fileInput}
+					type="file"
+					disabled={isBusy}
+					className="hidden"
+					tabIndex={-1}
+					aria-label={t(
+						"components.portfolio.post.create.media.upload",
+						"Add images",
+					)}
+					accept="image/*"
+					multiple
+					onChange={handleImageChange}
+				/>
 			</div>
-
-			<div className="min-h-0 flex-1">
+			<div className={cn("min-h-0", !isPage && "flex-1")}>
 				<EditorScrollArea
 					page={isPage}
-					className={cn("flex size-full flex-col", isPage && "h-auto")}
+					className={cn("flex flex-col", !isPage && "size-full")}
 				>
 					{imagePreviewUrls.length === 0 ? (
-						<label
+						<button
+							type="button"
+							disabled={isBusy}
+							onClick={() => fileInput.current?.click()}
 							className={cn(
-								"flex size-full min-h-64 cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-muted-foreground/25 bg-background px-6 text-center text-muted-foreground transition-colors hover:bg-surface-2",
-								isPage && "h-40 min-h-40",
+								"flex min-h-64 w-full flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-muted-foreground/30 bg-background px-6 py-10 text-center transition-colors hover:bg-secondary/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50",
+								!isPage && "flex-1",
 							)}
 						>
-							<Upload className="size-8 opacity-50" />
-							<p className="text-sm font-medium">
+							<span className="flex size-14 items-center justify-center rounded-full bg-secondary text-muted-foreground">
+								<ImagePlus aria-hidden="true" className="size-6" />
+							</span>
+							<span className="text-sm font-medium">
 								{t(
-									"components.portfolio.post.create.media.upload",
-									"Click to upload image",
+									"components.portfolio.post.create.media.choose",
+									"Choose images",
 								)}
-							</p>
-							<input
-								type="file"
-								disabled={isBusy}
-								className="sr-only"
-								accept="image/*"
-								multiple
-								onChange={handleImageChange}
-							/>
-						</label>
+							</span>
+							<span className="max-w-64 text-sm leading-relaxed text-muted-foreground">
+								{t(
+									"components.portfolio.post.create.media.hint",
+									"Select one or more images to include in your post.",
+								)}
+							</span>
+						</button>
 					) : (
-						<div className="grid w-full grid-cols-2 gap-4 xl:grid-cols-3">
+						<div
+							className={cn(
+								"grid w-full shrink-0 gap-3",
+								imagePreviewUrls.length === 1
+									? "grid-cols-1"
+									: "grid-cols-2 xl:grid-cols-3",
+							)}
+						>
 							{imagePreviewUrls.map((url, idx) => (
 								<div
 									key={url}
-									className="group relative aspect-square overflow-hidden rounded-2xl bg-surface-2"
+									className="min-w-0 rounded-2xl border bg-background p-2"
 								>
-									<img
-										src={url}
-										alt={t("ui.preview_value0", {
-											defaultValue: "Preview {{value0}}",
-											value0: idx + 1,
-										})}
-										className="size-full object-cover"
-									/>
-									<button
-										type="button"
-										disabled={isBusy}
-										onClick={() => removeImage(idx)}
-										aria-label={t(
-											"components.portfolio.post.create.media.remove",
-											"Remove image",
-										)}
-										className="absolute top-3 right-3 rounded-full bg-background/85 p-2 text-foreground opacity-100 backdrop-blur-sm transition-colors hover:bg-destructive hover:text-destructive-foreground lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100"
-									>
-										<X className="size-4" />
-									</button>
+									<div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+										<img
+											src={url}
+											alt={t("ui.preview_value0", {
+												defaultValue: "Preview {{value0}}",
+												value0: idx + 1,
+											})}
+											className="size-full object-contain"
+										/>
+										<span
+											aria-hidden="true"
+											className="absolute top-2 left-2 flex size-6 items-center justify-center rounded-full bg-black/60 text-xs font-medium text-white"
+										>
+											{idx + 1}
+										</span>
+									</div>
+									<div className="mt-1 flex min-w-0 items-center gap-1">
+										<p
+											className="min-w-0 flex-1 truncate pl-1 text-xs text-muted-foreground"
+											title={imageFiles[idx]?.name}
+										>
+											{imageFiles[idx]?.name}
+										</p>
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon-xl"
+											disabled={isBusy}
+											onClick={() => removeImage(idx)}
+											aria-label={t(
+												"components.portfolio.post.create.media.remove",
+												"Remove image",
+											)}
+											className="shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+										>
+											<X aria-hidden="true" className="size-4" />
+										</Button>
+									</div>
 								</div>
 							))}
 						</div>
 					)}
 				</EditorScrollArea>
 			</div>
-		</div>
+		</section>
 	);
 	const detailsContent = (
 		<form
@@ -462,7 +502,7 @@ export function CreatePostModal({
 				<div className="min-h-0 flex-1">
 					<EditorScrollArea
 						page={isPage}
-						className={isPage ? "p-4" : "h-full p-6"}
+						className={isPage ? "p-4" : "h-full p-5 sm:p-6"}
 					>
 						<div className="flex flex-col gap-6">
 							<FieldGroup>
@@ -516,6 +556,7 @@ export function CreatePostModal({
 
 									<InputGroup className="rounded-xl">
 										<InputGroupTextArea
+											className="min-h-28 resize-y"
 											id="post-description"
 											value={description}
 											rows={5}
@@ -573,18 +614,21 @@ export function CreatePostModal({
 										)}
 									</FieldLabel>
 									<MultiSelectPopover
-										title={t("ui.categories", "Categories")}
-										options={allCategories.map((c) => ({
+										title={t("ui.tags", "Tags")}
+										options={availableTags.map((c) => ({
 											label: c.name,
-											value: c.name,
+											value: c.id,
 										}))}
 										selected={selectedTags}
 										onChange={setSelectedTags}
 										placeholder={t(
-											"ui.select_categories",
-											"Select categories...",
+											"components.portfolio.post.create.placeholders.tags",
+											"Select tags...",
 										)}
-										emptyText="No categories found."
+										emptyText={t(
+											"components.portfolio.post.create.no_tags",
+											"No tags found.",
+										)}
 									/>
 									<FieldDescription>
 										{t(
@@ -605,7 +649,7 @@ export function CreatePostModal({
 										title={t("ui.warnings", "Warnings")}
 										options={availableCWs.map((cw) => ({
 											label: cw.name,
-											value: cw.name,
+											value: cw.id,
 										}))}
 										selected={selectedContentWarnings}
 										onChange={setSelectedContentWarnings}
@@ -629,14 +673,14 @@ export function CreatePostModal({
 										)}
 									</FieldLabel>
 									<MultiSelectPopover
-										title={t("ui.catalogs", "Catalogs")}
+										title={t("ui.catalogs", "Folders")}
 										options={catalogs.map((c) => ({
 											label: c.name,
 											value: c.id,
 										}))}
 										selected={selectedCatalogs}
 										onChange={setSelectedCatalogs}
-										placeholder={t("ui.select_catalogs", "Select catalogs...")}
+										placeholder={t("ui.select_catalogs", "Select folders...")}
 										emptyText={t("ui.no_folders_found", "No folders found.")}
 									/>
 								</Field>
@@ -658,7 +702,7 @@ export function CreatePostModal({
 		</form>
 	);
 	const footerContent = (
-		<div className="flex justify-end gap-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+		<div className="flex items-center justify-end gap-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
 			<Button
 				type="button"
 				size={"xl"}
@@ -693,11 +737,16 @@ export function CreatePostModal({
 			</Button>
 		</div>
 	);
-	const editorTitle = t("components.portfolio.post.create.title", "New Post");
+	const editorTitle = t(
+		"components.portfolio.post.create.title",
+		"Create post",
+	);
+	const editorDescription = t("components.portfolio.post.create.description");
 	if (isPage)
 		return open ? (
 			<CreationPageLayout
 				title={editorTitle}
+				description={editorDescription}
 				onBack={() => handleOpenChange(false)}
 				isBusy={isBusy}
 				footer={footerContent}
@@ -706,17 +755,23 @@ export function CreatePostModal({
 				{detailsContent}
 			</CreationPageLayout>
 		) : null;
+
 	return (
-		<UniversalModalLayout
+		<CreationDialogLayout
 			open={open}
 			onOpenChange={handleOpenChange}
-			initialFocus="content"
 			title={editorTitle}
-			mediaClassName="min-h-0 bg-surface-1 lg:overflow-hidden"
-			mediaContent={mediaContent}
-			detailsContent={detailsContent}
-			detailsFooterContent={footerContent}
-		/>
+			description={editorDescription}
+			isBusy={isBusy}
+			className="h-[min(52rem,calc(100dvh-2rem))] max-w-6xl sm:max-w-6xl"
+			bodyClassName="grid flex-1 md:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)] md:overflow-hidden"
+			footer={footerContent}
+		>
+			<div className="min-h-0 border-b bg-surface-1 md:border-r md:border-b-0">
+				{mediaContent}
+			</div>
+			<div className="min-h-0">{detailsContent}</div>
+		</CreationDialogLayout>
 	);
 }
 
@@ -729,11 +784,11 @@ function EditorScrollArea({
 	className: string;
 	children: ReactNode;
 }) {
-	return page ? (
-		<div className={className}>{children}</div>
-	) : (
-		<ScrollShadow className={className} size={32}>
+	return (
+		<div
+			className={cn(!page && "overflow-y-auto overscroll-contain", className)}
+		>
 			{children}
-		</ScrollShadow>
+		</div>
 	);
 }

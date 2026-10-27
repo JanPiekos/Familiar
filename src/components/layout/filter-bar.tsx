@@ -2,6 +2,7 @@ import { ScrollShadow } from "@heroui/react";
 import { Search } from "lucide-react";
 import type React from "react";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useDataTableFilters } from "@/components/data-table-filter";
 import { ActiveFilters } from "@/components/data-table-filter/components/active-filters";
 import { FilterActions } from "@/components/data-table-filter/components/filter-actions";
@@ -21,15 +22,15 @@ import type {
 	OptionFilterOperator,
 	TextFilterOperator,
 } from "@/components/data-table-filter/core/types";
+import { MENU_SEARCH_HEIGHT_CLASS_NAME } from "@/components/ui/menu-styles";
 import { useIsMobile } from "@/hooks/ui/use-mobile";
+import appI18n from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
 	InputGroup,
 	InputGroupAddon,
 	InputGroupInput,
 } from "../ui/input-group";
-import appI18n from "@/lib/i18n";
-import { useTranslation } from "react-i18next";
 
 type FilterOperator = FilterOperators[ColumnDataType];
 
@@ -576,11 +577,12 @@ export function FilterBar<TData>({
 		<div className={cn("flex min-w-0 flex-col gap-3", className)}>
 			<div className="flex flex-wrap items-center gap-2 sm:gap-3">
 				<div className="min-w-32 flex-1">
-					<InputGroup className="w-full">
+					<InputGroup className={cn("w-full", MENU_SEARCH_HEIGHT_CLASS_NAME)}>
 						<InputGroupAddon>
-							<Search className="size-4" />
+							<Search className="mt-0! size-4" />
 						</InputGroupAddon>
 						<InputGroupInput
+							className="h-full"
 							aria-label={searchPlaceholder}
 							value={searchQuery}
 							onChange={(event) => onSearchChange?.(event.target.value)}

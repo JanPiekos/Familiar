@@ -91,8 +91,8 @@ export const PortfolioFeedItem = memo(function PortfolioFeedItem({
 			className="portfolio-feed-item group relative isolate cursor-pointer overflow-hidden rounded-none"
 			style={{
 				...style,
-				minWidth: 160,
-				minHeight: 160,
+				minWidth: 0,
+				minHeight: 0,
 				opacity: 1,
 			}}
 		>

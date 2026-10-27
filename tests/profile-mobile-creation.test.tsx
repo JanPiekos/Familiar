@@ -6,6 +6,7 @@ import {
 	render,
 	screen,
 	waitFor,
+	within,
 } from "@testing-library/react";
 import {
 	createMemoryHistory,
@@ -18,6 +19,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createInstance } from "i18next";
 import { I18nextProvider } from "react-i18next";
+import type { TTagResponse } from "@/types/commissions";
 import type { TUserResponse } from "@/types/user";
 import { TRoles } from "@/types/user/roles";
 import en from "@/i18n/en";
@@ -29,6 +31,7 @@ const state = vi.hoisted(() => ({
 	createPost: vi.fn(),
 	createFolder: vi.fn(),
 	upload: vi.fn(),
+	tags: [] as TTagResponse[],
 }));
 vi.mock("@/providers/auth", () => ({
 	useAuth: () => ({ user: state.user, isPending: false }),
@@ -49,7 +52,7 @@ vi.mock("@/api/portfolio/catalogs/catalog", async (original) => ({
 }));
 vi.mock("@/api/commisions/index", async (original) => ({
 	...(await original<typeof import("@/api/commisions/index")>()),
-	getTags: async () => [],
+	getTags: async () => state.tags,
 }));
 vi.mock("@/api/commisions/categories", () => ({
 	getCommissionCategories: async () => [],
@@ -91,6 +94,7 @@ import {
 const clients: QueryClient[] = [];
 beforeEach(() => {
 	state.compact = true;
+	state.tags = [];
 	state.user = {
 		userId: "artist-id",
 		username: "artist",
@@ -114,6 +118,7 @@ beforeEach(() => {
 		},
 	);
 	window.scrollTo = vi.fn();
+Element.prototype.scrollIntoView=vi.fn();
 	let urlIndex = 0;
 	vi.spyOn(URL, "createObjectURL").mockImplementation(
 		() => "blob:preview-" + ++urlIndex,
@@ -252,7 +257,7 @@ describe("mobile creation pages", () => {
 		).toBeDefined();
 		expect(screen.getByRole("button", { name: "Create folder" })).toBeDefined();
 		fireEvent.click(screen.getByRole("button", { name: "Create post" }));
-		await screen.findByRole("heading", { name: "New Post", level: 1 });
+		await screen.findByRole("heading", { name: "Create post", level: 1 });
 		expect(router.state.location.pathname).toBe("/create/post");
 		expect(screen.queryByRole("menu")).toBeNull();
 	});
@@ -333,17 +338,17 @@ describe("mobile creation pages", () => {
 		state.createPost.mockRejectedValueOnce(new Error("Please retry"));
 		const router = await app();
 		openPost();
-		await screen.findByRole("heading", { name: "New Post", level: 1 });
+		await screen.findByRole("heading", { name: "Create post", level: 1 });
 		expect(router.state.location.pathname).toBe("/create/post");
 		expect(screen.queryByRole("dialog")).toBeNull();
 		const title = screen.getByRole("textbox", {
-			name: "TITLE *",
+			name: "Title *",
 		}) as HTMLInputElement;
 		fireEvent.change(title, { target: { value: "  New artwork  " } });
-		fireEvent.click(screen.getByRole("button", { name: "Create" }));
+		fireEvent.click(screen.getByRole("button", { name: "Create post" }));
 		expect((await screen.findByRole("alert")).textContent).toBe("Please retry");
 		expect(title.value).toBe("  New artwork  ");
-		fireEvent.click(screen.getByRole("button", { name: "Create" }));
+		fireEvent.click(screen.getByRole("button", { name: "Create post" }));
 		await screen.findByRole("heading", { name: "Portfolio" });
 		expect(state.createPost).toHaveBeenCalledTimes(2);
 		expect(state.createPost.mock.calls[1][0]).toMatchObject({
@@ -362,11 +367,11 @@ describe("mobile creation pages", () => {
 		);
 		const router = await app();
 		openPost();
-		await screen.findByRole("heading", { name: "New Post", level: 1 });
-		fireEvent.change(screen.getByRole("textbox", { name: "TITLE *" }), {
+		await screen.findByRole("heading", { name: "Create post", level: 1 });
+		fireEvent.change(screen.getByRole("textbox", { name: "Title *" }), {
 			target: { value: "Artwork" },
 		});
-		fireEvent.click(screen.getByRole("button", { name: "Create" }));
+		fireEvent.click(screen.getByRole("button", { name: "Create post" }));
 		await waitFor(() =>
 			expect(
 				(screen.getByRole("button", { name: "Back" }) as HTMLButtonElement)
@@ -374,7 +379,7 @@ describe("mobile creation pages", () => {
 			).toBe(true),
 		);
 		fireEvent.submit(
-			screen.getByRole("textbox", { name: "TITLE *" }).closest("form")!,
+			screen.getByRole("textbox", { name: "Title *" }).closest("form")!,
 		);
 		expect(state.createPost).toHaveBeenCalledTimes(1);
 		expect(
@@ -392,7 +397,7 @@ describe("mobile creation pages", () => {
 	it("keeps image previews valid when adding files and releases them on exit", async () => {
 		await app();
 		openPost();
-		await screen.findByRole("heading", { name: "New Post", level: 1 });
+		await screen.findByRole("heading", { name: "Create post", level: 1 });
 		const input =
 			document.querySelector<HTMLInputElement>('input[type="file"]')!;
 		fireEvent.change(input, {
@@ -415,7 +420,7 @@ describe("mobile creation pages", () => {
 		const router = await app(
 			"/create/post?returnTo=https%3A%2F%2Fevil.example",
 		);
-		await screen.findByRole("heading", { name: "New Post", level: 1 });
+		await screen.findByRole("heading", { name: "Create post", level: 1 });
 		fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
 		await screen.findByRole("heading", { name: "Portfolio" });
 		expect(router.state.location.pathname).toBe("/user/artist/portfolio");
@@ -445,6 +450,82 @@ describe("mobile creation pages", () => {
 		},
 	);
 
+	it("uses the creation dialog header and keeps every selected image removable", async () => {
+		state.compact = false;
+		const router = await app();
+		openPost();
+		const dialog = await screen.findByRole("dialog", { name: "Create post" });
+		expect(
+			within(dialog).getByRole("heading", { name: "Create post" }),
+		).toBeDefined();
+		const input = dialog.querySelector<HTMLInputElement>('input[type="file"]')!;
+		fireEvent.change(input, {
+			target: {
+				files: Array.from(
+					{ length: 7 },
+					(_, i) =>
+						new File(["image"], "artwork-" + (i + 1) + ".png", {
+							type: "image/png",
+						}),
+				),
+			},
+		});
+		expect(
+			within(dialog).getAllByRole("img", { name: /Preview/ }),
+		).toHaveLength(7);
+		expect(within(dialog).getByText("7 selected")).toBeDefined();
+		expect(within(dialog).getByText("artwork-7.png")).toBeDefined();
+		fireEvent.click(
+			within(dialog).getAllByRole("button", { name: "Remove image" })[0],
+		);
+		expect(
+			within(dialog).getAllByRole("img", { name: /Preview/ }),
+		).toHaveLength(6);
+		fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
+		await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+		expect(router.state.location.pathname).toBe("/user/artist/portfolio");
+		expect(URL.revokeObjectURL).toHaveBeenCalledTimes(7);
+		expect(state.createPost).not.toHaveBeenCalled();
+		expect(state.upload).not.toHaveBeenCalled();
+	});
+
+	it("keeps the desktop creation dialog open while a post is being saved", async () => {
+		state.compact = false;
+		let finish!: (value: unknown) => void;
+		state.createPost.mockImplementation(
+			() =>
+				new Promise((resolve) => {
+					finish = resolve;
+				}),
+		);
+		await app();
+		openPost();
+		const dialog = await screen.findByRole("dialog", { name: "Create post" });
+		fireEvent.change(within(dialog).getByRole("textbox", { name: "Title *" }), {
+			target: { value: "Artwork" },
+		});
+		fireEvent.click(
+			within(dialog).getByRole("button", { name: "Create post" }),
+		);
+		await waitFor(() =>
+			expect(
+				(
+					within(dialog).getByRole("button", {
+						name: "Close",
+					}) as HTMLButtonElement
+				).disabled,
+			).toBe(true),
+		);
+		fireEvent.keyDown(dialog, { key: "Escape" });
+		expect(screen.getByRole("dialog", { name: "Create post" })).toBeDefined();
+		fireEvent.submit(
+			within(dialog).getByRole("textbox", { name: "Title *" }).closest("form")!,
+		);
+		expect(state.createPost).toHaveBeenCalledTimes(1);
+		await act(async () => finish({ id: "post-1" }));
+		await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+	});
+
 	it("keeps desktop folder creation in its existing dialog", async () => {
 		state.compact = false;
 		const router = await app();
@@ -472,5 +553,54 @@ describe("creation return URL validation", () => {
 	it("retains a localized folder URL, search, and anchor", () => {
 		const path = "/pl/user/artist/portfolio/folder/sketches?sort=new#posts";
 		expect(getCreationReturnPath(path, fallback)).toBe(path);
+	});
+});
+
+describe("post warning selection", () => {
+	it("submits ordinary and warning tags as UUIDs", async () => {
+		const base = {
+			isAdultOnly: false,
+			isActive: true,
+			createdAt: "",
+			updatedAt: "",
+		};
+		state.tags = [
+			{
+				...base,
+				id: "11111111-1111-4111-8111-111111111111",
+				name: "Fantasy",
+				hasContentWarning: false,
+			},
+			{
+				...base,
+				id: "22222222-2222-4222-8222-222222222222",
+				name: "Violence",
+				hasContentWarning: true,
+			},
+		];
+		await app();
+		openPost();
+		await screen.findByRole("heading", { name: "Create post", level: 1 });
+		fireEvent.change(screen.getByRole("textbox", { name: "Title *" }), {
+			target: { value: "Artwork" },
+		});
+		fireEvent.click(screen.getByRole("combobox", { name: "Tags" }));
+		fireEvent.click(await screen.findByRole("option", { name: /Fantasy/ }));
+		fireEvent.click(screen.getByRole("combobox", { name: "Tags" }));
+		fireEvent.click(screen.getByRole("combobox", { name: "Warnings" }));
+		fireEvent.click(await screen.findByRole("option", { name: /Violence/ }));
+		fireEvent.click(screen.getByRole("combobox", { name: "Warnings" }));
+		fireEvent.click(screen.getByRole("button", { name: "Create post" }));
+		await waitFor(() => expect(state.createPost).toHaveBeenCalled());
+		expect(state.createPost.mock.calls[0][0]).toMatchObject({
+			tagIds: [
+				"11111111-1111-4111-8111-111111111111",
+				"22222222-2222-4222-8222-222222222222",
+			],
+		});
+		expect(state.createPost.mock.calls[0][0]).not.toHaveProperty(
+			"contentWarnings",
+		);
+		expect(state.createPost.mock.calls[0][0]).not.toHaveProperty("tags");
 	});
 });

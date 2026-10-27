@@ -6,6 +6,7 @@ import {
 	Edit2,
 	Flag,
 	MoreHorizontal,
+	ShieldAlert,
 	Trash2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -20,7 +21,6 @@ import {
 	OutlineSend,
 } from "@/components/icons/icons";
 import { EmptyPage } from "@/components/layout/empty-page";
-import { UniversalModalLayout } from "@/components/layout/modal/universal-modal-layout";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -41,14 +41,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Spinner } from "@/components/ui/spinner";
 import {
-	useDeletePortfolioPost,
 	useArtistPortfolioPost,
+	useDeletePortfolioPost,
 } from "@/hooks/portfolio/use-portfolio";
 import { useUserByUsername } from "@/hooks/user/use-user";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import { ContentWarningOverlay } from "../../content-warning-overlay";
 import User from "../../profile/user";
+import { PostViewerLayout } from "./post-viewer-layout";
+import { PostWarningsDialog } from "./post-warnings-dialog";
 
 interface PortfolioPostModalProps {
 	postId: string;
@@ -94,12 +96,14 @@ function usePortfolioPostController({
 	const deletePostMutation = useDeletePortfolioPost();
 
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [warningsDialogOpen, setWarningsDialogOpen] = useState(false);
 	const [activeMediaIndex, setActiveMediaIndex] = useState(0);
 	const [liked, setLiked] = useState(false);
 	const [bookmarked, setBookmarked] = useState(false);
 
 	useEffect(() => {
 		setActiveMediaIndex(0);
+		setWarningsDialogOpen(false);
 	}, [postId]);
 
 	useEffect(() => {
@@ -212,6 +216,8 @@ function usePortfolioPostController({
 		deletePostMutation,
 		deleteDialogOpen,
 		setDeleteDialogOpen,
+		warningsDialogOpen,
+		setWarningsDialogOpen,
 		activeMediaIndex,
 		setActiveMediaIndex,
 		liked,
@@ -234,18 +240,24 @@ function usePortfolioPostController({
 type Controller = ReturnType<typeof usePortfolioPostController>;
 
 function PostHeader({ controller }: { controller: Controller }) {
-	const { t, profileUser } = controller;
+	const { profileUser } = controller;
 
 	return (
 		<div className="flex min-w-0 items-center gap-3">
-			<User avatarSize="default" user={profileUser} showUsername={false} />
+			<User avatarSize="default" user={profileUser} />
 		</div>
 	);
 }
 
 function PostMoreMenuItems({ controller }: { controller: Controller }) {
-	const { t, canManagePost, setDeleteDialogOpen, post, profileUser } =
-		controller;
+	const {
+		t,
+		canManagePost,
+		setDeleteDialogOpen,
+		setWarningsDialogOpen,
+		post,
+		profileUser,
+	} = controller;
 
 	if (canManagePost) {
 		return (
@@ -265,6 +277,10 @@ function PostMoreMenuItems({ controller }: { controller: Controller }) {
 					{t("components.portfolio.post.manage.edit", "Edit post")}
 				</DropdownMenuItem>
 
+				<DropdownMenuItem onSelect={() => setWarningsDialogOpen(true)}>
+					<ShieldAlert className="size-4" />
+					{t("components.portfolio.post.warnings.title")}
+				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 
 				<DropdownMenuItem
@@ -321,7 +337,13 @@ function PostMoreMenuItems({ controller }: { controller: Controller }) {
 	);
 }
 
-function PostMedia({ controller }: { controller: Controller }) {
+function PostMedia({
+	controller,
+	preview = false,
+}: {
+	controller: Controller;
+	preview?: boolean;
+}) {
 	const {
 		t,
 		post,
@@ -341,9 +363,16 @@ function PostMedia({ controller }: { controller: Controller }) {
 		<ContentWarningOverlay
 			key={post.id}
 			warnings={post.contentWarnings}
+			variant={preview ? "compact" : "default"}
+			hideButtonClassName={preview ? "right-3 top-3 size-10" : undefined}
 			className="size-full"
 		>
-			<div className="relative flex size-full min-h-0 items-center justify-center overflow-hidden bg-black">
+			<div
+				className={cn(
+					"relative flex size-full min-h-0 items-center justify-center overflow-hidden",
+					preview ? "bg-muted/30" : "bg-black",
+				)}
+			>
 				{currentMedia && currentMediaPath ? (
 					currentMedia.mediaType === "VIDEO" ? (
 						<video
@@ -427,47 +456,35 @@ function PostMedia({ controller }: { controller: Controller }) {
 }
 
 function PostDetails({ controller }: { controller: Controller }) {
-	const { post, profileUser, displayTitle, createdAt } = controller;
-
+	const { post, displayTitle, createdAt } = controller;
 	if (!post) return null;
-
 	return (
-		<article className="p-4">
-			<div className="flex flex-col items-start gap-3">
-				<User avatarSize="sm" user={profileUser} />
-
-				<div className="ml-11.5 min-w-0 flex-1 text-sm leading-relaxed">
-					<Typography.Paragraph size="sm" className="wrap-break-word">
-						{displayTitle}
-					</Typography.Paragraph>
-
-					{post.description && (
-						<Typography.Paragraph
-							size="sm"
-							className="mt-2 whitespace-pre-wrap wrap-break-word text-foreground"
-						>
-							{post.description}
-						</Typography.Paragraph>
-					)}
-
-					{post.tags && post.tags.length > 0 && (
-						<div className="mt-3 flex flex-wrap gap-x-1.5 gap-y-1">
-							{post.tags.map((tag) => (
-								<span
-									key={tag}
-									className="cursor-pointer text-primary hover:underline"
-								>
-									#{tag.replace(/^#/, "")}
-								</span>
-							))}
-						</div>
-					)}
-
-					{createdAt && (
-						<p className="mt-3 text-xs text-muted-foreground">{createdAt}</p>
-					)}
-				</div>
+		<article className="space-y-4 p-5 sm:p-6">
+			<div className="space-y-2">
+				<h2 className="wrap-break-word text-xl font-semibold leading-snug text-foreground">
+					{displayTitle}
+				</h2>
+				{createdAt && (
+					<p className="text-xs text-muted-foreground">{createdAt}</p>
+				)}
 			</div>
+			{post.description && (
+				<Typography.Paragraph
+					size="sm"
+					className="whitespace-pre-wrap wrap-break-word text-foreground leading-relaxed"
+				>
+					{post.description}
+				</Typography.Paragraph>
+			)}
+			{post.tags && post.tags.length > 0 && (
+				<div className="flex flex-wrap gap-x-2 gap-y-1 text-sm">
+					{post.tags.map((tag) => (
+						<span key={tag} className="wrap-break-word text-primary">
+							#{tag.replace(/^#/, "")}
+						</span>
+					))}
+				</div>
+			)}
 		</article>
 	);
 }
@@ -481,7 +498,6 @@ function PostActions({ controller }: { controller: Controller }) {
 		bookmarked,
 		setBookmarked,
 		displayedLikeCount,
-		createdAt,
 	} = controller;
 
 	return (
@@ -563,15 +579,6 @@ function PostActions({ controller }: { controller: Controller }) {
 						},
 					)}
 				</Typography.Paragraph>
-
-				{createdAt && (
-					<Typography.Paragraph
-						size="xs"
-						className="mt-1 uppercase text-muted-foreground"
-					>
-						{createdAt}
-					</Typography.Paragraph>
-				)}
 			</div>
 		</div>
 	);
@@ -643,13 +650,12 @@ export function PortfolioPostModal({
 
 	if (isPending) {
 		return (
-			<UniversalModalLayout
+			<PostViewerLayout
 				open={open}
 				onOpenChange={onOpenChange}
 				title={t("components.portfolio.post.loading", "Loading post...")}
-				mediaClassName="bg-black"
 				mediaContent={
-					<div className="flex size-full min-h-75 items-center justify-center text-white">
+					<div className="flex size-full min-h-0 items-center justify-center text-foreground">
 						<Spinner />
 					</div>
 				}
@@ -673,13 +679,12 @@ export function PortfolioPostModal({
 
 	if (isError || !post) {
 		return (
-			<UniversalModalLayout
+			<PostViewerLayout
 				open={open}
 				onOpenChange={onOpenChange}
 				title={t("components.portfolio.post.error", "Error")}
-				mediaClassName="bg-black"
 				mediaContent={
-					<div className="flex size-full min-h-75 items-center justify-center px-6 text-center text-sm text-white/70">
+					<div className="flex size-full min-h-0 items-center justify-center px-6 text-center text-sm text-muted-foreground">
 						{t(
 							"components.portfolio.post.not_found",
 							"Post not found or could not be loaded.",
@@ -693,19 +698,25 @@ export function PortfolioPostModal({
 
 	return (
 		<>
-			<UniversalModalLayout
+			<PostViewerLayout
+				key={post.id}
 				open={open}
 				onOpenChange={onOpenChange}
 				title={displayTitle}
-				mediaClassName="bg-black"
 				detailsHeaderContent={<PostHeader controller={controller} />}
 				moreMenuContent={<PostMoreMenuItems controller={controller} />}
-				mediaContent={<PostMedia controller={controller} />}
+				mediaContent={<PostMedia controller={controller} preview />}
 				detailsContent={<PostDetails controller={controller} />}
 				detailsFooterContent={<PostActions controller={controller} />}
 			/>
 
 			<DeletePostDialog controller={controller} />
+			{controller.canManagePost && controller.warningsDialogOpen && (
+				<PostWarningsDialog
+					post={post}
+					onOpenChange={controller.setWarningsDialogOpen}
+				/>
+			)}
 		</>
 	);
 }
@@ -803,6 +814,12 @@ export function PortfolioPostPage({
 			</main>
 
 			<DeletePostDialog controller={controller} />
+			{controller.canManagePost && controller.warningsDialogOpen && (
+				<PostWarningsDialog
+					post={post}
+					onOpenChange={controller.setWarningsDialogOpen}
+				/>
+			)}
 		</>
 	);
 }

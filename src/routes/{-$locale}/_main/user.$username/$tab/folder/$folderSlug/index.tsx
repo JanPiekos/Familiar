@@ -58,7 +58,7 @@ export function FolderContent({
 	}
 
 	if (isPending) {
-		return <TabContentSkeleton tab={tab} />;
+		return <TabContentSkeleton tab={tab} folder isOwner={isCurrentUser} />;
 	}
 
 	if (tab === "portfolio" && content?.hasPortfolio === false) {

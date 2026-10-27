@@ -4,6 +4,9 @@ import { getUserAccentStylesFromHex } from "@/lib/colors";
 import type { TUserResponse } from "@/types/user";
 import { useTranslation } from "react-i18next";
 
+const PROFILE_COVER_CLASS_NAME =
+	"relative h-48 w-full overflow-hidden rounded-none ring-1 ring-ring/30 md:h-72 lg:rounded-3xl";
+
 const imageCache = new Map<string, Promise<void> | true>();
 
 function useImagePreload(src?: string | null) {
@@ -42,10 +45,7 @@ function ProfileCover({ user }: { user: TUserResponse }) {
 	);
 
 	return (
-		<div
-			className="relative h-48 w-full overflow-hidden ring-1 ring-ring/30 md:h-72 lg:rounded-3xl"
-			style={coverBgStyle}
-		>
+		<div className={PROFILE_COVER_CLASS_NAME} style={coverBgStyle}>
 			{/* TODO: add webm (animated) support */}
 			{user.coverPath && (
 				<img
@@ -62,7 +62,7 @@ function ProfileCover({ user }: { user: TUserResponse }) {
 }
 
 function ProfileCoverSkeleton() {
-	return <Skeleton className="h-48 w-full lg:rounded-3xl md:h-72" />;
+	return <Skeleton className={PROFILE_COVER_CLASS_NAME} />;
 }
 
 export { ProfileCover, ProfileCoverSkeleton };

@@ -1,22 +1,22 @@
 import type { ReactNode } from "react";
 import { memo } from "react";
 import { useTranslation } from "react-i18next";
-import { OutlineCalendar } from "@/components/icons/icons";
-import { Badge } from "@/components/ui/badge";
+import { OutlineCalendar, OutlineClose } from "@/components/icons/icons";
+import { Button } from "@/components/ui/button";
 import {
+	DialogClose,
 	DialogContent,
-	DialogHeader,
+	DialogDescription,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
-import { userJoinDate } from "@/lib/profile";
 import type { TUserProfile } from "@/types/user";
+import UserAvatar from "./avatar";
 import { ProfileBio } from "./bio";
 import { ProfileSocials } from "./socials";
 
 function SectionLabel({ children }: { children: ReactNode }) {
 	return (
-		<h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+		<h4 className="mb-3 text-xs font-medium text-muted-foreground">
 			{children}
 		</h4>
 	);
@@ -27,50 +27,85 @@ export const ProfileDetailsContent = memo(function ProfileDetailsContent({
 }: {
 	user: TUserProfile;
 }) {
-	const joinDate = userJoinDate({ createdAt: user.createdAt });
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
+	const name = user.displayName || user.username;
+	const createdAt = user.createdAt ? new Date(user.createdAt) : null;
+	const joinDate =
+		createdAt && !Number.isNaN(createdAt.getTime())
+			? new Intl.DateTimeFormat(
+					i18n.resolvedLanguage || i18n.language || "en",
+					{ month: "long", year: "numeric" },
+				).format(createdAt)
+			: null;
 
 	return (
-		<DialogContent className="max-w-sm! gap-4 rounded-2xl border-border p-4">
-			<DialogHeader>
-				<DialogTitle className="text-base font-semibold leading-4 tracking-tight">
-					{user.displayName || user.username}
+		<DialogContent
+			showCloseButton={false}
+			className="flex max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg! flex-col gap-0 overflow-hidden rounded-3xl bg-card p-0 text-foreground [color-scheme:light] dark:[color-scheme:dark]"
+		>
+			<header className="flex shrink-0 items-center justify-between gap-4 border-b px-5 py-4 sm:px-6">
+				<DialogTitle className="text-base leading-snug font-semibold text-foreground">
+					{t("components.profile.info.about_me")}
 				</DialogTitle>
-				<div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-					<span>@{user.username}</span>
-					{user.pronouns && (
-						<>
-							<span>·</span>
-							<span>{user.pronouns}</span>
-						</>
+				<DialogDescription className="sr-only">
+					{t("components.profile.details.description", { name })}
+				</DialogDescription>
+				<DialogClose asChild>
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon-xl"
+						className="-mr-2"
+						aria-label={t("ui.close")}
+					>
+						<OutlineClose aria-hidden="true" />
+					</Button>
+				</DialogClose>
+			</header>
+			<div className="min-h-0 space-y-6 overflow-y-auto overscroll-contain p-5 sm:p-6">
+				<div>
+					<div className="flex items-center gap-4">
+						<UserAvatar user={user} size="xl" />
+						<div className="min-w-0 flex-1">
+							<h3 className="break-words text-xl leading-snug font-semibold text-foreground sm:text-2xl">
+								{name}
+							</h3>
+							<div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground [overflow-wrap:anywhere]">
+								<span>@{user.username}</span>
+								{user.pronouns && (
+									<>
+										<span aria-hidden="true">·</span>
+										<span>{user.pronouns}</span>
+									</>
+								)}
+							</div>
+						</div>
+					</div>
+					{joinDate && (
+						<p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+							<OutlineCalendar aria-hidden="true" className="size-4 shrink-0" />
+							<span>
+								{t("components.profile.details.joined")} {joinDate}
+							</span>
+						</p>
 					)}
 				</div>
-			</DialogHeader>
-
-			<Separator />
-
-			{joinDate && (
-				<Badge variant="secondary" className="w-fit">
-					<OutlineCalendar />
-					{t("components.profile.details.joined")} {joinDate}
-				</Badge>
-			)}
-
-			{user.bio && (
-				<div>
-					<SectionLabel>{t("components.profile.details.bio")}</SectionLabel>
-					<div className="line-clamp-10 leading-relaxed text-primary/80">
-						<ProfileBio user={user} className="text-xs" />
-					</div>
-				</div>
-			)}
-
-			{user.socials.length > 0 && (
-				<>
-					<Separator />
-					<ProfileSocials socials={user.socials} />
-				</>
-			)}
+				{user.bio?.trim() && (
+					<section aria-label={t("components.profile.details.bio")}>
+						<SectionLabel>{t("components.profile.details.bio")}</SectionLabel>
+						<ProfileBio
+							user={user}
+							className="text-sm leading-relaxed text-foreground [overflow-wrap:anywhere] prose-headings:text-foreground prose-strong:text-foreground"
+						/>
+					</section>
+				)}
+				{user.socials.length > 0 && (
+					<section aria-label={t("components.profile.details.links")}>
+						<SectionLabel>{t("components.profile.details.links")}</SectionLabel>
+						<ProfileSocials socials={user.socials} />
+					</section>
+				)}
+			</div>
 		</DialogContent>
 	);
 });

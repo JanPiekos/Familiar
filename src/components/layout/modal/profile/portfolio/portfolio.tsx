@@ -3,7 +3,6 @@ import {
 	type ReactNode,
 	useEffect,
 	useId,
-	useRef,
 	useState,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,20 +11,11 @@ import type {
 	CreateCatalogRequest,
 	UpdateCatalogRequest,
 } from "@/api/portfolio/catalogs/catalog-types";
-import {
-	OutlineClose,
-	OutlineFolder,
-	OutlineFolderAddOuLc,
-} from "@/components/icons/icons";
+import { OutlineFolder, OutlineFolderAddOuLc } from "@/components/icons/icons";
+import { CreationDialogLayout } from "@/components/layout/creation-dialog-layout";
 import { CreationPageLayout } from "@/components/layout/creation-page-layout";
 import { FolderCard } from "@/components/layout/profile/feed/folder-card";
 import { Button } from "@/components/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogTitle,
-} from "@/components/ui/dialog";
 import {
 	Field,
 	FieldDescription,
@@ -499,8 +489,6 @@ function CatalogModalLayout({
 	detailsContent,
 	detailsFooterContent,
 }: CatalogModalLayoutProps) {
-	const { t } = useTranslation();
-	const contentRef = useRef<HTMLDivElement>(null);
 	const handleOpenChange = (nextOpen: boolean) => {
 		if (!isBusy) onOpenChange(nextOpen);
 	};
@@ -521,46 +509,19 @@ function CatalogModalLayout({
 		) : null;
 	}
 	return (
-		<Dialog open={open} onOpenChange={handleOpenChange}>
-			<DialogContent
-				ref={contentRef}
-				tabIndex={-1}
-				showCloseButton={false}
-				onOpenAutoFocus={(event) => {
-					event.preventDefault();
-					contentRef.current?.focus({ preventScroll: true });
-				}}
-				className="flex max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-3xl flex-col gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-3xl"
-			>
-				<header className="flex shrink-0 items-start gap-4 border-b p-5 sm:p-6">
-					<div className="min-w-0 flex-1 space-y-2">
-						<DialogTitle className="leading-snug">{title}</DialogTitle>
-						<DialogDescription className="text-pretty leading-relaxed">
-							{description}
-						</DialogDescription>
-					</div>
-					<Button
-						type="button"
-						variant="ghost"
-						size="icon-xl"
-						className="-mt-1 -mr-2 shrink-0"
-						disabled={isBusy}
-						aria-label={t("ui.close", "Close")}
-						onClick={() => handleOpenChange(false)}
-					>
-						<OutlineClose aria-hidden="true" />
-					</Button>
-				</header>
-				<div className="min-h-0 overflow-y-auto overscroll-contain sm:grid sm:grid-cols-[16rem_minmax(0,1fr)]">
-					<div className="border-b bg-surface-1 px-6 py-5 sm:flex sm:items-center sm:border-r sm:border-b-0 sm:p-6">
-						{mediaContent}
-					</div>
-					{detailsContent}
-				</div>
-				<footer className="shrink-0 border-t bg-background">
-					{detailsFooterContent}
-				</footer>
-			</DialogContent>
-		</Dialog>
+		<CreationDialogLayout
+			open={open}
+			onOpenChange={handleOpenChange}
+			title={title}
+			description={description}
+			isBusy={isBusy}
+			footer={detailsFooterContent}
+			bodyClassName="sm:grid sm:grid-cols-[16rem_minmax(0,1fr)]"
+		>
+			<div className="border-b bg-surface-1 px-6 py-5 sm:flex sm:items-center sm:border-r sm:border-b-0 sm:p-6">
+				{mediaContent}
+			</div>
+			{detailsContent}
+		</CreationDialogLayout>
 	);
 }

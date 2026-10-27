@@ -736,7 +736,6 @@ const en = {
 				search_placeholder: "Search portfolio...",
 			},
 			folder: {
-				items: "{{count}} items",
 				back: "Back to portfolio",
 				manage: {
 					rename: "Rename folder",
@@ -757,6 +756,40 @@ const en = {
 					title: "New folder",
 				},
 				catalogs: "Portfolio folders",
+				label: "Portfolio folder",
+				items: "{{count}} posts",
+				items_one: "{{count}} post",
+				items_few: "{{count}} posts",
+				items_many: "{{count}} posts",
+				items_other: "{{count}} posts",
+				empty: {
+					title: "This folder is empty",
+					description: "Posts added to this folder will appear here.",
+					owner_description:
+						"Add existing posts from your portfolio, or choose this folder when creating a new post.",
+					browse: "Browse portfolio",
+					search_title: "No matching posts",
+					search_description:
+						"Try a different search or clear the filters to see more posts.",
+					clear: "Clear search and filters",
+				},
+				add: {
+					action: "Add posts",
+					title: "Add posts to folder",
+					description: "Choose existing posts from your portfolio.",
+					search: "Search your posts...",
+					untitled: "Untitled post",
+					no_matches: "No posts match your search.",
+					none: "All your posts are already in this folder.",
+					error:
+						"Some posts could not be added. Try again to add the remaining selection.",
+					saving: "Adding...",
+					confirm: "Add {{count}} posts",
+					confirm_one: "Add {{count}} post",
+					confirm_few: "Add {{count}} posts",
+					confirm_many: "Add {{count}} posts",
+					confirm_other: "Add {{count}} posts",
+				},
 			},
 			search_placeholder: "Search folders...",
 			content_warning: {
@@ -808,30 +841,34 @@ const en = {
 				create: {
 					success: "Post created successfully!",
 					error: "Failed to create post.",
-					title: "New Post",
+					title: "Create post",
 					media: {
-						title: "IMAGES",
+						title: "Images",
 						upload: "Add images",
 						remove: "Remove image",
+						choose: "Choose images",
+						hint: "Select one or more images to include in your post.",
+						selected: "{{count}} selected",
 					},
 					fields: {
-						title: "TITLE *",
-						description: "DESCRIPTION",
-						visibility: "VISIBILITY",
-						categories: "CATEGORIES (TAGS)",
-						cws: "CONTENT WARNINGS",
-						catalogs: "ADD TO CATALOGS",
+						title: "Title *",
+						description: "Description",
+						visibility: "Visibility",
+						categories: "Tags",
+						cws: "Content warnings",
+						catalogs: "Add to folders",
 					},
 					placeholders: {
 						title: "e.g. Character portrait",
 						description: "Optional description...",
+						tags: "Select tags...",
 					},
 					errors: {
 						title_required: "Title is required.",
 					},
 					hints: {
 						title_length: "Maximum 100 characters.",
-						categories: "Select from available categories.",
+						categories: "Select tags that describe your work.",
 						cws: "Select applicable content warnings.",
 					},
 					visibility: {
@@ -841,13 +878,23 @@ const en = {
 					actions: {
 						cancel: "Cancel",
 						creating: "Creating...",
-						create: "Create",
+						create: "Create post",
 					},
+					description: "Add images and details to share your work in your portfolio.",
+					no_tags: "No tags found.",
 				},
 				likes_one: "{{formattedCount}} like",
 				likes_few: "{{formattedCount}} likes",
 				likes_many: "{{formattedCount}} likes",
 				likes_other: "{{formattedCount}} likes",
+				warnings: {
+					title: "Content warnings",
+					description:
+						"Choose the warnings viewers should see before opening this artwork.",
+					load_error: "We couldn't load the warning options.",
+					retry: "Try again",
+					save_error: "Warnings couldn't be saved. Please try again.",
+				},
 			},
 		},
 		profile: {
@@ -889,6 +936,7 @@ const en = {
 				add_post: "Create post",
 				more: "More actions",
 				share_profile: "Share Profile",
+				share_failed: "Could not share this profile. Please try again.",
 				report_user: "Report",
 				block_user: "Block user",
 				sign_in_to_follow: "Please sign in to follow this user.",
@@ -912,6 +960,8 @@ const en = {
 				local: "local",
 				bio: "Bio",
 				languages: "Languages",
+				description: "More about {{name}}.",
+				links: "Links",
 			},
 			languages: {
 				levels: {
@@ -1962,8 +2012,8 @@ const en = {
 		select_categories: "Select categories...",
 		warnings: "Warnings",
 		select_warnings: "Select warnings...",
-		catalogs: "Catalogs",
-		select_catalogs: "Select catalogs...",
+		catalogs: "Folders",
+		select_catalogs: "Select folders...",
 		create_portfolio_folder: "Create portfolio folder",
 		create_folder: "Create folder",
 		new_portfolio_catalog: "New portfolio catalog",
@@ -2348,6 +2398,7 @@ const en = {
 		search_for_a_command_to_run: "Search for a command to run...",
 		commission_request_id: "Commission request {{id}}",
 		review_tab: "Review",
+		no_categories_found: "No categories found.",
 	},
 };
 

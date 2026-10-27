@@ -75,7 +75,6 @@ export function ProfileImageMenu({
 				>
 					<DropdownMenuItem
 						disabled={disabled}
-						className="min-h-11 gap-3 px-3"
 						onSelect={() => inputRef.current?.click()}
 					>
 						<OutlineEdit />
@@ -85,7 +84,6 @@ export function ProfileImageMenu({
 						<DropdownMenuItem
 							disabled={disabled}
 							variant="destructive"
-							className="min-h-11 gap-3 px-3"
 							onSelect={onRemove}
 						>
 							<OutlineTrash />

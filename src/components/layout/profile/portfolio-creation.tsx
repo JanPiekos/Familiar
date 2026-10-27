@@ -110,19 +110,13 @@ export function PortfolioCreationMenu() {
 					className="w-56 max-w-[calc(100vw-2rem)]"
 				>
 					{actions.onCreatePost && (
-						<DropdownMenuItem
-							className={compact ? "min-h-11" : undefined}
-							onSelect={() => select(actions.onCreatePost)}
-						>
+						<DropdownMenuItem onSelect={() => select(actions.onCreatePost)}>
 							<ImagePlus aria-hidden="true" />
 							{t("components.profile.actions.add_post", "Create post")}
 						</DropdownMenuItem>
 					)}
 					{actions.onCreateFolder && (
-						<DropdownMenuItem
-							className={compact ? "min-h-11" : undefined}
-							onSelect={() => select(actions.onCreateFolder)}
-						>
+						<DropdownMenuItem onSelect={() => select(actions.onCreateFolder)}>
 							<FolderPlus aria-hidden="true" />
 							{t("ui.create_folder", "Create folder")}
 						</DropdownMenuItem>

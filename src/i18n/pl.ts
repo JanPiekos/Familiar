@@ -744,7 +744,6 @@ const pl = {
 				search_placeholder: "Szukaj w portfolio...",
 			},
 			folder: {
-				items: "{{count}} elementów",
 				back: "Powrót do portfolio",
 				manage: {
 					rename: "Zmień nazwę folderu",
@@ -765,6 +764,40 @@ const pl = {
 					title: "Nowy folder",
 				},
 				catalogs: "Foldery portfolio",
+				label: "Folder portfolio",
+				items: "{{count}} postów",
+				items_one: "{{count}} post",
+				items_few: "{{count}} posty",
+				items_many: "{{count}} postów",
+				items_other: "{{count}} posta",
+				empty: {
+					title: "Ten folder jest pusty",
+					description: "Posty dodane do tego folderu pojawią się tutaj.",
+					owner_description:
+						"Dodaj istniejące posty ze swojego portfolio lub wybierz ten folder podczas tworzenia nowego posta.",
+					browse: "Przeglądaj portfolio",
+					search_title: "Brak pasujących postów",
+					search_description:
+						"Zmień wyszukiwanie lub wyczyść filtry, aby zobaczyć więcej postów.",
+					clear: "Wyczyść wyszukiwanie i filtry",
+				},
+				add: {
+					action: "Dodaj posty",
+					title: "Dodaj posty do folderu",
+					description: "Wybierz istniejące posty ze swojego portfolio.",
+					search: "Szukaj w swoich postach...",
+					untitled: "Post bez tytułu",
+					no_matches: "Żaden post nie pasuje do wyszukiwania.",
+					none: "Wszystkie Twoje posty są już w tym folderze.",
+					error:
+						"Nie udało się dodać części postów. Spróbuj ponownie, aby dodać pozostałe zaznaczone posty.",
+					saving: "Dodawanie...",
+					confirm: "Dodaj {{count}} postów",
+					confirm_one: "Dodaj {{count}} post",
+					confirm_few: "Dodaj {{count}} posty",
+					confirm_many: "Dodaj {{count}} postów",
+					confirm_other: "Dodaj {{count}} posta",
+				},
 			},
 			search_placeholder: "Szukaj folderów...",
 			content_warning: {
@@ -816,30 +849,34 @@ const pl = {
 				create: {
 					success: "Post został utworzony!",
 					error: "Nie udało się utworzyć posta.",
-					title: "Nowy post",
+					title: "Utwórz post",
 					media: {
-						title: "OBRAZY",
+						title: "Obrazy",
 						upload: "Dodaj obrazy",
 						remove: "Usuń obraz",
+						choose: "Wybierz obrazy",
+						hint: "Wybierz jeden lub więcej obrazów, które chcesz dodać do posta.",
+						selected: "Wybrano: {{count}}",
 					},
 					fields: {
-						title: "TYTUŁ *",
-						description: "OPIS",
-						visibility: "WIDOCZNOŚĆ",
-						categories: "KATEGORIE (TAGI)",
-						cws: "OSTRZEŻENIA O TREŚCI",
-						catalogs: "DODAJ DO FOLDERÓW",
+						title: "Tytuł *",
+						description: "Opis",
+						visibility: "Widoczność",
+						categories: "Tagi",
+						cws: "Ostrzeżenia o treści",
+						catalogs: "Dodaj do folderów",
 					},
 					placeholders: {
 						title: "np. Portret postaci",
 						description: "Opcjonalny opis...",
+						tags: "Wybierz tagi...",
 					},
 					errors: {
 						title_required: "Tytuł jest wymagany.",
 					},
 					hints: {
 						title_length: "Maksymalnie 100 znaków.",
-						categories: "Wybierz spośród dostępnych kategorii.",
+						categories: "Wybierz tagi opisujące Twoją pracę.",
 						cws: "Wybierz odpowiednie ostrzeżenia o treści.",
 					},
 					visibility: {
@@ -849,13 +886,23 @@ const pl = {
 					actions: {
 						cancel: "Anuluj",
 						creating: "Tworzenie...",
-						create: "Utwórz",
+						create: "Utwórz post",
 					},
+					description: "Dodaj obrazy i opis, aby udostępnić pracę w swoim portfolio.",
+					no_tags: "Nie znaleziono tagów.",
 				},
 				likes_one: "{{formattedCount}} polubienie",
 				likes_few: "{{formattedCount}} polubienia",
 				likes_many: "{{formattedCount}} polubień",
 				likes_other: "{{formattedCount}} polubienia",
+				warnings: {
+					title: "Ostrzeżenia o treści",
+					description:
+						"Wybierz ostrzeżenia, które odbiorcy zobaczą przed otwarciem tej pracy.",
+					load_error: "Nie udało się wczytać dostępnych ostrzeżeń.",
+					retry: "Spróbuj ponownie",
+					save_error: "Nie udało się zapisać ostrzeżeń. Spróbuj ponownie.",
+				},
 			},
 		},
 		profile: {
@@ -897,6 +944,7 @@ const pl = {
 				add_post: "Utwórz post",
 				more: "Więcej opcji",
 				share_profile: "Udostępnij profil",
+				share_failed: "Nie udało się udostępnić profilu. Spróbuj ponownie.",
 				report_user: "Zgłoś",
 				block_user: "Zablokuj użytkownika",
 				sign_in_to_follow: "Zaloguj się, aby obserwować tego użytkownika.",
@@ -920,6 +968,8 @@ const pl = {
 				local: "lokalnie",
 				bio: "Biografia",
 				languages: "Języki",
+				description: "Więcej o {{name}}.",
+				links: "Linki",
 			},
 			languages: {
 				levels: {
@@ -2370,6 +2420,7 @@ const pl = {
 		search_for_a_command_to_run: "Wyszukaj polecenie...",
 		commission_request_id: "Zapytanie o zlecenie {{id}}",
 		review_tab: "Opinia",
+		no_categories_found: "Nie znaleziono kategorii.",
 	},
 };
 
