@@ -65,7 +65,9 @@ function BasketPage() {
 
 	return (
 		<div className="flex flex-col gap-6 max-w-6xl mx-auto w-full pt-4 px-4 lg:px-0 pb-10">
-			<Typography.Heading level={2}>My basket</Typography.Heading>
+			<Typography.Heading level={2}>
+				{t("ui.my_basket", "My basket")}
+			</Typography.Heading>
 
 			<Form {...form}>
 				<form
@@ -88,14 +90,17 @@ function BasketPage() {
 										size={"xs"}
 										className="text-muted-foreground truncate"
 									>
-										1 item • {item.currency} {item.price.toFixed(2)}
+										{t("ui.1_item", "1 item •")} {item.currency}{" "}
+										{item.price.toFixed(2)}
 									</Typography.Paragraph>
 								</div>
 								<div className="flex items-center gap-2 shrink-0">
-									<Button variant={"secondary"} size={"icon"}>
+									<Button disabled variant={"secondary"} size={"icon"}>
 										<OutlineChat />
 									</Button>
-									<Button variant={"destructive"}>Remove all</Button>
+									<Button disabled variant={"destructive"}>
+										{t("ui.remove_all", "Remove all")}
+									</Button>
 								</div>
 							</div>
 
@@ -129,11 +134,11 @@ function BasketPage() {
 										</Typography.Paragraph>
 									</div>
 									<div className="flex items-center gap-2 mt-3">
-										<Button variant={"destructive"} size={"icon"}>
+										<Button disabled variant={"destructive"} size={"icon"}>
 											<Trash2 className="size-4" />
 										</Button>
-										<Button variant="secondary">
-											<OutlineEdit /> Edit
+										<Button disabled variant="secondary">
+											<OutlineEdit /> {t("ui.edit", "Edit")}
 										</Button>
 									</div>
 								</div>
@@ -148,15 +153,18 @@ function BasketPage() {
 										<FormItem>
 											<div className="flex justify-between items-center mb-1">
 												<FormLabel className="text-xs font-semibold text-foreground/80">
-													Note to artist
+													{t("ui.note_to_artist", "Note to artist")}
 												</FormLabel>
 												<span className="text-[10px] text-muted-foreground">
-													Optional
+													{t("ui.optional", "Optional")}
 												</span>
 											</div>
 											<FormControl>
 												<Textarea
-													placeholder="Leave an important note, say thanks, or just say something nice to the artist!"
+													placeholder={t(
+														"ui.leave_an_important_note_say_thanks_or_just_say_something_nice_to_the_artist",
+														"Leave an important note, say thanks, or just say something nice to the artist!",
+													)}
 													className="resize-none bg-secondary min-h-[80px] border-none"
 													{...field}
 												/>
@@ -172,16 +180,20 @@ function BasketPage() {
 						<Elevated className="p-5 rounded-2xl flex flex-col gap-4">
 							<div className="flex items-center gap-3">
 								<Typography.Heading level={4} className="text-lg">
-									More from {item.author.username}'s shop
+									{t("ui.more_from", "More from")} {item.author.username}
+									{t("ui.s_shop", "'s shop")}
 								</Typography.Heading>
-								<Button variant="secondary" size={"sm"}>
-									Follow
+								<Button disabled variant="secondary" size={"sm"}>
+									{t("ui.follow", "Follow")}
 								</Button>
 							</div>
 							<EmptyPage
 								icon={ShoppingBasket}
-								title="No more items"
-								description="Add more items to your basket"
+								title={t("ui.no_more_items", "No more items")}
+								description={t(
+									"ui.add_more_items_to_your_basket",
+									"Add more items to your basket",
+								)}
 							/>
 						</Elevated>
 					</div>
@@ -193,11 +205,13 @@ function BasketPage() {
 							name="name"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Your name*</FormLabel>
+									<FormLabel>
+										{t("ui.your_name_7b44f2", "Your name*")}
+									</FormLabel>
 									<FormControl>
 										<InputGroup>
 											<InputGroupInput
-												placeholder="Enter your name"
+												placeholder={t("ui.enter_your_name", "Enter your name")}
 												{...field}
 											/>
 										</InputGroup>
@@ -212,7 +226,9 @@ function BasketPage() {
 							name="email"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Your email*</FormLabel>
+									<FormLabel>
+										{t("ui.your_email_35787b", "Your email*")}
+									</FormLabel>
 									<FormControl>
 										<InputGroup>
 											<InputGroupAddon aria-hidden="true">
@@ -220,7 +236,10 @@ function BasketPage() {
 											</InputGroupAddon>
 											<InputGroupInput
 												type="email"
-												placeholder="Enter your email"
+												placeholder={t(
+													"ui.enter_your_email",
+													"Enter your email",
+												)}
 												{...field}
 											/>
 										</InputGroup>
@@ -231,8 +250,10 @@ function BasketPage() {
 											size={"xs"}
 											className="text-muted-foreground"
 										>
-											Email is NOT shared with ANYONE. Only used by Familiar for
-											order updates.
+											{t(
+												"ui.email_is_not_shared_with_anyone_only_used_by_familiar_for_order_updates",
+												"Email is NOT shared with ANYONE. Only used by Familiar for order updates.",
+											)}
 										</Typography.Paragraph>
 									</div>
 									<FormMessage />
@@ -243,12 +264,14 @@ function BasketPage() {
 						<div className="flex flex-col gap-3 mt-2">
 							<div className="flex justify-between items-center py-2 border-b border-border/50">
 								<div className="flex flex-col">
-									<Typography.Heading level={6}>Subtotal</Typography.Heading>
+									<Typography.Heading level={6}>
+										{t("ui.subtotal", "Subtotal")}
+									</Typography.Heading>
 									<Typography.Paragraph
 										size={"xs"}
 										className="text-muted-foreground"
 									>
-										For all items
+										{t("ui.for_all_items", "For all items")}
 									</Typography.Paragraph>
 								</div>
 								<div className="flex items-center gap-2">
@@ -266,12 +289,17 @@ function BasketPage() {
 
 							<div className="flex justify-between items-center py-2">
 								<div className="flex flex-col">
-									<Typography.Heading level={6}>Due now</Typography.Heading>
+									<Typography.Heading level={6}>
+										{t("ui.due_now", "Due now")}
+									</Typography.Heading>
 									<Typography.Paragraph
 										size={"xs"}
 										className="text-muted-foreground"
 									>
-										Currency conversion fees may apply
+										{t(
+											"ui.currency_conversion_fees_may_apply",
+											"Currency conversion fees may apply",
+										)}
 									</Typography.Paragraph>
 								</div>
 								<div className="flex items-center gap-2">
@@ -288,21 +316,24 @@ function BasketPage() {
 							</div>
 						</div>
 
-						<Button size={"2xl"} className="w-full">
-							Pay with Mollie
+						<Button disabled size={"2xl"} className="w-full">
+							{t("ui.pay_with_mollie", "Pay with Mollie")}
 						</Button>
 
 						<Typography.Paragraph
 							size={"xs"}
 							className="text-center text-muted-foreground px-4"
 						>
-							By purchasing this item, you agree to Familiar's{" "}
+							{t(
+								"ui.by_purchasing_this_item_you_agree_to_familiar_s",
+								"By purchasing this item, you agree to Familiar's",
+							)}{" "}
 							<Link to="/tos" className="font-bold link text-xs">
-								Terms of Service
+								{t("ui.terms_of_service", "Terms of Service")}
 							</Link>{" "}
-							and acknowledge our{" "}
+							{t("ui.and_acknowledge_our", "and acknowledge our")}{" "}
 							<Link to="/privacy" className="font-bold link text-xs">
-								Privacy Policy
+								{t("ui.privacy_policy", "Privacy Policy")}
 							</Link>
 							.
 						</Typography.Paragraph>

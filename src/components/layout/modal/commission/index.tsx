@@ -468,7 +468,10 @@ function CommissionTermsSection({
 				<Separator className="mb-4" />
 			</div>
 			<div className="text-xs italic text-muted-foreground">
-				Terms of service not available.
+				{t(
+					"ui.terms_of_service_not_available",
+					"Terms of service not available.",
+				)}
 			</div>
 		</div>
 	);

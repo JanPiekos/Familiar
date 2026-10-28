@@ -30,6 +30,8 @@ import { getMarkerHeight, hasMarkerContent } from "./lifeline-utils";
 import type { LifelineEvent, LifelineMarker, LifelineProps } from "./types";
 import { useLifelineIntro } from "./use-lifeline-intro";
 import { useLifelineVerticalScroll } from "./use-lifeline-vertical-scroll";
+import appI18n from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 
 const GRID_CLASS = "grid grid-cols-[2.5rem_1rem_1fr] gap-x-3";
 const RAIL_LEFT = "calc(2.5rem + 0.75rem + 0.5rem)";
@@ -310,9 +312,10 @@ const LifelineVerticalEntry = forwardRef<
 export function LifelineVertical({
 	markers,
 	birthYear,
-	title = "Lifeline",
+	title = appI18n.t("ui.lifeline", "Lifeline"),
 	mode = "auto",
 }: LifelineProps) {
+	useTranslation();
 	const axisLabels = useLifelineAxisLabels();
 	// Only an explicit `mode` embeds the vertical layout. `"auto"` measures
 	// scrollability on desktop, but the mobile layout *is* a vertical

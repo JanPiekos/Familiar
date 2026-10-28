@@ -27,6 +27,7 @@ import {
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "src/components/ui/dropdown-menu";
+import { useTranslation } from "react-i18next";
 
 type DataGridContext = ReturnType<typeof useDataGrid>;
 
@@ -151,6 +152,7 @@ export function DataGridColumnHeaderDropdown({
 	move,
 	columnVisibility,
 }: DataGridColumnHeaderDropdownProps) {
+	const { t } = useTranslation();
 	const menuItems = useMemo(() => {
 		const items: ReactNode[] = [];
 		let hasPreviousSection = false;
@@ -181,7 +183,7 @@ export function DataGridColumnHeaderDropdown({
 					}}
 				>
 					<ArrowUpIcon className="size-3.5!" />
-					<span className="grow">Asc</span>
+					<span className="grow">{t("ui.asc", "Asc")}</span>
 					{sort.state === "asc" && (
 						<CheckIcon className="text-primary size-4 opacity-100!" />
 					)}
@@ -197,7 +199,7 @@ export function DataGridColumnHeaderDropdown({
 					}}
 				>
 					<ArrowDownIcon className="size-3.5!" />
-					<span className="grow">Desc</span>
+					<span className="grow">{t("ui.desc", "Desc")}</span>
 					{sort.state === "desc" && (
 						<CheckIcon className="text-primary size-4 opacity-100!" />
 					)}
@@ -217,7 +219,7 @@ export function DataGridColumnHeaderDropdown({
 					onClick={() => column.pin(pin.state === "left" ? false : "left")}
 				>
 					<ArrowLeftToLineIcon className="size-3.5!" aria-hidden="true" />
-					<span className="grow">Pin to left</span>
+					<span className="grow">{t("ui.pin_to_left", "Pin to left")}</span>
 					{pin.state === "left" && (
 						<CheckIcon className="text-primary size-4 opacity-100!" />
 					)}
@@ -227,7 +229,7 @@ export function DataGridColumnHeaderDropdown({
 					onClick={() => column.pin(pin.state === "right" ? false : "right")}
 				>
 					<ArrowRightToLineIcon className="size-3.5!" aria-hidden="true" />
-					<span className="grow">Pin to right</span>
+					<span className="grow">{t("ui.pin_to_right", "Pin to right")}</span>
 					{pin.state === "right" && (
 						<CheckIcon className="text-primary size-4 opacity-100!" />
 					)}
@@ -250,7 +252,7 @@ export function DataGridColumnHeaderDropdown({
 					disabled={move.left === "disabled" || move.pinState !== "none"}
 				>
 					<ArrowLeftIcon className="size-3.5!" aria-hidden="true" />
-					<span>Move to Left</span>
+					<span>{t("ui.move_to_left", "Move to Left")}</span>
 				</DropdownMenuItem>,
 				<DropdownMenuItem
 					key="move-right"
@@ -260,7 +262,7 @@ export function DataGridColumnHeaderDropdown({
 					disabled={move.right === "disabled" || move.pinState !== "none"}
 				>
 					<ArrowRightIcon className="size-3.5!" aria-hidden="true" />
-					<span>Move to Right</span>
+					<span>{t("ui.move_to_right", "Move to Right")}</span>
 				</DropdownMenuItem>,
 			);
 			hasPreviousSection = true;
@@ -275,7 +277,7 @@ export function DataGridColumnHeaderDropdown({
 				<DropdownMenuSub key="visibility">
 					<DropdownMenuSubTrigger>
 						<Settings2Icon className="size-3.5!" />
-						<span>Columns</span>
+						<span>{t("ui.columns", "Columns")}</span>
 					</DropdownMenuSubTrigger>
 					<DropdownMenuSubContent>
 						{getColumnVisibilityItems(table)}
@@ -285,7 +287,7 @@ export function DataGridColumnHeaderDropdown({
 		}
 
 		return items;
-	}, [filter, sort, column, pin, move, columnVisibility, table]);
+	}, [filter, sort, column, pin, move, columnVisibility, table, t]);
 
 	return (
 		<DropdownMenu>
