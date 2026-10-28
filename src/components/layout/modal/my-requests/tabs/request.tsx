@@ -4,6 +4,7 @@ import type { TCommission, TCommissionRequest } from "@/types/commissions";
 import { Surface } from "@heroui/react";
 import { Link } from "@tanstack/react-router";
 import { Download, ExternalLink } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export type RequestSectionMedia = {
 	id: string;
@@ -64,6 +65,7 @@ export function RequestSectionCard({
 	formatMoney?: (value: number) => string;
 	onRemoveMedia?: (mediaId: string) => void;
 }) {
+	const { t } = useTranslation();
 	const title = commission?.title || "Untitled commission";
 	const commissionCover =
 		commission?.multimedia?.[0]?.sizes?.half ||
@@ -86,7 +88,7 @@ export function RequestSectionCard({
 						/>
 					) : (
 						<div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-							No image
+							{t("ui.no_image", "No image")}
 						</div>
 					)}
 				</div>
@@ -96,13 +98,18 @@ export function RequestSectionCard({
 						{title}
 					</h4>
 					<p className="mt-1 text-xs text-muted-foreground">
-						Commission listing selected by the client
+						{t(
+							"ui.commission_listing_selected_by_the_client",
+							"Commission listing selected by the client",
+						)}
 					</p>
 				</div>
 
 				{commission?.basePrice ? (
 					<div className="shrink-0 text-right">
-						<p className="text-[11px] text-muted-foreground">Starting at</p>
+						<p className="text-[11px] text-muted-foreground">
+							{t("ui.starting_at", "Starting at")}
+						</p>
 						<p className="text-sm font-semibold text-foreground">
 							{formatMoney(commission.basePrice)}
 						</p>
@@ -116,10 +123,11 @@ export function RequestSectionCard({
 					className="rounded-2xl border border-border px-4 py-3"
 				>
 					<p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-primary">
-						Licence
+						{t("ui.licence", "Licence")}
 					</p>
 					<p className="text-sm font-medium text-foreground">
-						{commission?.usageLabel || "No usage label provided."}
+						{commission?.usageLabel ||
+							t("ui.no_usage_label_provided", "No usage label provided.")}
 						{/* TODO: here's go licences */}
 					</p>
 				</Surface>
@@ -129,7 +137,7 @@ export function RequestSectionCard({
 					className="rounded-2xl border border-border px-4 py-3"
 				>
 					<p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-primary">
-						Request ID
+						{t("ui.request_id", "Request ID")}
 					</p>
 					<p className="text-sm font-medium text-foreground">{request.id}</p>
 				</Surface>
@@ -137,7 +145,7 @@ export function RequestSectionCard({
 
 			<div>
 				<span className="mb-3 block text-xs font-medium uppercase tracking-wide text-primary">
-					Client brief
+					{t("ui.client_brief", "Client brief")}
 				</span>
 
 				<Surface
@@ -145,14 +153,18 @@ export function RequestSectionCard({
 					className="rounded-2xl border border-border p-4"
 				>
 					<p className="text-sm leading-relaxed text-foreground/90">
-						{request.description || "No additional details provided."}
+						{request.description ||
+							t(
+								"ui.no_additional_details_provided",
+								"No additional details provided.",
+							)}
 					</p>
 				</Surface>
 			</div>
 
 			<div>
 				<span className="mb-3 block text-xs font-medium uppercase tracking-wide text-primary">
-					References and Files
+					{t("ui.references_and_files_f7d356", "References and Files")}
 				</span>
 
 				{request.multimedia?.length ? (
@@ -171,12 +183,15 @@ export function RequestSectionCard({
 										{previewUrl ? (
 											<img
 												src={previewUrl}
-												alt={`Attachment ${media.id}`}
+												alt={t("ui.attachment_value0", {
+													defaultValue: "Attachment {{value0}}",
+													value0: media.id,
+												})}
 												className="h-full w-full object-cover"
 											/>
 										) : (
 											<div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-												Preview unavailable
+												{t("ui.preview_unavailable", "Preview unavailable")}
 											</div>
 										)}
 
@@ -184,7 +199,10 @@ export function RequestSectionCard({
 											{originalUrl ? (
 												<Button
 													size="icon-lg"
-													aria-label="Open original file"
+													aria-label={t(
+														"ui.open_original_file",
+														"Open original file",
+													)}
 													asChild
 												>
 													<Link
@@ -198,7 +216,11 @@ export function RequestSectionCard({
 											) : null}
 
 											{originalUrl ? (
-												<Button size="icon-lg" aria-label="Download file">
+												<Button
+													disabled
+													size="icon-lg"
+													aria-label={t("ui.download_file", "Download file")}
+												>
 													<Download className="size-4" />
 												</Button>
 											) : null}
@@ -224,7 +246,9 @@ export function RequestSectionCard({
 						variant="secondary"
 						className="rounded-2xl border border-border p-4"
 					>
-						<p className="text-sm text-foreground">No references attached.</p>
+						<p className="text-sm text-foreground">
+							{t("ui.no_references_attached", "No references attached.")}
+						</p>
 					</Surface>
 				)}
 			</div>

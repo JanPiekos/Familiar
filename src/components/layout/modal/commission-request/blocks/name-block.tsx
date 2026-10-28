@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/input-group";
 import type { PrebuiltRequestFormBlock } from "@/types/commissions/form";
 import type { FormValues } from "../types";
+import { useTranslation } from "react-i18next";
 
 interface Props {
 	control: Control<FormValues>;
@@ -20,6 +21,7 @@ export const RequesterNameBlock = memo(function RequesterNameBlock({
 	control,
 	block,
 }: Props) {
+	const { t } = useTranslation();
 	return (
 		<FormField
 			control={control}
@@ -27,9 +29,13 @@ export const RequesterNameBlock = memo(function RequesterNameBlock({
 			render={({ field, fieldState }) => (
 				<Field>
 					<FieldLabel htmlFor={field.name} className="w-full justify-between">
-						<span className="flex-1 w-full">{block.label ?? "Your name"}</span>
+						<span className="flex-1 w-full">
+							{block.label ?? t("ui.your_name", "Your name")}
+						</span>
 						{block.isRequired ? (
-							<span className="w-fit text-destructive">Required *</span>
+							<span className="w-fit text-destructive">
+								{t("ui.required", "Required *")}
+							</span>
 						) : null}
 					</FieldLabel>
 
@@ -39,7 +45,9 @@ export const RequesterNameBlock = memo(function RequesterNameBlock({
 						</InputGroupAddon>
 						<InputGroupInput
 							id={field.name}
-							placeholder={block.description ?? "Name / nickname"}
+							placeholder={
+								block.description ?? t("ui.name_nickname", "Name / nickname")
+							}
 							{...field}
 						/>
 					</InputGroup>

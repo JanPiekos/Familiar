@@ -26,6 +26,8 @@ import {
 	useDeleteFormTemplate,
 	useFormTemplates,
 } from "@/hooks/commissions/use-form-templates";
+import { useTranslation } from "react-i18next";
+import appI18n from "@/lib/i18n";
 
 export const Route = createFileRoute("/{-$locale}/dashboard/forms_templates")({
 	component: DashboardForms,
@@ -90,7 +92,9 @@ interface DashboardFormsActions {
 const FORM_TEMPLATE_FILTER_GROUPS: FilterGroup<FormTemplateItem>[] = [
 	{
 		id: "updatedAt",
-		label: "Last updated",
+		get label() {
+			return appI18n.t("ui.last_updated", "Last updated");
+		},
 		type: "date",
 		icon: CalendarIcon,
 		getItemValue: (template) =>
@@ -514,13 +518,16 @@ function DashboardFormsPage({
 }
 
 function FormsHeader({ onCreate }: { onCreate: () => void }) {
+	const { t } = useTranslation();
 	return (
 		<DashboardHeader
-			title="Form Templates"
+			title={t("ui.form_templates", "Form Templates")}
 			actions={
 				<Button onClick={onCreate} className="gap-2" size="xl">
 					<Plus className="size-4" />
-					<span className="hidden sm:inline">New Template</span>
+					<span className="hidden sm:inline">
+						{t("ui.new_template", "New Template")}
+					</span>
 				</Button>
 			}
 		/>
@@ -668,31 +675,42 @@ function TemplatesBody({
 }
 
 function EmptyTemplatesState({ onCreate }: { onCreate: () => void }) {
+	const { t } = useTranslation();
 	return (
 		<Surface className="flex h-[420px] flex-col items-center justify-center rounded-3xl border border-dashed text-center">
-			<h2 className="text-lg font-semibold">No templates yet</h2>
+			<h2 className="text-lg font-semibold">
+				{t("ui.no_templates_yet", "No templates yet")}
+			</h2>
 			<p className="mt-2 max-w-md text-sm text-muted-foreground">
-				Start by creating a reusable request form for portraits, emotes,
-				illustrations, character sheets, or any other commission type.
+				{t(
+					"ui.start_by_creating_a_reusable_request_form_for_portraits_emotes_illustration",
+					"Start by creating a reusable request form for portraits, emotes, illustrations, character sheets, or any other commission type.",
+				)}
 			</p>
 
 			<Button onClick={onCreate} className="mt-6 gap-2">
 				<Plus className="size-4" />
-				Create Template
+				{t("ui.create_template", "Create Template")}
 			</Button>
 		</Surface>
 	);
 }
 
 function NoMatchingTemplatesState() {
+	const { t } = useTranslation();
 	return (
 		<Surface className="flex h-[280px] flex-col items-center justify-center rounded-[28px] border text-center">
 			<div className="mb-4 flex size-12 items-center justify-center rounded-2xl border bg-muted/50">
 				<Search className="size-5 text-muted-foreground" />
 			</div>
-			<h3 className="text-base font-semibold">No matching templates</h3>
+			<h3 className="text-base font-semibold">
+				{t("ui.no_matching_templates", "No matching templates")}
+			</h3>
 			<p className="mt-2 text-sm text-muted-foreground">
-				Try a different search phrase or change sorting.
+				{t(
+					"ui.try_a_different_search_phrase_or_change_sorting",
+					"Try a different search phrase or change sorting.",
+				)}
 			</p>
 		</Surface>
 	);
@@ -759,6 +777,7 @@ function TemplateCard({
 }
 
 function TemplateCardHeader({ template }: { template: FormTemplateItem }) {
+	const { t } = useTranslation();
 	return (
 		<div className="flex items-start justify-between gap-4">
 			<div className="flex min-w-0 items-start gap-3">
@@ -768,7 +787,8 @@ function TemplateCardHeader({ template }: { template: FormTemplateItem }) {
 					</h3>
 					<p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
 						<OutlineClock03 className="size-3.5" />
-						Updated {formatRelativeDate(template.updatedAt)}
+						{t("ui.updated", "Updated")}{" "}
+						{formatRelativeDate(template.updatedAt)}
 					</p>
 				</div>
 			</div>
@@ -781,14 +801,17 @@ function TemplateCardHeader({ template }: { template: FormTemplateItem }) {
 }
 
 function TemplateDescription({ description }: { description?: string | null }) {
+	const { t } = useTranslation();
 	return (
 		<p className="mt-5 min-h-[40px] text-sm leading-6 text-muted-foreground line-clamp-2">
-			{description || "No description provided."}
+			{description ||
+				t("ui.no_description_provided", "No description provided.")}
 		</p>
 	);
 }
 
 function TemplateFieldsPreview({ template }: { template: FormTemplateItem }) {
+	const { t } = useTranslation();
 	const fields = template.fields ?? [];
 	const previewFields = fields.slice(0, 4);
 	const remainingFields = Math.max(fields.length - 4, 0);
@@ -809,13 +832,13 @@ function TemplateFieldsPreview({ template }: { template: FormTemplateItem }) {
 
 					{remainingFields > 0 && (
 						<Badge size="sm" variant="outline">
-							+{remainingFields} more
+							+{remainingFields} {t("ui.more_333b55", "more")}
 						</Badge>
 					)}
 				</>
 			) : (
 				<Badge size="sm" variant="outline">
-					No fields yet
+					{t("ui.no_fields_yet", "No fields yet")}
 				</Badge>
 			)}
 		</div>
@@ -831,11 +854,12 @@ function TemplateCardActions({
 	onDelete: () => void;
 	deleteDisabled: boolean;
 }) {
+	const { t } = useTranslation();
 	return (
 		<div className="mt-auto flex w-full justify-end gap-2 pt-6">
 			<Button size="xl" variant="ghost" onClick={onEdit}>
 				<OutlineEdit />
-				Edit
+				{t("ui.edit", "Edit")}
 			</Button>
 
 			<Button
@@ -845,7 +869,7 @@ function TemplateCardActions({
 				disabled={deleteDisabled}
 			>
 				<OutlineTrash />
-				Delete
+				{t("ui.delete", "Delete")}
 			</Button>
 		</div>
 	);
@@ -880,12 +904,16 @@ function DeleteTemplateDialog({
 	onOpenChange: (open: boolean) => void;
 	onConfirm: (templateId: string) => void;
 }) {
+	const { t } = useTranslation();
 	return (
 		<ConfirmDialog
 			open={!!templateId}
 			onOpenChange={onOpenChange}
-			title="Delete Template"
-			description="Are you sure you want to delete this template? This action cannot be undone."
+			title={t("ui.delete_template", "Delete Template")}
+			description={t(
+				"ui.are_you_sure_you_want_to_delete_this_template_this_action_cannot_be_undone",
+				"Are you sure you want to delete this template? This action cannot be undone.",
+			)}
 			onConfirm={() => {
 				if (templateId) {
 					onConfirm(templateId);
