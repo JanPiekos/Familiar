@@ -60,6 +60,36 @@ const en = {
 			system: "System",
 		},
 	},
+	image_crop: {
+		close: "Close image editor",
+		avatar_title: "Crop profile picture",
+		cover_title: "Crop cover image",
+		description: "Choose what appears on your profile.",
+		position: "Position image",
+		position_help:
+			"Drag or use the arrow keys to position. Pinch or scroll to zoom.",
+		image_alt: "Image being cropped",
+		zoom: "Zoom",
+		zoom_in: "Zoom in",
+		zoom_out: "Zoom out",
+		rotate: "Rotate",
+		reset: "Reset",
+		guides: "Screen guides",
+		guide_help:
+			"Keep important details inside the mobile guide. The visible area changes with screen width.",
+		desktop: "Desktop",
+		tablet: "Tablet",
+		mobile: "Mobile",
+		cancel: "Cancel",
+		apply: "Apply crop",
+		loading: "Loading image",
+		failed:
+			"We couldn't crop this image. Try again or choose a different image.",
+		load_failed: "This image couldn't be opened. Please choose another image.",
+		animation:
+			"Cropping saves a still frame. Keep the original to preserve animation.",
+		original: "Use original",
+	},
 	auth: {
 		login: {
 			cta: "Login",

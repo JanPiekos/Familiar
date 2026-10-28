@@ -60,6 +60,36 @@ const pl = {
 			system: "Systemowy",
 		},
 	},
+	image_crop: {
+		close: "Zamknij edytor obrazu",
+		avatar_title: "Kadruj zdjęcie profilowe",
+		cover_title: "Kadruj zdjęcie w tle",
+		description: "Wybierz, co będzie widoczne na Twoim profilu.",
+		position: "Ustaw położenie obrazu",
+		position_help:
+			"Przeciągnij obraz lub użyj strzałek, aby go przesunąć. Zbliżaj palcami lub kółkiem myszy.",
+		image_alt: "Kadrowany obraz",
+		zoom: "Zbliżenie",
+		zoom_in: "Przybliż",
+		zoom_out: "Oddal",
+		rotate: "Obróć",
+		reset: "Resetuj",
+		guides: "Obszary ekranów",
+		guide_help:
+			"Umieść ważne elementy w obszarze telefonu. Widoczny fragment zależy od szerokości ekranu.",
+		desktop: "Komputer",
+		tablet: "Tablet",
+		mobile: "Telefon",
+		cancel: "Anuluj",
+		apply: "Zastosuj kadr",
+		loading: "Wczytywanie obrazu",
+		failed:
+			"Nie udało się wykadrować obrazu. Spróbuj ponownie lub wybierz inny obraz.",
+		load_failed: "Nie udało się otworzyć obrazu. Wybierz inny obraz.",
+		animation:
+			"Kadrowanie zapisuje pojedynczą klatkę. Zachowaj oryginał, aby zachować animację.",
+		original: "Użyj oryginału",
+	},
 	auth: {
 		login: {
 			cta: "Zaloguj",

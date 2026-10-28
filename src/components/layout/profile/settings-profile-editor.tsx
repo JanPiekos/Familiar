@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { useProfileImageCrop } from "./profile-image-crop-dialog";
 import { profileSettingsSchema } from "@/schemas/user/profile";
 import {
 	OutlineAt,
@@ -61,6 +62,7 @@ export function SettingsProfileEditor({
 	onSubmit,
 }: SettingsProfileEditorProps) {
 	const { t } = useTranslation();
+	const { requestCrop, cropDialog } = useProfileImageCrop();
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const submittingRef = useRef(false);
 	// Keep the edit baseline stable when background profile queries refresh.
@@ -148,11 +150,9 @@ export function SettingsProfileEditor({
 		const file = event.target.files?.[0];
 		if (!file) return;
 
-		const reader = new FileReader();
-		reader.onloadend = () => {
-			form.setFieldValue(field, reader.result as string);
-		};
-		reader.readAsDataURL(file);
+		requestCrop(file, field === "avatar_url" ? "avatar" : "cover", ({ dataUrl }) => {
+			form.setFieldValue(field, dataUrl);
+		});
 		event.target.value = "";
 	}
 
@@ -165,6 +165,7 @@ export function SettingsProfileEditor({
 				void form.handleSubmit();
 			}}
 		>
+			{cropDialog}
 			{submitError && (
 				<p role="alert" className="mb-4 text-sm text-destructive">
 					{submitError}

@@ -2,6 +2,7 @@ import { Typography } from "@heroui/react";
 import { type RefObject, useId, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { useProfileImageCrop } from "./profile-image-crop-dialog";
 import {
 	OutlineAt,
 	OutlineEdit,
@@ -45,6 +46,7 @@ export function ProfileEditor({
 	bioClassName,
 }: ProfileEditorProps) {
 	const { t } = useTranslation();
+	const { requestCrop, cropDialog } = useProfileImageCrop();
 	const uploadId = useId();
 	const { control, watch, setValue } = useFormContext<ProfileEditorValues>();
 	const watchedAvatar = watch("avatar_url");
@@ -74,20 +76,19 @@ export function ProfileEditor({
 			return;
 		}
 
-		const reader = new FileReader();
-		reader.onloadend = () => {
-			setValue(field, reader.result as string, {
+		requestCrop(file, field === "avatar_url" ? "avatar" : "cover", ({ dataUrl }) => {
+			setValue(field, dataUrl, {
 				shouldDirty: true,
 				shouldTouch: true,
 				shouldValidate: true,
 			});
-		};
-		reader.readAsDataURL(file);
+		});
 		event.target.value = "";
 	};
 
 	return (
 		<div className="flex flex-col gap-6">
+			{cropDialog}
 			<div className="relative w-full overflow-hidden">
 				<div className="relative h-40 w-full overflow-hidden rounded-3xl bg-surface-3 shadow-none! sm:h-44 lg:h-48">
 					{watchedCover ? (

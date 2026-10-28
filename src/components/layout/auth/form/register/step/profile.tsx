@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { useProfileImageCrop } from "@/components/layout/profile/profile-image-crop-dialog";
 import {
 	OutlineAt,
 	OutlineEdit,
@@ -47,6 +48,7 @@ function useFilePreview(file: File | null | undefined) {
 
 export function RegisterStepProfile() {
 	const { t } = useTranslation();
+	const { requestCrop, cropDialog } = useProfileImageCrop();
 	const uploadId = useId();
 	const {
 		control,
@@ -67,18 +69,21 @@ export function RegisterStepProfile() {
 		event: React.ChangeEvent<HTMLInputElement>,
 		field: "avatar" | "cover",
 	) => {
-		const file = event.target.files?.[0] ?? null;
-
-		setValue(field, file, {
-			shouldDirty: true,
-			shouldTouch: true,
-			shouldValidate: true,
+		const file = event.target.files?.[0];
+		if (!file) return;
+		requestCrop(file, field, ({ file: croppedFile }) => {
+			setValue(field, croppedFile, {
+				shouldDirty: true,
+				shouldTouch: true,
+				shouldValidate: true,
+			});
 		});
 		event.target.value = "";
 	};
 
 	return (
 		<div className="space-y-4">
+			{cropDialog}
 			<div>
 				<h3 className="font-medium">
 					{t("auth.register.profile.title", "Profile details")}
