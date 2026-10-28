@@ -7,6 +7,7 @@ import { ChatPanelState } from "./chat-panel-state";
 import { MessageComposer } from "./message-composer";
 import { MessageList } from "./message-list";
 import type { ChatPanelProps } from "./types";
+import { useTranslation } from "react-i18next";
 
 export function ChatPanel({
 	conversation,
@@ -16,6 +17,7 @@ export function ChatPanel({
 	error,
 	onBack,
 }: ChatPanelProps) {
+	const { t } = useTranslation();
 	return (
 		<section
 			className={cn(
@@ -27,8 +29,11 @@ export function ChatPanel({
 				<div className="flex flex-1 items-center justify-center p-8">
 					<EmptyPage
 						icon={OutlineChat}
-						title="Your Messages"
-						description="Select a conversation to start chatting."
+						title={t("ui.your_messages", "Your Messages")}
+						description={t(
+							"ui.select_a_conversation_to_start_chatting",
+							"Select a conversation to start chatting.",
+						)}
 					/>
 				</div>
 			) : (
