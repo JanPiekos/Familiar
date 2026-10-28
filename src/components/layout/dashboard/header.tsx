@@ -16,7 +16,7 @@ export function DashboardHeader({ title, actions }: DashboardHeaderProps) {
 	return (
 		<header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 border-b px-6 justify-between bg-background/90 backdrop-blur-md">
 			<div className="flex items-center gap-2">
-				<SidebarTrigger className="-ml-2" />
+				<SidebarTrigger className="-ml-2 hidden lg:inline-flex" />
 			</div>
 
 			<div className="flex items-center gap-4">
@@ -27,7 +27,9 @@ export function DashboardHeader({ title, actions }: DashboardHeaderProps) {
 					<CurrencySelect />
 					<LanguageSelect />
 					{!isPending && user && (
-						<User user={user} showInfo={false} isDropdown />
+						<div className="hidden lg:block">
+							<User user={user} showInfo={false} isDropdown />
+						</div>
 					)}
 				</div>
 			</div>
