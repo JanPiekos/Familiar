@@ -968,6 +968,7 @@ export function FilterValueDateController<TData>({
 	filter,
 	column,
 	actions,
+	locale = "en",
 	backButtonMode = "inside",
 	onBack,
 }: FilterValueControllerProps<TData, "date"> & { onBack?: () => void }) {
@@ -1024,7 +1025,7 @@ export function FilterValueDateController<TData>({
 							onClick={onBack}
 						>
 							<ChevronLeft className="size-4 mr-2" />
-							{t("back", "en") || "Back"}
+							{t("back", locale) || "Back"}
 						</Button>
 					</div>
 				)}

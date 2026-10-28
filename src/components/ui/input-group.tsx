@@ -277,6 +277,7 @@ function InputGroupNumberInput({
 	value: controlledValue,
 	...props
 }: NumberInputProps) {
+	const { t } = useTranslation();
 	const inputRef = useRef<HTMLInputElement>(null);
 	const mergedInputRef = useMergedRef(inputRef, ref);
 
@@ -296,7 +297,7 @@ function InputGroupNumberInput({
 
 		setValue(nextValue);
 		onValueChange?.(nextValue);
-	}, [value, stepper, max, onValueChange]);
+	}, [value, stepper, max, onValueChange, t]);
 
 	const handleDecrement = useCallback(() => {
 		const currentValue =
@@ -308,7 +309,7 @@ function InputGroupNumberInput({
 
 		setValue(nextValue);
 		onValueChange?.(nextValue);
-	}, [value, stepper, min, onValueChange]);
+	}, [value, stepper, min, onValueChange, t]);
 
 	const handleIncrementEvent = useEffectEvent(() => {
 		handleIncrement();
@@ -392,7 +393,7 @@ function InputGroupNumberInput({
 				<Button
 					type="button"
 					size="icon-sm"
-					aria-label="Increase value"
+					aria-label={t("ui.increase_value", "Increase value")}
 					className="h-5 rounded-none rounded-tr-xl border-0 border-b border-primary/10 pr-1 focus-visible:z-10"
 					variant="ghost"
 					onClick={handleIncrement}
@@ -404,7 +405,7 @@ function InputGroupNumberInput({
 				<Button
 					type="button"
 					size="icon-sm"
-					aria-label="Decrease value"
+					aria-label={t("ui.decrease_value", "Decrease value")}
 					className="h-5 rounded-none rounded-br-xl border-0 pr-1 focus-visible:z-10"
 					variant="ghost"
 					onClick={handleDecrement}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { ScrollShadow } from "@heroui/react";
 import type {
 	Column,
@@ -25,8 +26,11 @@ export function DataTableFilter<TData>({
 	filters,
 	actions,
 	strategy,
-	locale = "en",
+	locale: localeProp,
 }: DataTableFilterProps<TData>) {
+	const { i18n } = useTranslation();
+	const locale =
+		localeProp ?? (i18n.resolvedLanguage?.startsWith("pl") ? "pl" : "en");
 	return (
 		<div className="flex w-full flex-col gap-2">
 			<div className="flex w-full items-start">

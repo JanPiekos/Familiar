@@ -6,6 +6,7 @@ import UserAvatar from "@/components/layout/profile/avatar";
 import { ProfileBadge } from "@/components/layout/profile/badge";
 import { cn } from "@/lib/utils";
 import type { TUserProfile } from "@/types/user";
+import { useTranslation } from "react-i18next";
 
 interface UserCommentProps {
 	author: TUserProfile | undefined;
@@ -24,6 +25,7 @@ export function UserComment({
 	children,
 	className,
 }: UserCommentProps) {
+	const { t } = useTranslation();
 	return (
 		<div className={cn("flex flex-col gap-1", className)}>
 			<div className="flex items-start gap-3 py-2">
@@ -42,7 +44,7 @@ export function UserComment({
 							<div className="flex flex-col">
 								<div className="flex items-center gap-1">
 									<span className="font-semibold text-sm">
-										{author?.displayName || "Unknown"}
+										{author?.displayName || t("ui.unknown", "Unknown")}
 									</span>
 									{author && <ProfileBadge user={author} />}
 								</div>

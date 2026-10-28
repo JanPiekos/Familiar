@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "src/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const imageUrlPattern = /\.(?:avif|bmp|gif|jpe?g|png|svg|webp)(?:[?#].*)?$/i;
 const pdfUrlPattern = /\.pdf(?:[?#].*)?$/i;
@@ -65,6 +66,7 @@ interface FileThumbnailProps {
 }
 
 function FileThumbnail({ file, size, className }: FileThumbnailProps) {
+	const { t } = useTranslation();
 	const isUrl = typeof file === "string";
 	const isPdf = isPdfAttachment(file);
 	const isImage = !isPdf && isImageAttachment(file);
@@ -124,7 +126,11 @@ function FileThumbnail({ file, size, className }: FileThumbnailProps) {
 			) : (
 				<div className="flex h-full w-full flex-col items-center justify-center gap-1 px-2 text-center">
 					<div className="rounded-md border border-border bg-background/60 px-2 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground">
-						{isPdf ? "PDF" : isImage ? "IMG" : "FILE"}
+						{isPdf
+							? "PDF"
+							: isImage
+								? t("ui.img", "IMG")
+								: t("ui.file_20ed7c", "FILE")}
 					</div>
 
 					<div

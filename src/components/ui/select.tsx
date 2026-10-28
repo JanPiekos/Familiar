@@ -3,6 +3,7 @@ import { Select as SelectPrimitive } from "radix-ui";
 import type * as React from "react";
 import { cn } from "src/lib/utils";
 import { OutlineChevronDown } from "../icons/icons";
+import { MENU_ITEM_LAYOUT_CLASS_NAME } from "./menu-styles";
 
 function Select({
 	...props
@@ -112,14 +113,16 @@ function SelectItem({
 		<SelectPrimitive.Item
 			data-slot="select-item"
 			className={cn(
-				"focus:bg-primary/6 focus:text-primary [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 first:rounded-t-[calc(var(--select-content-radius)-var(--select-content-padding))] last:rounded-b-[calc(var(--select-content-radius)-var(--select-content-padding))] rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+				MENU_ITEM_LAYOUT_CLASS_NAME,
+				"pr-9",
+				"focus:bg-primary/6 focus:text-primary [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center first:rounded-t-[calc(var(--select-content-radius)-var(--select-content-padding))] last:rounded-b-[calc(var(--select-content-radius)-var(--select-content-padding))] rounded-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
 				className,
 			)}
 			{...props}
 		>
 			<span
 				data-slot="select-item-indicator"
-				className="absolute right-2 flex size-3.5 items-center justify-center"
+				className="absolute right-3 flex size-4 items-center justify-center"
 			>
 				<SelectPrimitive.ItemIndicator>
 					<CheckIcon className="size-4" />
