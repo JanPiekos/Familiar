@@ -1,5 +1,7 @@
 "use client";
 
+import { AccessibilitySettings } from "./accessibility-settings";
+
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "@tanstack/react-router";
 import type { TFunction } from "i18next";
@@ -1363,104 +1365,6 @@ function SettingsThemeSelect() {
 				</Command>
 			</PopoverContent>
 		</Popover>
-	);
-}
-
-function AccessibilitySettings({
-	onSubmit,
-}: {
-	onSubmit?: () => void | Promise<void>;
-}) {
-	const { t } = useTranslation();
-	const form = useForm({
-		defaultValues: {
-			reduceMotion: false,
-			highContrast: false,
-			underlineLinks: false,
-			largerInterfaceText: false,
-		},
-		onSubmit: async () => {
-			await onSubmit?.();
-		},
-	});
-	const preferences = [
-		{
-			name: "reduceMotion",
-			title: t("settings.accessibility.reduce_motion.title", "Reduce motion"),
-			description: t(
-				"settings.accessibility.reduce_motion.description",
-				"Reduce interface animations and transitions.",
-			),
-		},
-		{
-			name: "highContrast",
-			title: t("settings.accessibility.high_contrast.title", "High contrast"),
-			description: t(
-				"settings.accessibility.high_contrast.description",
-				"Increase contrast between interface elements.",
-			),
-		},
-		{
-			name: "underlineLinks",
-			title: t(
-				"settings.accessibility.underline_links.title",
-				"Underline links",
-			),
-			description: t(
-				"settings.accessibility.underline_links.description",
-				"Always show underlines beneath links.",
-			),
-		},
-		{
-			name: "largerInterfaceText",
-			title: t(
-				"settings.accessibility.larger_text.title",
-				"Larger interface text",
-			),
-			description: t(
-				"settings.accessibility.larger_text.description",
-				"Increase the base text size throughout the application.",
-			),
-		},
-	] as const;
-
-	return (
-		<form
-			id="accessibility-settings-form"
-			onSubmit={(event) => {
-				event.preventDefault();
-				void form.handleSubmit();
-			}}
-		>
-			<SettingsCard
-				title={t(
-					"settings.accessibility.preferences.title",
-					"Accessibility preferences",
-				)}
-				description={t(
-					"settings.accessibility.preferences.description",
-					"Adjust the interface to make it more comfortable to use.",
-				)}
-			>
-				<FieldGroup>
-					{preferences.map((preference) => (
-						<form.Field
-							key={preference.name}
-							name={preference.name}
-							children={(field) => (
-								<SettingSwitch
-									id={field.name}
-									title={preference.title}
-									description={preference.description}
-									checked={field.state.value}
-									onCheckedChange={field.handleChange}
-								/>
-							)}
-						/>
-					))}
-				</FieldGroup>
-			</SettingsCard>
-		</form>
 	);
 }
 
