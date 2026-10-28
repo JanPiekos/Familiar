@@ -76,7 +76,7 @@ const pl = {
 		reset: "Resetuj",
 		guides: "Obszary ekranów",
 		guide_help:
-			"Umieść ważne elementy w obszarze telefonu. Widoczny fragment zależy od szerokości ekranu.",
+			"Ważne elementy umieść w ramce telefonu. Kliknij ekran ponownie, aby ukryć ramkę.",
 		desktop: "Komputer",
 		tablet: "Tablet",
 		mobile: "Telefon",

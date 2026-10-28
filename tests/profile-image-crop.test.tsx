@@ -246,19 +246,25 @@ describe("profile image cropping", () => {
 			/>,
 			"pl",
 		);
-		expect(await screen.findByText("Telefon")).toBeTruthy();
-		expect(screen.getByText("Komputer")).toBeTruthy();
-		fireEvent.change(screen.getByRole("slider", { name: "Zbliżenie" }), {
-			target: { value: "2" },
-		});
+		const mobile = await screen.findByRole("button", { name: "Telefon" });
+		expect(mobile.getAttribute("aria-pressed")).toBe("true");
+		const slider = screen.getByRole("slider", { name: "Zbliżenie" });
+		fireEvent.keyDown(slider, { key: "ArrowRight" });
+		expect(state.props.zoom).toBe(1.01);
+		expect(slider.getAttribute("aria-valuetext")).toBe("101%");
 		fireEvent.click(screen.getByRole("button", { name: "Obróć" }));
-		expect(state.props.zoom).toBe(2);
 		expect(state.props.rotation).toBe(90);
 		fireEvent.click(screen.getByRole("button", { name: "Resetuj" }));
 		expect(state.props.zoom).toBe(1);
 		expect(state.props.rotation).toBe(0);
-		fireEvent.click(screen.getByRole("checkbox", { name: "Obszary ekranów" }));
-		expect(screen.queryByText("Telefon")).toBeNull();
+		const desktop = screen.getByRole("button", { name: "Komputer" });
+		fireEvent.click(desktop);
+		expect(desktop.getAttribute("aria-pressed")).toBe("true");
+		expect(mobile.getAttribute("aria-pressed")).toBe("false");
+		expect(document.querySelectorAll("[data-crop-guide]")).toHaveLength(1);
+		expect(document.querySelector('[data-crop-guide="desktop"]')).toBeTruthy();
+		fireEvent.click(desktop);
+		expect(document.querySelector("[data-crop-guide]")).toBeNull();
 	});
 
 	it("blocks dismissal and duplicate exports while applying a crop", async () => {

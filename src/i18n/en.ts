@@ -76,7 +76,7 @@ const en = {
 		reset: "Reset",
 		guides: "Screen guides",
 		guide_help:
-			"Keep important details inside the mobile guide. The visible area changes with screen width.",
+			"Keep key details inside the mobile frame. Tap a screen again to hide its guide.",
 		desktop: "Desktop",
 		tablet: "Tablet",
 		mobile: "Mobile",
