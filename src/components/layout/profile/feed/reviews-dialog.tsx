@@ -12,12 +12,14 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getUserReviews } from "@/data/reviews";
 import { calculateReviewStats } from "@/lib/commission-utils";
+import { useTranslation } from "react-i18next";
 
 interface ReviewsDialogProps {
 	username?: string;
 }
 
 export function ReviewsDialog({ username }: ReviewsDialogProps) {
+	const { t } = useTranslation();
 	const { data: reviews = [] } = useQuery({
 		queryKey: ["userReviews", username],
 		queryFn: () => getUserReviews({ data: { username } }),
@@ -32,7 +34,13 @@ export function ReviewsDialog({ username }: ReviewsDialogProps) {
 					<SolidStar />
 					<span className="font-bold">{average}</span>
 					<span className="text-muted-foreground text-xs">
-						({count} reviews)
+						(
+						{t(
+							"components.profile.commissions.modal.reviews.total_count",
+							`${count} reviews`,
+							{ count },
+						)}
+						)
 					</span>
 					<OutlineChevronRight className="text-muted-foreground" size={14} />
 				</Button>
@@ -43,7 +51,13 @@ export function ReviewsDialog({ username }: ReviewsDialogProps) {
 						<div className="flex items-center gap-2">
 							<Star className="fill-foreground text-foreground" size={20} />
 							<span className="font-bold text-2xl">{average}</span>
-							<span className="text-muted-foreground">{count} reviews</span>
+							<span className="text-muted-foreground">
+								{t(
+									"components.profile.commissions.modal.reviews.total_count",
+									`${count} reviews`,
+									{ count },
+								)}
+							</span>
 						</div>
 					</DialogHeader>
 				</div>

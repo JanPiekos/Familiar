@@ -44,6 +44,16 @@ beforeEach(() => { state.mobile = false; });
 afterEach(cleanup);
 
 describe("settings overlay lifecycle", () => {
+ it("places the owner's share control beside Edit Profile without opening settings", async () => {
+  const { router } = renderSettings("/user/me");
+  const edit = await screen.findByRole("button", { name: /edit profile/i });
+  const share = screen.getByRole("button", { name: /share profile/i });
+  expect(share.parentElement).toBe(edit.parentElement);
+  expect(share.textContent).toMatch(/share profile/i);
+  expect(screen.queryByRole("dialog")).toBeNull();
+  expect(router.state.location.pathname).toBe("/user/me");
+ });
+
  it.each(["profile", "menu"])("keeps full-page settings after reloading a dialog opened from %s", async (entryPoint) => {
   const original = renderSettings("/user/me");
   await screen.findByRole("textbox", { name: "Page input" });

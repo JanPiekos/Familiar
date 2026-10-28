@@ -230,11 +230,7 @@ export function SpokenLanguageSelect({
 					</SelectTrigger>
 					<SelectContent>
 						{levels.map((level) => (
-							<SelectItem
-								key={level.value}
-								value={level.value}
-								className="text-xs"
-							>
+							<SelectItem key={level.value} value={level.value}>
 								<div className="flex items-center gap-2">
 									<div
 										className={cn("h-1.5 w-1.5 rounded-full", level.color)}

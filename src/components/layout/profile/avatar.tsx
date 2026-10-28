@@ -17,7 +17,7 @@ export default function UserAvatar({
 	user?: UserIdentity;
 	isHuge?: boolean;
 	hasOutline?: boolean;
-	size?: "sm" | "default" | "lg" | "xl" | "2xl";
+	size?: "sm" | "md" | "default" | "lg" | "xl" | "2xl";
 	isOnline?: boolean;
 	badgeClassName?: string;
 	className?: string;
@@ -37,6 +37,9 @@ export default function UserAvatar({
 	} else if (size === "sm") {
 		sizeClasses = "size-8";
 		hashSize = 32;
+	} else if (size === "md") {
+		sizeClasses = "size-10";
+		hashSize = 40;
 	} else if (size === "lg") {
 		sizeClasses = "size-12";
 		hashSize = 48;
