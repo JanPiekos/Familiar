@@ -1,14 +1,25 @@
 import { apiFetch } from "@/lib/fetch";
+import { normalizePortfolioPost } from "./normalize-post";
 import type {
 	CreatePortfolioPostRequest,
 	MediaJobResponse,
-	PagePortfolioPostResponse,
-	PortfolioPostResponse,
+	PagePortfolioPostApiResponse,
+	PortfolioPostApiResponse,
 	PostPageableParams,
 	ReorderPostImagesRequest,
 	ReorderRequest,
 	UpdatePortfolioPostRequest,
 } from "./post-types";
+
+async function fetchPortfolioPostPage(...args: Parameters<typeof apiFetch>) {
+	const page = await apiFetch<PagePortfolioPostApiResponse>(...args);
+	return { ...page, content: page.content?.map(normalizePortfolioPost) };
+}
+async function fetchPortfolioPost(...args: Parameters<typeof apiFetch>) {
+	return normalizePortfolioPost(
+		await apiFetch<PortfolioPostApiResponse>(...args),
+	);
+}
 
 // Helper for generating query strings
 function buildQueryString(params?: PostPageableParams): string {
@@ -30,13 +41,13 @@ function buildQueryString(params?: PostPageableParams): string {
 // ------------------------------------------------------------------
 
 export async function getMyPortfolioPosts(params?: PostPageableParams) {
-	return apiFetch<PagePortfolioPostResponse>(
+	return fetchPortfolioPostPage(
 		`portfolio/me/posts${buildQueryString(params)}`,
 	);
 }
 
 export async function createPortfolioPost(data: CreatePortfolioPostRequest) {
-	return apiFetch<PortfolioPostResponse>("portfolio/me/posts", {
+	return fetchPortfolioPost("portfolio/me/posts", {
 		method: "POST",
 		body: JSON.stringify(data),
 	});
@@ -46,7 +57,7 @@ export async function updatePortfolioPost(
 	postId: string,
 	data: UpdatePortfolioPostRequest,
 ) {
-	return apiFetch<PortfolioPostResponse>(`portfolio/me/posts/${postId}`, {
+	return fetchPortfolioPost(`portfolio/me/posts/${postId}`, {
 		method: "PATCH",
 		body: JSON.stringify(data),
 	});
@@ -120,7 +131,7 @@ export async function getArtistPortfolioPosts(
 	username: string,
 	params?: PostPageableParams,
 ) {
-	return apiFetch<PagePortfolioPostResponse>(
+	return fetchPortfolioPostPage(
 		`portfolio/artists/${encodeURIComponent(username)}/posts${buildQueryString(
 			params,
 		)}`,
@@ -128,7 +139,7 @@ export async function getArtistPortfolioPosts(
 }
 
 export async function getPortfolioPost(postId: string) {
-	return apiFetch<PortfolioPostResponse>(`portfolio/posts/${postId}`);
+	return fetchPortfolioPost(`portfolio/posts/${postId}`);
 }
 
 export async function getArtistPortfolioPost(username: string, postId: string) {
@@ -151,7 +162,7 @@ export async function getArtistPortfolioPost(username: string, postId: string) {
 		page += 1;
 	}
 
-	return apiFetch<PortfolioPostResponse>(
+	return fetchPortfolioPost(
 		`portfolio/artists/${encodeURIComponent(username)}/posts/${postId}`,
 	);
 }
@@ -161,7 +172,7 @@ export async function getArtistCatalogPosts(
 	catalogId: string,
 	params?: PostPageableParams,
 ) {
-	return apiFetch<PagePortfolioPostResponse>(
+	return fetchPortfolioPostPage(
 		`portfolio/artists/${encodeURIComponent(
 			username,
 		)}/catalogs/${catalogId}/posts${buildQueryString(params)}`,
