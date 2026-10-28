@@ -10,7 +10,11 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { useProfileImageCrop } from "./profile-image-crop-dialog";
+import {
+	ProfileImageSizeHint,
+	useProfileImageCrop,
+} from "./profile-image-crop-dialog";
+import { PROFILE_COVER_CLASS_NAME } from "@/lib/image-crop";
 import { profileSettingsSchema } from "@/schemas/user/profile";
 import {
 	OutlineAt,
@@ -186,7 +190,10 @@ export function SettingsProfileEditor({
 								return (
 									<div className="flex flex-col gap-6">
 										<div className="relative w-full overflow-hidden">
-											<div className="relative h-40 w-full overflow-hidden rounded-3xl bg-surface-3 sm:h-44 lg:h-48">
+											<div className={cn(
+												"relative w-full overflow-hidden rounded-3xl bg-surface-3",
+												PROFILE_COVER_CLASS_NAME,
+											)}>
 												{values.cover_url ? (
 													<img
 														src={values.cover_url}
@@ -320,6 +327,9 @@ export function SettingsProfileEditor({
 											</div>
 										</div>
 
+										<p className="flex flex-wrap gap-x-3 text-xs leading-5 text-muted-foreground">
+											<ProfileImageSizeHint />
+										</p>
 										<FieldGroup>
 											<form.Field
 												name="display_name"

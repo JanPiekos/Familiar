@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getUserAccentStylesFromHex } from "@/lib/colors";
+import { PROFILE_COVER_CLASS_NAME } from "@/lib/image-crop";
+import { cn } from "@/lib/utils";
 import type { TUserResponse } from "@/types/user";
 
 const imageCache = new Map<string, Promise<void> | true>();
@@ -41,7 +43,10 @@ function ProfileCover({ user }: { user: TUserResponse }) {
 
 	return (
 		<div
-			className="relative h-48 w-full overflow-hidden ring-1 ring-ring/30 md:h-72 lg:rounded-3xl"
+			className={cn(
+				"relative w-full overflow-hidden ring-1 ring-ring/30 lg:rounded-3xl",
+				PROFILE_COVER_CLASS_NAME,
+			)}
 			style={coverBgStyle}
 		>
 			{/* TODO: add webm (animated) support */}
@@ -57,7 +62,11 @@ function ProfileCover({ user }: { user: TUserResponse }) {
 }
 
 function ProfileCoverSkeleton() {
-	return <Skeleton className="h-48 w-full lg:rounded-3xl md:h-72" />;
+	return (
+		<Skeleton
+			className={cn("w-full lg:rounded-3xl", PROFILE_COVER_CLASS_NAME)}
+		/>
+	);
 }
 
 export { ProfileCover, ProfileCoverSkeleton };

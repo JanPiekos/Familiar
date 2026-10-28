@@ -22,7 +22,10 @@ import {
 } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
 import {
+	AVATAR_IMAGE_SIZE,
 	COVER_GUIDES,
+	COVER_IMAGE_ASPECT,
+	COVER_IMAGE_SIZE,
 	type CropArea,
 	type CroppedProfileImage,
 	coverGuideBounds,
@@ -38,6 +41,22 @@ type Request = {
 	apply: (image: CroppedProfileImage) => void;
 	id: number;
 };
+
+export function ProfileImageSizeHint({ kind }: { kind?: ProfileImageKind }) {
+	const { t } = useTranslation();
+	return (
+		<>
+			{kind !== "avatar" && (
+				<span>{t("image_crop.cover_size_hint", COVER_IMAGE_SIZE)}</span>
+			)}
+			{kind !== "cover" && (
+				<span>
+					{t("image_crop.avatar_size_hint", { size: AVATAR_IMAGE_SIZE })}
+				</span>
+			)}
+		</>
+	);
+}
 
 export function useProfileImageCrop() {
 	const [request, setRequest] = useState<Request | null>(null);
@@ -163,7 +182,7 @@ export function ProfileImageCropDialog({
 							)}
 						</DialogTitle>
 						<DialogDescription className="mt-0.5">
-							{t("image_crop.description")}
+							<ProfileImageSizeHint kind={kind} />
 						</DialogDescription>
 					</div>
 					<Button
@@ -226,7 +245,7 @@ export function ProfileImageCropDialog({
 									crop={crop}
 									zoom={zoom}
 									rotation={rotation}
-									aspect={kind === "avatar" ? 1 : 3}
+									aspect={kind === "avatar" ? 1 : COVER_IMAGE_ASPECT}
 									cropShape={kind === "avatar" ? "round" : "rect"}
 									showGrid={false}
 									maxZoom={4}

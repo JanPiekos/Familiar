@@ -64,6 +64,8 @@ const pl = {
 		close: "Zamknij edytor obrazu",
 		avatar_title: "Kadruj zdjęcie profilowe",
 		cover_title: "Kadruj zdjęcie w tle",
+		cover_size_hint: "Zalecane tło: {{width}} × {{height}} px.",
+		avatar_size_hint: "Zalecany awatar: {{size}} × {{size}} px.",
 		description: "Wybierz, co będzie widoczne na Twoim profilu.",
 		position: "Ustaw położenie obrazu",
 		position_help:

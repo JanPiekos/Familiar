@@ -1,7 +1,11 @@
 import { useEffect, useId, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useProfileImageCrop } from "@/components/layout/profile/profile-image-crop-dialog";
+import {
+	ProfileImageSizeHint,
+	useProfileImageCrop,
+} from "@/components/layout/profile/profile-image-crop-dialog";
+import { PROFILE_COVER_CLASS_NAME } from "@/lib/image-crop";
 import {
 	OutlineAt,
 	OutlineEdit,
@@ -99,7 +103,8 @@ export function RegisterStepProfile() {
 			<div className="relative">
 				<div
 					className={cn(
-						"relative h-36 w-full overflow-hidden rounded-3xl border bg-surface-3",
+						"relative w-full overflow-hidden rounded-3xl border bg-surface-3",
+						PROFILE_COVER_CLASS_NAME,
 						errors.cover &&
 							"border-destructive ring-3 ring-destructive/20 dark:ring-destructive/40",
 					)}
@@ -248,6 +253,9 @@ export function RegisterStepProfile() {
 				) : null}
 			</div>
 
+			<p className="flex flex-wrap gap-x-3 text-xs leading-5 text-muted-foreground">
+				<ProfileImageSizeHint />
+			</p>
 			<div className="space-y-4">
 				<FormField
 					control={control}

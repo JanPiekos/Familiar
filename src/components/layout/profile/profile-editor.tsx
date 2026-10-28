@@ -2,7 +2,11 @@ import { Typography } from "@heroui/react";
 import { type RefObject, useId, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useProfileImageCrop } from "./profile-image-crop-dialog";
+import {
+	ProfileImageSizeHint,
+	useProfileImageCrop,
+} from "./profile-image-crop-dialog";
+import { PROFILE_COVER_CLASS_NAME } from "@/lib/image-crop";
 import {
 	OutlineAt,
 	OutlineEdit,
@@ -90,7 +94,10 @@ export function ProfileEditor({
 		<div className="flex flex-col gap-6">
 			{cropDialog}
 			<div className="relative w-full overflow-hidden">
-				<div className="relative h-40 w-full overflow-hidden rounded-3xl bg-surface-3 shadow-none! sm:h-44 lg:h-48">
+				<div className={cn(
+					"relative w-full overflow-hidden rounded-3xl bg-surface-3 shadow-none!",
+					PROFILE_COVER_CLASS_NAME,
+				)}>
 					{watchedCover ? (
 						<img src={watchedCover} alt="" className="size-full object-cover" />
 					) : (
@@ -187,6 +194,9 @@ export function ProfileEditor({
 				</div>
 			</div>
 
+			<p className="flex flex-wrap gap-x-3 text-xs leading-5 text-muted-foreground">
+				<ProfileImageSizeHint />
+			</p>
 			<div className="flex flex-col gap-4">
 				<FormField
 					control={control}

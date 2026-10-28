@@ -64,6 +64,8 @@ const en = {
 		close: "Close image editor",
 		avatar_title: "Crop profile picture",
 		cover_title: "Crop cover image",
+		cover_size_hint: "Recommended cover: {{width}} × {{height}} px.",
+		avatar_size_hint: "Recommended avatar: {{size}} × {{size}} px.",
 		description: "Choose what appears on your profile.",
 		position: "Position image",
 		position_help:

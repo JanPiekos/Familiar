@@ -15,6 +15,7 @@ import en from "@/i18n/en";
 import pl from "@/i18n/pl";
 import {
 	COVER_GUIDES,
+	COVER_IMAGE_ASPECT,
 	coverGuideBounds,
 	cropProfileImage,
 	isAnimatedImage,
@@ -146,6 +147,8 @@ function ProfileHarness() {
 describe("profile image cropping", () => {
 	it("keeps registration's File contract and retains its text draft", async () => {
 		const view = await show(<RegistrationHarness />);
+		expect(screen.getByText("Recommended cover: 1600 × 360 px.")).toBeTruthy();
+		expect(screen.getByText("Recommended avatar: 512 × 512 px.")).toBeTruthy();
 		fireEvent.change(
 			view.container.querySelector('input[type="file"][id$="-avatar"]')!,
 			{ target: { files: [file()] } },
@@ -247,6 +250,8 @@ describe("profile image cropping", () => {
 			"pl",
 		);
 		const mobile = await screen.findByRole("button", { name: "Telefon" });
+		expect(screen.getByText("Zalecane tło: 1600 × 360 px.")).toBeTruthy();
+		expect(state.props.aspect).toBe(COVER_IMAGE_ASPECT);
 		expect(mobile.getAttribute("aria-pressed")).toBe("true");
 		const slider = screen.getByRole("slider", { name: "Zbliżenie" });
 		fireEvent.keyDown(slider, { key: "ArrowRight" });
@@ -340,13 +345,13 @@ describe("profile image cropping", () => {
 	it("exports the selected rotated region as a size-limited PNG without filling transparent pixels", async () => {
 		const result = await cropProfileImage(
 			"blob:test",
-			{ x: 100, y: 200, width: 1800, height: 600 },
+			{ x: 100, y: 200, width: 2000, height: 450 },
 			180,
 			"cover",
 			"picture.jpg",
 		);
 		const canvas = toBlob.mock.instances[0] as HTMLCanvasElement;
-		expect([canvas.width, canvas.height]).toEqual([1500, 500]);
+		expect([canvas.width, canvas.height]).toEqual([1600, 360]);
 		expect(result.file.name).toBe("picture-cropped.png");
 		expect(result.file.type).toBe("image/png");
 		expect(result.dataUrl).toMatch(/^data:image\/png/);
@@ -362,13 +367,14 @@ describe("profile image cropping", () => {
 	});
 
 	it("places screen guides at the centered object-cover bounds used by the profile cover", () => {
-		const desktop = coverGuideBounds(COVER_GUIDES[0].aspect);
-		const mobile = coverGuideBounds(COVER_GUIDES[2].aspect);
-		expect(desktop.width).toBe(1);
-		expect(desktop.height).toBeCloseTo(0.675);
-		expect(mobile.height).toBe(1);
-		expect(mobile.width).toBeCloseTo(0.6770833);
-		expect(mobile.left * 2 + mobile.width).toBeCloseTo(1);
+		for (const guide of COVER_GUIDES) {
+			const bounds = coverGuideBounds(guide.aspect);
+			expect(bounds.top).toBe(0);
+			expect(bounds.height).toBe(1);
+			expect(bounds.left * 2 + bounds.width).toBeCloseTo(1);
+			expect(bounds.width * COVER_IMAGE_ASPECT).toBeCloseTo(guide.aspect);
+		}
+		expect(coverGuideBounds(COVER_GUIDES[0].aspect).width).toBe(1);
 	});
 
 	it("detects animated WebP and APNG headers as well as GIFs", async () => {

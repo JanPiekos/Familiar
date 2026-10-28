@@ -2,16 +2,24 @@ export type ProfileImageKind = "avatar" | "cover";
 export type CropArea = { x: number; y: number; width: number; height: number };
 export type CroppedProfileImage = { file: File; dataUrl: string };
 
-// Representative viewports for ProfileCover's h-48 / md:h-72 layout.
+export const COVER_IMAGE_SIZE = { width: 1600, height: 360 } as const;
+export const COVER_IMAGE_ASPECT =
+	COVER_IMAGE_SIZE.width / COVER_IMAGE_SIZE.height;
+export const AVATAR_IMAGE_SIZE = 512;
+// Match these responsive ratios in every cover and its loading placeholder.
+export const PROFILE_COVER_CLASS_NAME =
+	"aspect-[65/32] md:aspect-[8/3] lg:aspect-[40/9]";
+
+// Smaller screens crop the sides of the desktop image, retaining its full height.
 export const COVER_GUIDES = [
-	{ id: "desktop", aspect: 1280 / 288, color: "#c4b5fd" },
+	{ id: "desktop", aspect: COVER_IMAGE_ASPECT, color: "#c4b5fd" },
 	{ id: "tablet", aspect: 768 / 288, color: "#fbbf24" },
 	{ id: "mobile", aspect: 390 / 192, color: "#5eead4" },
 ] as const;
 
 export function coverGuideBounds(aspect: number) {
-	const width = Math.min(1, aspect / 3);
-	const height = Math.min(1, 3 / aspect);
+	const width = Math.min(1, aspect / COVER_IMAGE_ASPECT);
+	const height = Math.min(1, COVER_IMAGE_ASPECT / aspect);
 	return { left: (1 - width) / 2, top: (1 - height) / 2, width, height };
 }
 
@@ -63,7 +71,10 @@ export async function cropProfileImage(
 	const ratio = area.width / area.height;
 	const outputWidth = Math.max(
 		1,
-		Math.min(kind === "avatar" ? 512 : 1500, Math.round(area.width)),
+		Math.min(
+			kind === "avatar" ? AVATAR_IMAGE_SIZE : COVER_IMAGE_SIZE.width,
+			Math.round(area.width),
+		),
 	);
 	const canvas = document.createElement("canvas");
 	canvas.width = outputWidth;
