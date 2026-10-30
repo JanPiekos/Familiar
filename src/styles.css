@@ -176,7 +176,7 @@ code {
 
   .dark {
     --background: var(--color-familiar-800);
-    --foreground: var(--color-familiar-300);
+    --foreground: var(--color-familiar-50);
 
     --card: var(--color-familiar-800);
     --card-foreground: var(--color-familiar-50);
@@ -262,7 +262,7 @@ code {
 
   .oled {
     --background: #000000;
-    --foreground: var(--color-familiar-500);
+    --foreground: var(--color-familiar-50);
 
     --card: #000000;
     --card-foreground: var(--color-familiar-50);

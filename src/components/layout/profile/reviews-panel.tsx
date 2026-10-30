@@ -166,21 +166,21 @@ export function ReviewsPanel({
 
 	const { average, count: totalReviews } = useMemo(
 		() => calculateReviewStats(reviews),
-		[reviews],
+		[reviews, t],
 	);
 
 	const ratingDistribution = useMemo(() => {
 		if (!reviews.length) return [];
 
 		return getRatingDistribution(reviews, totalReviews);
-	}, [reviews, totalReviews]);
+	}, [reviews, totalReviews, t]);
 
 	const totalPages = Math.ceil(totalReviews / itemsPerPage);
 
 	const paginatedReviews = useMemo(() => {
 		const start = (currentPage - 1) * itemsPerPage;
 		return reviews.slice(start, start + itemsPerPage);
-	}, [reviews, currentPage, itemsPerPage]);
+	}, [reviews, currentPage, itemsPerPage, t]);
 
 	if (isLoading) {
 		return (

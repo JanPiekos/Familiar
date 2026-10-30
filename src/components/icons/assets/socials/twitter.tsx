@@ -26,7 +26,11 @@ export const OutlineTwitter: React.FC<IconProps> = ({
 	</svg>
 );
 
-export const SolidTwitter: React.FC<IconProps> = ({ className, size = 24 }) => (
+export const SolidTwitter: React.FC<IconProps> = ({
+	className,
+	size = 24,
+	style,
+}) => (
 	<svg
 		width={size}
 		height={size}

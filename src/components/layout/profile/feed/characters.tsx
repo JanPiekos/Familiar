@@ -6,19 +6,24 @@ import {
 import { EmptyPage } from "@/components/layout/empty-page";
 import { Card } from "@/components/ui/card";
 import type { Character } from "@/types/character";
+import { useTranslation } from "react-i18next";
 
 interface ProfileCharactersProps {
 	characters: Character[];
 }
 
 export function ProfileCharacters({ characters }: ProfileCharactersProps) {
+	const { t } = useTranslation();
 	if (characters.length === 0) {
 		return (
 			<div className="flex h-full flex-1 flex-col items-center justify-center">
 				<EmptyPage
 					icon={OutlineFaceSmilling}
-					title="No characters found"
-					description="This user hasn't added any characters yet."
+					title={t("ui.no_characters_found", "No characters found")}
+					description={t(
+						"ui.this_user_hasn_t_added_any_characters_yet",
+						"This user hasn't added any characters yet.",
+					)}
 				/>
 			</div>
 		);

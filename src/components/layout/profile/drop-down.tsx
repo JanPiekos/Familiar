@@ -7,6 +7,7 @@ import {
 	OutlineUser,
 } from "@/components/icons/icons";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
 	Drawer,
 	DrawerContent,
@@ -28,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import type { TUserProfile, TUserResponse } from "@/types/user";
 import UserAvatar from "./avatar";
+import { useTranslation } from "react-i18next";
 
 // TODO: make dropdown as optional prop state
 export default function UserDropDown({
@@ -37,6 +39,7 @@ export default function UserDropDown({
 	user: TUserResponse;
 	showInfo?: boolean;
 }) {
+	const { t } = useTranslation();
 	const { logout } = useAuth();
 	const isTablet = useIsTablet();
 	// TODO: replace isDesktop to useIsTablet
@@ -69,22 +72,22 @@ export default function UserDropDown({
 
 	const MenuItems = [
 		{
-			label: "Profile",
+			label: t("ui.profile", "Profile"),
 			icon: <OutlineUser />,
 			to: localizePath(`/user/${user?.username || ""}`, locale),
 		},
 		{
-			label: "Requests",
+			label: t("ui.requests", "Requests"),
 			icon: <OutlineReceipt />,
 			to: localizePath("/my-requests", locale),
 		},
 		{
-			label: "Orders",
+			label: t("ui.orders", "Orders"),
 			icon: <OutlineSettings />,
 			to: localizePath("/orders", locale),
 		},
 		{
-			label: "Characters",
+			label: t("ui.characters", "Characters"),
 			icon: <OutlineSettings />,
 			to: localizePath(
 				`/user/${user?.username || ""}/characters`,
@@ -95,12 +98,12 @@ export default function UserDropDown({
 
 	const SecondaryMenuItems = [
 		{
-			label: "Settings",
+			label: t("ui.settings", "Settings"),
 			icon: <OutlineSettings />,
 			to: "/settings" as any,
 		},
 		{
-			label: "Help",
+			label: t("ui.help", "Help"),
 			icon: <OutlineSettings />,
 			to: "https://help.familiar.art" as any,
 			target: "_blank",
@@ -109,9 +112,15 @@ export default function UserDropDown({
 
 	const MenuItemsContent = (
 		<>
-			<div className="flex flex-col gap-1 p-1">
+			<div className="flex flex-col gap-1">
 				{MenuItems.map((item) => (
-					<Button key={item.label} variant="ghost" size={"xl"} asChild>
+					<Button
+						key={item.label}
+						variant="ghost"
+						size="xl"
+						className="w-full justify-start gap-3 rounded-xl px-4"
+						asChild
+					>
 						<Link to={item.to} preload={false} onClick={() => setOpen(false)}>
 							{item.icon}
 							<span>{item.label}</span>
@@ -119,10 +128,16 @@ export default function UserDropDown({
 					</Button>
 				))}
 			</div>
-			<DropdownMenuSeparator />
-			<div className="flex flex-col gap-1 p-1">
+			<Separator className="my-2" />
+			<div className="flex flex-col gap-1">
 				{SecondaryMenuItems.map((item) => (
-					<Button key={item.label} variant="ghost" size={"xl"} asChild>
+					<Button
+						key={item.label}
+						variant="ghost"
+						size="xl"
+						className="w-full justify-start gap-3 rounded-xl px-4"
+						asChild
+					>
 						<Link
 							to={item.to}
 							target={item.target}
@@ -135,18 +150,19 @@ export default function UserDropDown({
 					</Button>
 				))}
 			</div>
-			<DropdownMenuSeparator />
-			<div className="p-1">
+			<Separator className="my-2" />
+			<div>
 				<Button
-					variant={"destructive"}
-					className="w-full justify-start cursor-pointer h-9 px-2"
+					variant="ghost"
+					size="xl"
+					className="w-full justify-start gap-3 rounded-xl px-4 text-destructive hover:bg-destructive/10 hover:text-destructive"
 					onClick={() => {
 						logout();
 						setOpen(false);
 					}}
 				>
-					<OutlineLogout className="mr-2 size-4" />
-					<span>Logout</span>
+					<OutlineLogout className="size-5" />
+					<span>{t("ui.logout", "Logout")}</span>
 				</Button>
 			</div>
 		</>
@@ -190,7 +206,7 @@ export default function UserDropDown({
 					<DropdownMenuSeparator />
 					<DropdownMenuItem variant={"destructive"} onClick={() => logout()}>
 						<OutlineLogout />
-						Logout
+						{t("ui.logout", "Logout")}
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
@@ -200,11 +216,19 @@ export default function UserDropDown({
 	return (
 		<Drawer open={open} onOpenChange={setOpen}>
 			<DrawerTrigger asChild>{TriggerButton}</DrawerTrigger>
-			<DrawerContent>
-				<DrawerHeader className="text-left">
-					<DrawerTitle>User Menu</DrawerTitle>
+			<DrawerContent
+				className="max-h-[calc(100dvh-2rem)]! overflow-hidden"
+				aria-describedby={undefined}
+			>
+				<DrawerHeader className="px-4 pt-4 pb-3 text-left!">
+					<DrawerTitle>{t("ui.user_menu", "User Menu")}</DrawerTitle>
 				</DrawerHeader>
-				<div className="pb-4">{MenuItemsContent}</div>
+				<nav
+					aria-label={t("ui.user_menu", "User Menu")}
+					className="min-h-0 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+				>
+					{MenuItemsContent}
+				</nav>
 			</DrawerContent>
 		</Drawer>
 	);

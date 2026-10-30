@@ -18,10 +18,11 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { usePostConversationDirect } from "@/hooks/chat/use-chat";
 import { useAvailableFeeds } from "@/hooks/feed/use-available-feeds";
 import { useIsTablet } from "@/hooks/ui/use-mobile";
+import { useShareProfile } from "@/hooks/user/use-share-profile";
 import { createStaticList } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import type { TUserProfile } from "@/types/user";
@@ -61,40 +62,76 @@ const FollowButton = ({
 	);
 };
 
-export function UserInfoSkeleton() {
+export function UserInfoSkeleton({
+	isMe = false,
+	hasQueue = false,
+	hasBio = true,
+	linkCount = 2,
+}: {
+	isMe?: boolean;
+	hasQueue?: boolean;
+	hasBio?: boolean;
+	linkCount?: number;
+}) {
 	return (
-		<aside className="-mt-12 h-fit flex flex-col gap-3 max-lg:px-4 lg:sticky lg:top-20 lg:-mt-16 lg:pb-10 lg:pl-4">
+		<aside
+			aria-hidden="true"
+			className="-mt-12 h-fit flex flex-col gap-3 max-lg:px-4 lg:sticky lg:top-20 lg:-mt-16 lg:pb-10 lg:pl-4"
+		>
 			<div className="relative z-10 flex">
-				<Skeleton className="size-32 rounded-full ring-6 ring-background" />
+				<Skeleton className="size-24 rounded-full ring-6 ring-background md:size-32" />
 			</div>
-
 			<div className="flex flex-col gap-4">
-				<div className="flex flex-col gap-1">
-					<Skeleton className="h-6 w-36" />
-					<Skeleton className="h-5 w-24" />
+				<div>
+					<Typography.Heading
+						level={3}
+						className="inline-flex w-full items-center gap-2 font-semibold text-foreground!"
+					>
+						<SkeletonText className="w-36" />
+					</Typography.Heading>
+					<Typography.Paragraph size="base" className="text-muted-foreground!">
+						<SkeletonText className="w-24" />
+					</Typography.Paragraph>
 				</div>
-
-				<div className="flex items-center gap-2">
-					<Skeleton className="h-9 flex-1 rounded-full" />
-					<Skeleton className="h-9 flex-1 rounded-full" />
+				<div className="flex flex-col gap-2">
+					<div className="flex gap-2">
+						<Skeleton className="h-11 flex-1 rounded-full lg:h-10" />
+						{isMe && <Skeleton className="h-11 flex-1 rounded-full lg:h-10" />}
+						{!isMe && <Skeleton className="h-11 flex-1 rounded-full lg:h-10" />}
+					</div>
+					{hasQueue && (
+						<Skeleton className="h-11 w-full rounded-full lg:h-10" />
+					)}
 				</div>
-
-				<div className="flex items-center gap-3 pt-1">
+				<div className="flex h-4 items-center gap-2">
 					<Skeleton className="h-3 w-20" />
 					<Skeleton className="h-3 w-20" />
 				</div>
-
-				<div className="flex flex-col gap-2 pt-1">
-					<Skeleton className="h-4 w-full" />
-					<Skeleton className="h-4 w-4/5" />
+				{hasBio && (
+					<div className="text-sm whitespace-pre-wrap prose-p:m-0 prose prose-sm dark:prose-invert max-w-none">
+						<p>
+							<SkeletonText className="w-full" />
+							<SkeletonText className="w-4/5" />
+						</p>
+					</div>
+				)}
+				<div className="link h-auto w-fit self-start text-left text-xs">
+					<SkeletonText className="w-20" />
 				</div>
-
-				<Skeleton className="h-4 w-20" />
+				{linkCount > 0 && (
+					<div className="flex flex-wrap gap-1.5">
+						{Array.from({ length: linkCount }, (_, index) => (
+							<Skeleton
+								key={`profile-link-${index}`}
+								className="h-8 w-24 rounded-full"
+							/>
+						))}
+					</div>
+				)}
 			</div>
 		</aside>
 	);
 }
-
 export function CommissionsContentSkeleton() {
 	return (
 		<div className="flex flex-col gap-4">
@@ -146,31 +183,82 @@ export function CharactersContentSkeleton() {
 	);
 }
 
-export function TabContentSkeleton({ tab = "portfolio" }: { tab?: string }) {
-	if (tab === "portfolio") return <PortfolioContentSkeleton />;
+export function TabContentSkeleton({
+	tab = "portfolio",
+	folder = false,
+	isOwner = false,
+}: {
+	tab?: string;
+	folder?: boolean;
+	isOwner?: boolean;
+}) {
+	if (tab === "portfolio")
+		return (
+			<PortfolioContentSkeleton
+				variant={folder ? "folder" : "portfolio"}
+				isOwner={isOwner}
+			/>
+		);
 	if (tab === "characters") return <CharactersContentSkeleton />;
 	return <CommissionsContentSkeleton />;
 }
 
-export function UserFeedsSkeleton() {
+export function UserFeedsSkeleton({
+	tab = "portfolio",
+	folder = false,
+	isOwner = false,
+}: {
+	tab?: string;
+	folder?: boolean;
+	isOwner?: boolean;
+} = {}) {
 	return (
-		<div className="mt-2 flex min-h-0 lg:mt-6 w-full flex-1 flex-col pb-12 lg:pb-24">
-			<PortfolioContentSkeleton />
+		<div className="mt-2 flex min-h-0 lg:mt-6 w-full flex-1 flex-col pb-4 lg:pb-6">
+			<TabContentSkeleton tab={tab} folder={folder} isOwner={isOwner} />
 		</div>
 	);
 }
 
-export function UserProfileSkeleton() {
+export function UserProfileSkeleton({ user }: { user?: TUserProfile } = {}) {
+	const { user: viewer } = useAuth();
+	const { username, tab, folderSlug } = useParams({ strict: false }) as {
+		username?: string;
+		tab?: string;
+		folderSlug?: string;
+	};
+	const isMe = Boolean(
+		viewer &&
+			viewer.username.toLowerCase() ===
+				(user?.username ?? username)?.toLowerCase(),
+	);
+	const knownUser = user ?? (isMe ? viewer : undefined);
+	const hasQueue = Boolean(
+		knownUser?.isVerified && knownUser.roles?.includes(TRoles.Artist),
+	);
 	return (
-		<div className="flex flex-1 flex-col">
-			<ProfileCoverSkeleton />
+		<div aria-hidden="true" className="flex flex-1 flex-col">
+			<div className="relative">
+				<ProfileCoverSkeleton />
+				{!isMe && (
+					<Skeleton className="absolute top-2 right-2 size-10 rounded-full" />
+				)}
+			</div>
 			<div className="flex min-h-0 flex-1 flex-col">
 				<div className="flex flex-1 flex-col gap-4 lg:flex-row lg:gap-8">
 					<div className="shrink-0 lg:w-72">
-						<UserInfoSkeleton />
+						<UserInfoSkeleton
+							isMe={isMe}
+							hasQueue={hasQueue}
+							hasBio={user ? Boolean(user.bio?.trim()) : true}
+							linkCount={user?.socials.length ?? 2}
+						/>
 					</div>
 					<div className="flex min-h-0 min-w-0 flex-1 flex-col pt-0">
-						<UserFeedsSkeleton />
+						<UserFeedsSkeleton
+							tab={tab}
+							folder={Boolean(folderSlug)}
+							isOwner={isMe}
+						/>
 					</div>
 				</div>
 			</div>
@@ -180,6 +268,12 @@ export function UserProfileSkeleton() {
 
 function UserProfileMoreMenu({ user }: { user: TUserProfile }) {
 	const { t } = useTranslation();
+	const { locale } = useParams({ strict: false }) as { locale?: string };
+	const { shareProfile, isSharing } = useShareProfile({
+		username: user.username,
+		displayName: user.displayName,
+		locale,
+	});
 
 	const handleReportUser = () => {
 		// TODO: open the report flow when the reporting API is available
@@ -189,13 +283,6 @@ function UserProfileMoreMenu({ user }: { user: TUserProfile }) {
 	const handleBlockUser = () => {
 		// TODO: block the user when the blocking API is available
 		toast.info(`Block user: @${user.username}`);
-	};
-
-	const handleShareProfile = () => {
-		// TODO: share the profile when the sharing API is available
-		//copy to clipboard
-		navigator.clipboard.writeText(`https://familiar.com/user/${user.username}`);
-		toast.success(`Successfully copied profile link`);
 	};
 
 	return (
@@ -213,16 +300,29 @@ function UserProfileMoreMenu({ user }: { user: TUserProfile }) {
 			</DropdownMenuTrigger>
 
 			<DropdownMenuContent align="end" className="w-48">
-				<DropdownMenuItem onClick={handleShareProfile}>
+				<DropdownMenuItem
+					disabled={isSharing}
+					onSelect={() => {
+						void shareProfile();
+					}}
+				>
 					<Share />
 					{t("components.profile.actions.share_profile", "Share Profile")}
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem onClick={handleReportUser} variant="destructive">
+				<DropdownMenuItem
+					disabled
+					onClick={handleReportUser}
+					variant="destructive"
+				>
 					<Flag />
 					{t("components.profile.actions.report_user", "Report")}
 				</DropdownMenuItem>
-				<DropdownMenuItem variant="destructive" onClick={handleBlockUser}>
+				<DropdownMenuItem
+					disabled
+					variant="destructive"
+					onClick={handleBlockUser}
+				>
 					<UserLock />
 					{t("components.profile.actions.block_user", "Block user")}
 				</DropdownMenuItem>
@@ -245,7 +345,7 @@ export default function UserProfile({
 	const { user: me, isPending } = useAuth();
 	const isMe = me?.username === user.username;
 
-	if (isPending) return <UserProfileSkeleton />;
+	if (isPending) return <UserProfileSkeleton user={user} />;
 
 	return (
 		<div className="flex flex-1 flex-col">
@@ -293,6 +393,11 @@ export function UserProfileSidebar({
 	const actionButtonSize = isTablet ? "2xl" : "xl";
 
 	const { locale } = useParams({ strict: false }) as { locale?: string };
+	const { shareProfile, isSharing } = useShareProfile({
+		username: user.username,
+		displayName: user.displayName,
+		locale,
+	});
 
 	const handleOpenSettings = () => {
 		void navigate({
@@ -383,7 +488,7 @@ export function UserProfileSidebar({
 								<FollowButton
 									isFollowing={false}
 									loading={false}
-									canFollow
+									canFollow={false}
 									onToggle={() => { }}
 									showText
 								/>
@@ -457,7 +562,7 @@ export function UserProfileSidebar({
 					<div>
 						<Typography.Heading
 							level={3}
-							className="inline-flex w-full items-center gap-2 font-semibold"
+							className="inline-flex w-full items-center gap-2 font-semibold text-foreground!"
 						>
 							<span className="truncate">{user.displayName}</span>
 
@@ -475,23 +580,40 @@ export function UserProfileSidebar({
 					{/* Desktop actions */}
 					<div className="flex flex-col gap-2">
 						{isMe ? (
-							<div className="flex gap-2">
+							<div className="flex flex-wrap gap-2">
 								<Button
 									type="button"
-									className="flex-1"
+									className="min-w-0 flex-1 px-2.5 text-sm"
 									variant={"outline"}
 									size={actionButtonSize}
 									onClick={handleOpenSettings}
 								>
 									{t("components.profile.actions.edit_profile", "Edit profile")}
 								</Button>
+								<Button
+									type="button"
+									variant="outline"
+									size={actionButtonSize}
+									className="min-w-0 flex-1 px-2.5 text-sm"
+									aria-busy={isSharing}
+									disabled={isSharing}
+									onClick={() => {
+										void shareProfile();
+									}}
+								>
+									{t(
+										"components.profile.actions.share_profile",
+										"Share Profile",
+									)}
+								</Button>
 
 								{user.roles.includes(TRoles.Artist) && user.isVerified && (
 									<Button
+										disabled
 										type="button"
 										variant="secondary"
 										size={actionButtonSize}
-										className="flex-1"
+										className="w-full"
 									>
 										{t("components.profile.actions.queue", "Queue")}
 										{/* <OutlineListBoxes /> */}
@@ -504,7 +626,7 @@ export function UserProfileSidebar({
 									<FollowButton
 										isFollowing={false}
 										loading={false}
-										canFollow
+										canFollow={false}
 										onToggle={handleFollow}
 										showText
 										size={actionButtonSize}
@@ -526,6 +648,7 @@ export function UserProfileSidebar({
 
 								{user.roles.includes(TRoles.Artist) && user.isVerified && (
 									<Button
+										disabled
 										type="button"
 										variant="secondary"
 										size={actionButtonSize}
@@ -648,7 +771,7 @@ function UserFeeds({
 				</ScrollShadow>
 			</div> */}
 
-			<div className="mt-2 flex min-h-0 lg:mt-6 flex-1 flex-col pb-12 lg:pb-24">
+			<div className="mt-2 flex min-h-0 lg:mt-6 flex-1 flex-col pb-4 lg:pb-6">
 				{children}
 			</div>
 		</div>
