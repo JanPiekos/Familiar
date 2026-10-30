@@ -10,6 +10,7 @@ import type * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { OutlineChevronDown } from "../icons/icons";
+import { useTranslation } from "react-i18next";
 
 function MessageScrollerProvider(
 	props: React.ComponentProps<typeof MessageScrollerPrimitive.Provider>,
@@ -90,6 +91,7 @@ function MessageScrollerButton({
 	...props
 }: React.ComponentProps<typeof MessageScrollerPrimitive.Button> &
 	Pick<React.ComponentProps<typeof Button>, "variant" | "size">) {
+	const { t } = useTranslation();
 	return (
 		<MessageScrollerPrimitive.Button
 			data-slot="message-scroller-button"
@@ -108,7 +110,9 @@ function MessageScrollerButton({
 				<>
 					<OutlineChevronDown />
 					<span className="sr-only">
-						{direction === "end" ? "Scroll to end" : "Scroll to start"}
+						{direction === "end"
+							? t("ui.scroll_to_end", "Scroll to end")
+							: t("ui.scroll_to_start", "Scroll to start")}
 					</span>
 				</>
 			)}
