@@ -316,6 +316,45 @@ const en = {
 			connect: "Connect",
 		},
 	},
+	accessibility: {
+		reading: "Reading",
+		save_hint:
+			"Changes apply when you save and are remembered in this browser.",
+		font: "Interface font",
+		font_help:
+			"Choose the font you find easiest to read. OpenDyslexic is an optional reading preference.",
+		font_default: "Familiar default",
+		font_dyslexic: "OpenDyslexic",
+		font_system: "System font",
+		text_size: "Text size",
+		preview_title: "Make yourself comfortable",
+		preview_text:
+			"Discover artists, explore their portfolios, and enjoy the details at your own pace.",
+		vision: "Display and interaction",
+		color_vision: "Color-vision palette",
+		color_help:
+			"Adjust interface accents for red–green or blue–yellow color differences. Artwork keeps its original colors; labels and icons provide additional cues.",
+		color_default: "Standard colors",
+		"color_red-green": "Red–green support (blue / orange)",
+		"color_blue-yellow": "Blue–yellow support (rose / teal)",
+		sample_complete: "Complete",
+		sample_attention: "Needs attention",
+		reduceMotion: "Reduce motion",
+		reduceMotion_help:
+			"Reduce animations and transitions. Your device’s reduced-motion preference is always respected.",
+		highContrast: "Higher contrast",
+		highContrast_help:
+			"Make text, borders, and keyboard focus easier to distinguish.",
+		underlineLinks: "Underline links",
+		underlineLinks_help: "Identify links with an underline as well as color.",
+		spaciousText: "Roomier reading",
+		spaciousText_help:
+			"Increase line, letter, and word spacing in paragraphs and text fields.",
+		reset: "Restore defaults",
+		saved: "Accessibility preferences saved.",
+		session_only:
+			"Preferences applied for this session. Browser storage is unavailable.",
+	},
 	seo: {
 		error_preview: {
 			title: "Error page preview",

@@ -21,6 +21,7 @@ import { useIsTablet } from "@/hooks/ui/use-mobile";
 import TanStackQueryDevtools from "@/integrations/tanstack-query/devtools";
 import i18n, { isSupportedLocale, setSSRLanguage } from "@/lib/i18n";
 import { getRouteSeo } from "@/lib/route-seo";
+import { AccessibilityEffects } from "@/providers/accessibility";
 import { AbilityProvider } from "@/providers/ability";
 import { AuthProvider } from "@/providers/auth";
 import { CurrencyProvider } from "@/providers/currency";
@@ -125,6 +126,7 @@ function RootDocument({ children }: { children: ReactNode }) {
 				)}
 			</head>
 			<body>
+				<AccessibilityEffects />
 				<ThemeProvider>{children}</ThemeProvider>
 				<Analytics />
 				<Scripts />

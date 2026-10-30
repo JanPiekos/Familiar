@@ -1,3 +1,5 @@
+import type en from "./en";
+
 const pl = {
 	error_preview: {
 		title: "Podgląd stron błędów",
@@ -321,6 +323,45 @@ const pl = {
 			disconnect: "Odłącz",
 			connect: "Połącz",
 		},
+	},
+	accessibility: {
+		reading: "Czytanie",
+		save_hint:
+			"Zmiany zostaną zastosowane po zapisaniu i zapamiętane w tej przeglądarce.",
+		font: "Krój pisma interfejsu",
+		font_help:
+			"Wybierz krój, który czyta Ci się najwygodniej. OpenDyslexic jest opcjonalną preferencją czytania.",
+		font_default: "Domyślny Familiar",
+		font_dyslexic: "OpenDyslexic",
+		font_system: "Krój systemowy",
+		text_size: "Rozmiar tekstu",
+		preview_title: "Poczuj się wygodnie",
+		preview_text:
+			"Odkrywaj artystów, przeglądaj ich portfolio i ciesz się szczegółami we własnym tempie.",
+		vision: "Wyświetlanie i obsługa",
+		color_vision: "Paleta widzenia barw",
+		color_help:
+			"Dostosuj kolory interfejsu do trudności z rozróżnianiem czerwieni i zieleni lub błękitu i żółci. Prace zachowują oryginalne kolory; etykiety i ikony dostarczają dodatkowych wskazówek.",
+		color_default: "Standardowe kolory",
+		"color_red-green": "Czerwień–zieleń (błękit / pomarańcz)",
+		"color_blue-yellow": "Błękit–żółć (róż / turkus)",
+		sample_complete: "Ukończono",
+		sample_attention: "Wymaga uwagi",
+		reduceMotion: "Ogranicz ruch",
+		reduceMotion_help:
+			"Ogranicz animacje i przejścia. Preferencja ograniczenia ruchu z ustawień urządzenia jest zawsze uwzględniana.",
+		highContrast: "Wyższy kontrast",
+		highContrast_help:
+			"Ułatw rozróżnianie tekstu, obramowań i fokusu klawiatury.",
+		underlineLinks: "Podkreślaj linki",
+		underlineLinks_help: "Rozpoznawaj linki dzięki podkreśleniu oraz kolorowi.",
+		spaciousText: "Więcej przestrzeni w tekście",
+		spaciousText_help:
+			"Zwiększ odstępy między wierszami, literami i słowami w akapitach i polach tekstowych.",
+		reset: "Przywróć domyślne",
+		saved: "Zapisano preferencje dostępności.",
+		session_only:
+			"Preferencje zastosowano na tę sesję. Pamięć przeglądarki jest niedostępna.",
 	},
 	seo: {
 		error_preview: {
@@ -2422,6 +2463,6 @@ const pl = {
 		review_tab: "Opinia",
 		no_categories_found: "Nie znaleziono kategorii.",
 	},
-};
+} satisfies typeof en;
 
 export default pl;

@@ -12,6 +12,7 @@ import {
 	type Option,
 } from "@/components/layout/commision/form-blocks";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 let clientTodaySnapshot: Date | undefined;
 
@@ -87,6 +88,7 @@ function getStaticOptions(field: FormFieldDto): Option[] {
 }
 
 function GenericFieldHeader({ field }: { field: FormFieldDto }) {
+	const { t } = useTranslation();
 	if (isStaticFieldType(field.type)) {
 		return null;
 	}
@@ -97,7 +99,7 @@ function GenericFieldHeader({ field }: { field: FormFieldDto }) {
 				<span className="flex-1 w-full">{getFieldLabel(field)}</span>
 				{field.required && (
 					<span className="w-fit text-destructive text-sm font-normal">
-						Required *
+						{t("ui.required", "Required *")}
 					</span>
 				)}
 			</FieldLabel>
@@ -116,6 +118,7 @@ function PreviewField({
 	field: FormFieldDto;
 	minDate?: Date;
 }) {
+	const { t } = useTranslation();
 	const options = getStaticOptions(field);
 
 	return (
@@ -129,7 +132,7 @@ function PreviewField({
 					label={getFieldLabel(field)}
 					description={field.description}
 					required={field.required}
-					placeholder="Your answer"
+					placeholder={t("ui.your_answer", "Your answer")}
 				/>
 			)}
 
@@ -138,7 +141,7 @@ function PreviewField({
 					label={getFieldLabel(field)}
 					description={field.description}
 					required={field.required}
-					placeholder="Your answer"
+					placeholder={t("ui.your_answer", "Your answer")}
 				/>
 			)}
 

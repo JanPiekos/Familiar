@@ -15,6 +15,7 @@ import { Elevated } from "@/lib/elevated";
 import { cn } from "@/lib/utils";
 import { formatMessageTime, getMessageDateLabel } from "./helpers";
 import { MessageAttachmentBubble } from "./message-attachments";
+import { useTranslation } from "react-i18next";
 
 type MessageListProps = {
 	messages: TChatMessage[];
@@ -22,13 +23,14 @@ type MessageListProps = {
 };
 
 export function MessageList({ messages, unreadCount = 0 }: MessageListProps) {
+	const { t } = useTranslation();
 	const orderedMessages = useMemo(() => {
 		return [...messages].reverse();
-	}, [messages]);
+	}, [messages, t]);
 
 	const timelineItems = useMemo(() => {
 		return createTimelineItems(orderedMessages, unreadCount);
-	}, [orderedMessages, unreadCount]);
+	}, [orderedMessages, unreadCount, t]);
 
 	return (
 		<MessageScrollerProvider autoScroll>
@@ -48,7 +50,9 @@ export function MessageList({ messages, unreadCount = 0 }: MessageListProps) {
 								return (
 									<MessageScrollerItem key={item.id} messageId={item.id}>
 										<Marker variant="separator" className="my-4 text-primary">
-											<MarkerContent>New messages</MarkerContent>
+											<MarkerContent>
+												{t("ui.new_messages", "New messages")}
+											</MarkerContent>
 										</Marker>
 									</MessageScrollerItem>
 								);

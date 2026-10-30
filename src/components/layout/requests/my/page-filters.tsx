@@ -14,13 +14,15 @@ import {
 } from "@/components/layout/requests/my/helpers";
 import { TCommissionRequestStatus } from "@/types/commissions";
 import { TPaymentStatus } from "@/types/payment";
+import { useTranslation } from "react-i18next";
 
 export function useMyRequestFilterGroups() {
+	const { t } = useTranslation();
 	return useMemo<FilterGroup<RequestItem>[]>(
 		() => [
 			{
 				id: "status",
-				label: "Status",
+				label: t("ui.status", "Status"),
 				type: "select",
 				icon: ListFilterIcon,
 				getItemValue: (request) => request.status,
@@ -53,56 +55,59 @@ export function useMyRequestFilterGroups() {
 			},
 			{
 				id: "payment",
-				label: "Payment",
+				label: t("ui.payment", "Payment"),
 				type: "select",
 				icon: CreditCard,
 				getItemValue: (request) => getPaymentFilterValue(request),
 				options: [
 					{
 						id: TPaymentStatus.Pending,
-						label: "Pending",
+						label: t("ui.pending", "Pending"),
 						icon: OutlineClock03,
 					},
 					{
 						id: TPaymentStatus.Completed,
-						label: "Paid",
+						label: t("ui.paid", "Paid"),
 						icon: OutlineCheck,
 					},
 					{
 						id: TPaymentStatus.Failed,
-						label: "Failed",
+						label: t("ui.failed", "Failed"),
 						icon: OutlineClose,
 					},
 					{
 						id: TPaymentStatus.Refunded,
-						label: "Refunded",
+						label: t("ui.refunded", "Refunded"),
 						icon: OutlineClose,
 					},
 				],
 			},
 			{
 				id: "timeline",
-				label: "Timeline",
+				label: t("ui.timeline", "Timeline"),
 				type: "select",
 				icon: Flag,
 				getItemValue: (request) => getRequestTimelineFilterValue(request),
 				options: [
-					{ id: "awaiting_review", label: "Awaiting review" },
-					{ id: "accepted", label: "Accepted" },
-					{ id: "in_progress", label: "In progress" },
-					{ id: "delivered", label: "Delivered" },
-					{ id: "completed", label: "Completed" },
-					{ id: "cancelled", label: "Cancelled" },
+					{
+						id: "awaiting_review",
+						label: t("ui.awaiting_review", "Awaiting review"),
+					},
+					{ id: "accepted", label: t("ui.accepted", "Accepted") },
+					{ id: "in_progress", label: t("ui.in_progress", "In progress") },
+					{ id: "delivered", label: t("ui.delivered", "Delivered") },
+					{ id: "completed", label: t("ui.completed", "Completed") },
+					{ id: "cancelled", label: t("ui.cancelled", "Cancelled") },
 				],
 			},
 			{
 				id: "submittedDate",
-				label: "Submitted date",
+				label: t("ui.submitted_date", "Submitted date"),
 				type: "date",
 				icon: CalendarIcon,
 				getItemValue: (request) => new Date(request.createdAt),
 			},
 		],
-		[],
+		[t],
 	);
 }

@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+	type ReactNode,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 
 import type {
@@ -16,6 +23,8 @@ import { cn } from "@/lib/utils";
 import { PortfolioFeedItem } from "../../feed/item";
 
 interface ProfileFeedProps {
+	emptyActions?: ReactNode;
+	emptyDescription?: string;
 	posts: PortfolioPostResponse[];
 	className?: string;
 	onPostClick?: (post: PortfolioPostResponse) => void;
@@ -69,6 +78,8 @@ function createPostById(posts: PortfolioPostResponse[]) {
 }
 
 export function ProfileFeed({
+	emptyActions,
+	emptyDescription,
 	posts,
 	className,
 	onPostClick,
@@ -84,7 +95,7 @@ export function ProfileFeed({
 	const [width, setWidth] = useState(0);
 	const [animateGate, setAnimateGate] = useState(false);
 
-	const postById = useMemo(() => createPostById(posts), [posts]);
+	const postById = useMemo(() => createPostById(posts), [posts, t]);
 	const { buckets, isMeasuring } = usePortfolioImageBuckets(posts);
 
 	const tiles = useMemo<Tile[]>(() => {
@@ -122,7 +133,7 @@ export function ProfileFeed({
 		}
 
 		return nextTiles;
-	}, [posts, buckets, isMeasuring]);
+	}, [posts, buckets, isMeasuring, t]);
 
 	const mobileTiles = useMemo<Tile[]>(
 		() =>
@@ -135,12 +146,12 @@ export function ProfileFeed({
 						}
 					: tile,
 			),
-		[tiles],
+		[tiles, t],
 	);
 
 	const mobilePlaced = useMemo(
 		() => packAppend([], mobileTiles, MOBILE_COLUMN_COUNT, "balanced"),
-		[mobileTiles],
+		[mobileTiles, t],
 	);
 
 	const tabletTiles = useMemo<Tile[]>(
@@ -154,12 +165,12 @@ export function ProfileFeed({
 						}
 					: tile,
 			),
-		[tiles],
+		[tiles, t],
 	);
 
 	const tabletPlaced = useMemo(
 		() => packAppend([], tabletTiles, TABLET_COLUMN_COUNT, "fit"),
-		[tabletTiles],
+		[tabletTiles, t],
 	);
 
 	const useTabletCompactLayout = isTablet && !isMobile;
@@ -245,7 +256,7 @@ export function ProfileFeed({
 				onPostClick?.(post);
 			}
 		},
-		[onPostClick, postById],
+		[onPostClick, postById, t],
 	);
 
 	const { nodes, containerHeight } = useMemo(() => {
@@ -255,7 +266,7 @@ export function ProfileFeed({
 
 		const cell = Math.max(0, (width - (cols - 1) * GAP) / cols);
 		return toPixels(placed, cell, GAP);
-	}, [cols, placed, width]);
+	}, [cols, placed, width, t]);
 
 	const { compactNodes, compactContainerHeight } = useMemo(() => {
 		if (width <= 0) {
@@ -272,7 +283,7 @@ export function ProfileFeed({
 			compactNodes: layout.nodes,
 			compactContainerHeight: layout.containerHeight,
 		};
-	}, [compactColumnCount, compactPlaced, width]);
+	}, [compactColumnCount, compactPlaced, width, t]);
 
 	const { tabletNodes, tabletContainerHeight } = useMemo(() => {
 		if (width <= 0) {
@@ -289,18 +300,23 @@ export function ProfileFeed({
 			tabletNodes: layout.nodes,
 			tabletContainerHeight: layout.containerHeight,
 		};
-	}, [tabletPlaced, width]);
+	}, [tabletPlaced, width, t]);
 
 	const emptyState = (
 		<EmptyPage
 			icon={OutlineFolderAddOuLc}
 			title={t("components.profile.portfolio.empty.title", "No posts yet.")}
-			description={t(
-				"components.profile.portfolio.empty.description",
-				"This user hasn't posted anything to their portfolio yet.",
-			)}
+			description={
+				emptyDescription ??
+				t(
+					"components.profile.portfolio.empty.description",
+					"This user hasn't posted anything to their portfolio yet.",
+				)
+			}
 			className="min-h-80 px-6 py-12"
-		/>
+		>
+			{emptyActions}
+		</EmptyPage>
 	);
 
 	if (postById.size === 0 && !isMeasuring) {

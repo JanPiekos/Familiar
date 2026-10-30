@@ -76,6 +76,26 @@ describe("profile settings Save feedback", () => {
   expect(toast.success).toHaveBeenCalledTimes(1);
  });
 
+ it.each([
+  ["avatar_url", "Edit profile picture", "Change profile picture", "Remove profile picture"],
+  ["cover_url", "Edit cover image", "Change cover image", "Remove cover image"],
+ ] as const)("changes %s through its image menu and defers removal until Save", async (field, editLabel, changeLabel, removeLabel) => {
+  const images = { ...initialValues, avatar_url: "/avatar.png", cover_url: "/cover.png" };
+  const submit = vi.fn().mockResolvedValue(undefined);
+  render(<><SettingsProfileEditor initialValues={images} onSubmit={submit} /><button type="submit" form="profile-settings-form">Save changes</button></>);
+  const upload = screen.getByLabelText(changeLabel) as HTMLInputElement;
+  const picker = vi.spyOn(upload, "click").mockImplementation(() => {});
+  fireEvent.pointerDown(screen.getByRole("button", { name: editLabel }), { button: 0, ctrlKey: false, pointerType: "mouse" });
+  fireEvent.click(await screen.findByRole("menuitem", { name: changeLabel }));
+  expect(picker).toHaveBeenCalledTimes(1);
+  fireEvent.pointerDown(screen.getByRole("button", { name: editLabel }), { button: 0, ctrlKey: false, pointerType: "mouse" });
+  fireEvent.click(await screen.findByRole("menuitem", { name: removeLabel }));
+  expect(submit).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByText("Save changes"));
+  await waitFor(() => expect(submit).toHaveBeenCalledWith({ ...images, [field]: "" }, images));
+  picker.mockRestore();
+ });
+
  it("shows validation feedback without calling the save handler", async () => {
   const submit = vi.fn();
   editor(submit);

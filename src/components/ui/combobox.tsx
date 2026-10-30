@@ -9,6 +9,7 @@ import {
 	InputGroupInput,
 } from "src/components/ui/input-group";
 import { cn } from "@/lib/utils";
+import { MENU_ITEM_LAYOUT_CLASS_NAME } from "./menu-styles";
 
 const Combobox = ComboboxPrimitive.Root;
 
@@ -145,7 +146,9 @@ function ComboboxItem({
 		<ComboboxPrimitive.Item
 			data-slot="combobox-item"
 			className={cn(
-				"data-highlighted:bg-accent data-highlighted:text-accent-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+				MENU_ITEM_LAYOUT_CLASS_NAME,
+				"pr-9",
+				"data-highlighted:bg-accent data-highlighted:text-accent-foreground relative flex w-full cursor-default items-center rounded-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 				className,
 			)}
 			{...props}
@@ -154,10 +157,10 @@ function ComboboxItem({
 			<ComboboxPrimitive.ItemIndicator
 				data-slot="combobox-item-indicator"
 				render={
-					<span className="pointer-events-none absolute right-2 flex size-4 items-center justify-center" />
+					<span className="pointer-events-none absolute right-3 flex size-4 items-center justify-center" />
 				}
 			>
-				<CheckIcon className="pointer-events-none size-4 pointer-coarse:size-5" />
+				<CheckIcon className="pointer-events-none size-4" />
 			</ComboboxPrimitive.ItemIndicator>
 		</ComboboxPrimitive.Item>
 	);
@@ -289,18 +292,18 @@ function useComboboxAnchor() {
 
 export {
 	Combobox,
-	ComboboxInput,
-	ComboboxContent,
-	ComboboxList,
-	ComboboxItem,
-	ComboboxGroup,
-	ComboboxLabel,
-	ComboboxCollection,
-	ComboboxEmpty,
-	ComboboxSeparator,
-	ComboboxChips,
 	ComboboxChip,
+	ComboboxChips,
 	ComboboxChipsInput,
+	ComboboxCollection,
+	ComboboxContent,
+	ComboboxEmpty,
+	ComboboxGroup,
+	ComboboxInput,
+	ComboboxItem,
+	ComboboxLabel,
+	ComboboxList,
+	ComboboxSeparator,
 	ComboboxTrigger,
 	ComboboxValue,
 	useComboboxAnchor,

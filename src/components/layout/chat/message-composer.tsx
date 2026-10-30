@@ -38,6 +38,8 @@ import {
 	type MessageComposerValues,
 	messageComposerSchema,
 } from "./message-composer.schema";
+import { useTranslation } from "react-i18next";
+import appI18n from "@/lib/i18n";
 
 const EMPTY_MESSAGE_ERROR = "Write a message or attach media.";
 const MAX_MEDIA_COUNT = 10;
@@ -62,6 +64,7 @@ export function MessageComposer({
 }: {
 	conversationId: string;
 }) {
+	const { t } = useTranslation();
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 	const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 	const [files, setFiles] = useState<File[]>([]);
@@ -150,7 +153,7 @@ export function MessageComposer({
 						className="gap-2"
 					>
 						<FieldLabel htmlFor="chat-message-body" className="sr-only">
-							Message
+							{t("ui.message", "Message")}
 						</FieldLabel>
 
 						{files.length > 0 && (
@@ -158,7 +161,7 @@ export function MessageComposer({
 								<AttachmentGroup
 									className="w-max max-w-none gap-2"
 									role="group"
-									aria-label="Selected media"
+									aria-label={t("ui.selected_media", "Selected media")}
 								>
 									{files.map((file, index) => (
 										<SelectedMediaAttachment
@@ -193,7 +196,7 @@ export function MessageComposer({
 									className="size-9 rounded-full"
 									disabled={isSubmitting}
 									onClick={() => fileInputRef.current?.click()}
-									aria-label="Attach media"
+									aria-label={t("ui.attach_media", "Attach media")}
 								>
 									<Paperclip data-icon="inline-start" />
 								</InputGroupButton>
@@ -201,7 +204,10 @@ export function MessageComposer({
 
 							<InputGroupTextArea
 								id="chat-message-body"
-								placeholder="Write a message or attach media..."
+								placeholder={t(
+									"ui.write_a_message_or_attach_media",
+									"Write a message or attach media...",
+								)}
 								rows={1}
 								aria-invalid={Boolean(bodyError)}
 								disabled={isSubmitting}
@@ -233,7 +239,7 @@ export function MessageComposer({
 									size="icon-sm"
 									disabled={!canSubmit}
 									className="size-9 rounded-full bg-accent text-accent-foreground hover:bg-accent/90"
-									aria-label="Send message"
+									aria-label={t("ui.send_message", "Send message")}
 								>
 									<OutlineSend data-icon="inline-start" />
 								</InputGroupButton>
@@ -269,6 +275,7 @@ function SelectedMediaAttachment({
 	isUploading,
 	onRemove,
 }: SelectedMediaAttachmentProps) {
+	const { t } = useTranslation();
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 	const isImage = file.type.startsWith("image/");
 	const isVideo = file.type.startsWith("video/");
@@ -316,7 +323,10 @@ function SelectedMediaAttachment({
 			<AttachmentActions>
 				<AttachmentAction
 					type="button"
-					aria-label={`Remove ${file.name}`}
+					aria-label={t("ui.remove_value0", {
+						defaultValue: "Remove {{value0}}",
+						value0: file.name,
+					})}
 					disabled={isUploading}
 					onClick={onRemove}
 				>
@@ -338,9 +348,9 @@ function getFileTypeLabel(file: File) {
 		return extension;
 	}
 
-	if (file.type.startsWith("image/")) return "Image";
-	if (file.type.startsWith("video/")) return "Video";
-	return "File";
+	if (file.type.startsWith("image/")) return appI18n.t("ui.image", "Image");
+	if (file.type.startsWith("video/")) return appI18n.t("ui.video", "Video");
+	return appI18n.t("ui.file", "File");
 }
 
 function formatFileSize(size: number) {

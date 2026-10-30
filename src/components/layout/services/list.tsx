@@ -30,6 +30,7 @@ import type { TCommission } from "@/types/commissions";
 import { EmptyPage } from "../empty-page";
 import { generatePaginationItems } from "../requests/my/helpers";
 import { CommissionStatusBadge } from "../badges";
+import { useTranslation } from "react-i18next";
 
 interface ServiceListProps {
 	commissions: TCommission[];
@@ -66,6 +67,7 @@ function useServiceListColumns({
 	onPublish?: (id: string) => void;
 	onDelete?: (id: string) => void;
 }) {
+	const { t } = useTranslation();
 	return useMemo<ColumnDef<TCommission>[]>(
 		() => [
 			{
@@ -73,7 +75,7 @@ function useServiceListColumns({
 				id: "title",
 				header: ({ column }) => (
 					<DataGridColumnHeader
-						title="Title"
+						title={t("ui.title", "Title")}
 						visibility={true}
 						column={column}
 					/>
@@ -89,7 +91,7 @@ function useServiceListColumns({
 				id: "status",
 				header: ({ column }) => (
 					<DataGridColumnHeader
-						title="Status"
+						title={t("ui.status", "Status")}
 						visibility={true}
 						column={column}
 					/>
@@ -104,7 +106,7 @@ function useServiceListColumns({
 				id: "basePrice",
 				header: ({ column }) => (
 					<DataGridColumnHeader
-						title="Base Price"
+						title={t("ui.base_price_11973a", "Base Price")}
 						visibility={true}
 						column={column}
 					/>
@@ -122,7 +124,7 @@ function useServiceListColumns({
 				id: "created",
 				header: ({ column }) => (
 					<DataGridColumnHeader
-						title="Created"
+						title={t("ui.created", "Created")}
 						visibility={true}
 						column={column}
 					/>
@@ -144,7 +146,10 @@ function useServiceListColumns({
 										variant="ghost"
 										size="icon"
 										className="size-8"
-										aria-label={`Open actions for ${commission.title}`}
+										aria-label={t("ui.open_actions_for_value0", {
+											defaultValue: "Open actions for {{value0}}",
+											value0: commission.title,
+										})}
 									>
 										<MoreHorizontal className="size-4" />
 									</Button>
@@ -153,7 +158,7 @@ function useServiceListColumns({
 									{commission.commissionStatus === "DRAFT" && onPublish && (
 										<DropdownMenuItem onClick={() => onPublish(commission.id)}>
 											<Send className="mr-2 size-4" />
-											Publish
+											{t("ui.publish", "Publish")}
 										</DropdownMenuItem>
 									)}
 									<DropdownMenuItem asChild>
@@ -161,7 +166,7 @@ function useServiceListColumns({
 											to={`/${username}/commissions/${commission.id}` as string}
 										>
 											<ExternalLink className="mr-2 size-4" />
-											View Page
+											{t("ui.view_page", "View Page")}
 										</Link>
 									</DropdownMenuItem>
 									{onDelete && (
@@ -170,7 +175,7 @@ function useServiceListColumns({
 											className="text-destructive focus:text-destructive"
 										>
 											<Trash className="mr-2 size-4" />
-											Delete
+											{t("ui.delete", "Delete")}
 										</DropdownMenuItem>
 									)}
 								</DropdownMenuContent>
@@ -182,7 +187,7 @@ function useServiceListColumns({
 				enableSorting: false,
 			},
 		],
-		[username, onPublish, onDelete],
+		[username, onPublish, onDelete, t],
 	);
 }
 
@@ -283,24 +288,31 @@ function ServiceListSummary({
 	endItem: number;
 	isRefreshing: boolean;
 }) {
+	const { t } = useTranslation();
 	return (
 		<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
 			<span>
-				Showing <span className="font-medium text-foreground">{startItem}</span>
-				–<span className="font-medium text-foreground">{endItem}</span> of{" "}
+				{t("ui.showing", "Showing")}{" "}
+				<span className="font-medium text-foreground">{startItem}</span>–
+				<span className="font-medium text-foreground">{endItem}</span>{" "}
+				{t("ui.of", "of")}{" "}
 				<span className="font-medium text-foreground">
 					{totalCount ?? commissions.length}
 				</span>{" "}
-				services
+				{t("ui.services_35105e", "services")}
 			</span>
 
 			<span>
-				Page <span className="font-medium text-foreground">{currentPage}</span>{" "}
-				of <span className="font-medium text-foreground">{totalPages}</span>
+				{t("ui.page", "Page")}{" "}
+				<span className="font-medium text-foreground">{currentPage}</span>{" "}
+				{t("ui.of", "of")}{" "}
+				<span className="font-medium text-foreground">{totalPages}</span>
 			</span>
 
 			{isRefreshing ? (
-				<span className="inline-flex items-center gap-1.5">Refreshing</span>
+				<span className="inline-flex items-center gap-1.5">
+					{t("ui.refreshing", "Refreshing")}
+				</span>
 			) : null}
 		</div>
 	);
@@ -392,12 +404,18 @@ export function ServiceList({
 	onDelete,
 	onRequestClick,
 }: ServiceListProps) {
+	const { t } = useTranslation();
 	const columns = useServiceListColumns({ username, onPublish, onDelete });
 
 	if (commissions.length === 0 && !isPending) {
 		return (
 			<div className={cn("w-full", className)}>
-				<EmptyPage title="No services found. Create one to get started!" />
+				<EmptyPage
+					title={t(
+						"ui.no_services_found_create_one_to_get_started",
+						"No services found. Create one to get started!",
+					)}
+				/>
 			</div>
 		);
 	}

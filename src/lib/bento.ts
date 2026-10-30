@@ -50,6 +50,7 @@ type HorizontalPreference = "left" | "right";
 
 const MAX_COLUMN_COUNT = 4;
 const BALANCED_LOOKAHEAD = 6;
+const MAX_SQUARE_REFLOW_CANDIDATES = 6;
 
 const BALANCED_DATE_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
 
@@ -472,7 +473,7 @@ function chooseNextTile(
 	return chooseFitCandidate(remainingTiles, columnCount, grid);
 }
 
-export function packAppend(
+function packTiles(
 	existingTiles: PlacedTile[],
 	incomingTiles: Tile[],
 	columnCount: number,
@@ -535,7 +536,116 @@ export function packAppend(
 		}
 	}
 
+	// Grow small squares into existing gaps without moving other posts or
+	// adding rows. Keep their original image bucket so later repacks can shrink
+	// them again when more posts arrive and need the space.
+	const rowCount = outputTiles.reduce(
+		(maximum, tile) => Math.max(maximum, tile.y + tile.heightUnit),
+		0,
+	);
+
+	for (
+		let index = existingTiles.length;
+		index < outputTiles.length;
+		index += 1
+	) {
+		const placed = outputTiles[index];
+		if (
+			placed.widthUnit !== 1 ||
+			placed.heightUnit !== 1 ||
+			placed.y + 2 > rowCount ||
+			!grid.isRegionFree(placed.x + 1, placed.y, 1, 2) ||
+			!grid.isRegionFree(placed.x, placed.y + 1, 1, 1)
+		) {
+			continue;
+		}
+
+		placed.widthUnit = 2;
+		placed.heightUnit = 2;
+		grid.markOccupied(placed.x, placed.y, 2, 2);
+	}
+
 	return outputTiles;
+}
+
+function getLayoutFill(tiles: PlacedTile[]): { area: number; rows: number } {
+	return tiles.reduce(
+		(fill, tile) => ({
+			area: fill.area + tile.widthUnit * tile.heightUnit,
+			rows: Math.max(fill.rows, tile.y + tile.heightUnit),
+		}),
+		{ area: 0, rows: 0 },
+	);
+}
+
+export function packAppend(
+	existingTiles: PlacedTile[],
+	incomingTiles: Tile[],
+	columnCount: number,
+	strategy: PackStrategy = "balanced",
+): PlacedTile[] {
+	let tiles = incomingTiles;
+	let placed = packTiles(existingTiles, tiles, columnCount, strategy);
+	let fill = getLayoutFill(placed);
+	const safeColumnCount = Math.max(1, Math.min(columnCount, MAX_COLUMN_COUNT));
+	if (safeColumnCount < 2 || fill.area === fill.rows * safeColumnCount) {
+		return placed;
+	}
+	const promoted = new Set<string>();
+	let reflowAttempts = 0;
+
+	// Reflow a few squares near the tail to fill partial rows on narrow screens.
+	// Bound the work for long feeds and only accept a better occupied fraction,
+	// so complete rows stay compact.
+	for (
+		let index = tiles.length - 1;
+		index >= 0 &&
+		reflowAttempts < MAX_SQUARE_REFLOW_CANDIDATES &&
+		fill.area < fill.rows * safeColumnCount;
+		index -= 1
+	) {
+		const tile = tiles[index];
+		if (tile.widthUnit !== 1 || tile.heightUnit !== 1) {
+			continue;
+		}
+		const current = placed.find((item) => item.tile.id === tile.id);
+		if (current?.widthUnit === 2 && current.heightUnit === 2) {
+			continue;
+		}
+
+		reflowAttempts += 1;
+		const candidateTiles = tiles.map((item, candidateIndex) =>
+			candidateIndex === index
+				? { ...item, widthUnit: 2 as const, heightUnit: 2 as const }
+				: item,
+		);
+		const candidate = packTiles(
+			existingTiles,
+			candidateTiles,
+			columnCount,
+			strategy,
+		);
+		const candidateFill = getLayoutFill(candidate);
+		if (candidateFill.area * fill.rows > fill.area * candidateFill.rows) {
+			tiles = candidateTiles;
+			placed = candidate;
+			fill = candidateFill;
+			promoted.add(tile.id);
+		}
+	}
+
+	const originals = new Map(incomingTiles.map((tile) => [tile.id, tile]));
+	return placed.map((item, index) => {
+		const original = originals.get(item.tile.id);
+		if (
+			index < existingTiles.length ||
+			!promoted.has(item.tile.id) ||
+			!original
+		) {
+			return item;
+		}
+		return { ...item, tile: { ...original } };
+	});
 }
 
 export function packAppendGeneric<

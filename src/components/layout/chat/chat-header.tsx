@@ -35,6 +35,7 @@ export function ChatHeader({ conversation, onBack }: ChatHeaderProps) {
 
 			<div className="flex items-center gap-2">
 				<Button
+					disabled
 					type="button"
 					variant="ghost"
 					size="icon"
@@ -44,6 +45,7 @@ export function ChatHeader({ conversation, onBack }: ChatHeaderProps) {
 				</Button>
 
 				<Button
+					disabled
 					type="button"
 					variant="ghost"
 					size="icon"

@@ -4,22 +4,16 @@ import {
 	type ChangeEvent,
 	type RefObject,
 	useEffect,
-	useId,
 	useRef,
 	useState,
 } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { profileSettingsSchema } from "@/schemas/user/profile";
-import {
-	OutlineAt,
-	OutlineEdit,
-	OutlineTrash,
-	OutlineUser,
-} from "@/components/icons/icons";
+import { OutlineAt, OutlineUser } from "@/components/icons/icons";
 import type { ProfileEditorValues } from "@/components/layout/profile/profile-editor";
 import UserAvatar from "@/components/layout/profile/avatar";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { ProfileImageMenu } from "./profile-image-menu";
 import {
 	Field,
 	FieldError,
@@ -32,7 +26,6 @@ import {
 	InputGroupInput,
 	InputGroupTextArea,
 } from "@/components/ui/input-group";
-import { cn } from "@/lib/utils";
 import type { TUserProfile } from "@/types/user";
 
 const EMPTY_PROFILE_VALUES: ProfileEditorValues = {
@@ -51,7 +44,11 @@ interface SettingsProfileEditorProps {
 	onSubmit?: (
 		values: ProfileEditorValues,
 		initialValues: ProfileEditorValues,
-	) => void | ProfileEditorValues | null | Promise<void | ProfileEditorValues | null>;
+	) =>
+		| void
+		| ProfileEditorValues
+		| null
+		| Promise<void | ProfileEditorValues | null>;
 }
 
 export function SettingsProfileEditor({
@@ -65,9 +62,6 @@ export function SettingsProfileEditor({
 	const submittingRef = useRef(false);
 	// Keep the edit baseline stable when background profile queries refresh.
 	const baselineRef = useRef(initialValues ?? EMPTY_PROFILE_VALUES);
-	const uploadId = useId();
-	const avatarUploadId = `${uploadId}-avatar`;
-	const coverUploadId = `${uploadId}-cover`;
 	const form = useForm({
 		defaultValues: baselineRef.current,
 		validators: {
@@ -105,9 +99,13 @@ export function SettingsProfileEditor({
 				baselineRef.current = nextValues;
 				formApi.reset(nextValues);
 				if (saved === null) {
-					toast.info(t("settings.profile.no_changes", "No changes to save."), { id: toastId });
+					toast.info(t("settings.profile.no_changes", "No changes to save."), {
+						id: toastId,
+					});
 				} else {
-					toast.success(t("settings.profile.saved", "Profile changes saved."), { id: toastId });
+					toast.success(t("settings.profile.saved", "Profile changes saved."), {
+						id: toastId,
+					});
 				}
 			} catch (error) {
 				toast.error(
@@ -134,8 +132,9 @@ export function SettingsProfileEditor({
 	});
 
 	useEffect(() => {
-		const hasEdits = (Object.keys(baselineRef.current) as Array<keyof ProfileEditorValues>)
-			.some((field) => form.state.values[field] !== baselineRef.current[field]);
+		const hasEdits = (
+			Object.keys(baselineRef.current) as Array<keyof ProfileEditorValues>
+		).some((field) => form.state.values[field] !== baselineRef.current[field]);
 		if (submittingRef.current || hasEdits) return;
 		baselineRef.current = initialValues ?? EMPTY_PROFILE_VALUES;
 		form.reset(baselineRef.current);
@@ -184,8 +183,8 @@ export function SettingsProfileEditor({
 
 								return (
 									<div className="flex flex-col gap-6">
-										<div className="relative w-full overflow-hidden">
-											<div className="relative h-40 w-full overflow-hidden rounded-3xl bg-surface-3 sm:h-44 lg:h-48">
+										<div className="relative -mx-4 -mt-4 w-[calc(100%+2rem)] sm:-mx-6 sm:-mt-6 sm:w-[calc(100%+3rem)] md:mx-0 md:mt-0 md:w-full">
+											<div className="relative h-40 w-full overflow-hidden bg-surface-3 sm:h-44 md:rounded-3xl lg:h-48">
 												{values.cover_url ? (
 													<img
 														src={values.cover_url}
@@ -197,125 +196,53 @@ export function SettingsProfileEditor({
 														{t("settings.profile.no_cover", "No cover image")}
 													</div>
 												)}
-
-												<div className="absolute right-3 top-3 flex gap-2">
-													<label
-														htmlFor={coverUploadId}
-														aria-label={t(
-															"settings.profile.change_cover",
-															"Change cover image",
-														)}
-														className={cn(
-															buttonVariants({
-																variant: "secondary",
-																size: "icon",
-															}),
-															"bg-surface-2 hover:bg-surface-2/90",
-														)}
-													>
-														<OutlineEdit />
-														<input
-															id={coverUploadId}
-															type="file"
-															accept="image/*"
-															className="sr-only"
-															onChange={(event) =>
-																handleFileChange(event, "cover_url")
-															}
-														/>
-													</label>
-
-													{values.cover_url ? (
-														<Button
-															type="button"
-															variant="destructive"
-															size="icon"
-															aria-label={t(
-																"settings.profile.remove_cover",
-																"Remove cover image",
-															)}
-															onClick={() =>
-																form.setFieldValue("cover_url", "")
-															}
-														>
-															<OutlineTrash />
-														</Button>
-													) : null}
-												</div>
+												<ProfileImageMenu
+													kind="cover"
+													hasImage={Boolean(values.cover_url)}
+													disabled={isSubmitting}
+													onChange={(event) =>
+														handleFileChange(event, "cover_url")
+													}
+													onRemove={() => form.setFieldValue("cover_url", "")}
+												/>
 											</div>
-
-											<div className="absolute bottom-16 left-4">
-												<div className="relative">
-													<UserAvatar
-														user={previewUser}
-														size="2xl"
-														hasOutline
-														className="ring-surface-2"
-													/>
-
-													<label
-														style={{ boxShadow: "none" }}
-														htmlFor={avatarUploadId}
-														aria-label={t(
-															"settings.profile.change_avatar",
-															"Change profile picture",
-														)}
-														className={cn(
-															buttonVariants({
-																size: "icon",
-																variant: "secondary",
-															}),
-															"absolute -bottom-1 -right-1 bg-surface-3 hover:bg-surface-3/90",
-														)}
-													>
-														<OutlineEdit />
-														<input
-															id={avatarUploadId}
-															type="file"
-															accept="image/*"
-															className="sr-only"
+											<div className="pointer-events-none relative z-10 -mt-12 px-4 sm:px-6 md:px-4">
+												<div className="pointer-events-auto size-24 rounded-full ring-6 ring-surface-2">
+													<div className="relative flex size-full items-center justify-center overflow-hidden rounded-full">
+														<UserAvatar user={previewUser} size="2xl" />
+														<ProfileImageMenu
+															kind="avatar"
+															hasImage={Boolean(values.avatar_url)}
+															disabled={isSubmitting}
 															onChange={(event) =>
 																handleFileChange(event, "avatar_url")
 															}
-														/>
-													</label>
-													{values.avatar_url ? (
-														<Button
-															type="button"
-															variant="destructive"
-															size="icon"
-															aria-label={t(
-																"auth.register.images.remove_avatar",
-																"Remove avatar",
-															)}
-															className="absolute -bottom-1 -left-1"
-															style={{ boxShadow: "none" }}
-															onClick={() =>
+															onRemove={() =>
 																form.setFieldValue("avatar_url", "")
 															}
-														>
-															<OutlineTrash />
-														</Button>
-													) : null}
+														/>
+													</div>
 												</div>
-											</div>
-
-											<div className="px-4 pb-4 pt-16">
-												<Typography.Paragraph
-													size="sm"
-													className="font-semibold"
-												>
-													{values.display_name ||
-														t("settings.profile.display_name", "Display name")}
-												</Typography.Paragraph>
-												<Typography.Paragraph
-													size="xs"
-													className="text-muted-foreground!"
-												>
-													@
-													{values.username ||
-														t("settings.profile.username", "username")}
-												</Typography.Paragraph>
+												<div className="pointer-events-auto mt-3">
+													<Typography.Paragraph
+														size="sm"
+														className="font-semibold"
+													>
+														{values.display_name ||
+															t(
+																"settings.profile.display_name",
+																"Display name",
+															)}
+													</Typography.Paragraph>
+													<Typography.Paragraph
+														size="xs"
+														className="text-muted-foreground!"
+													>
+														@
+														{values.username ||
+															t("settings.profile.username", "username")}
+													</Typography.Paragraph>
+												</div>
 											</div>
 										</div>
 
@@ -337,7 +264,7 @@ export function SettingsProfileEditor({
 																	<OutlineUser />
 																</InputGroupAddon>
 																<InputGroupInput
-															disabled
+																	disabled
 																	id={field.name}
 																	name={field.name}
 																	value={field.state.value}
@@ -378,7 +305,7 @@ export function SettingsProfileEditor({
 																	<OutlineAt />
 																</InputGroupAddon>
 																<InputGroupInput
-															disabled
+																	disabled
 																	id={field.name}
 																	name={field.name}
 																	value={field.state.value}

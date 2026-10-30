@@ -30,6 +30,7 @@ import {
 } from "src/components/ui/popover";
 import { cn } from "src/lib/utils";
 import { OutlineFilter } from "@/components/icons/icons";
+import { MENU_SEARCH_HEIGHT_CLASS_NAME } from "@/components/ui/menu-styles";
 import type {
 	Column,
 	ColumnDataType,
@@ -192,6 +193,7 @@ function FilterSelectorInner<TData>({
 			<PopoverTrigger asChild>
 				<Button
 					size={compact ? "icon-xl" : "xl"}
+					className={MENU_SEARCH_HEIGHT_CLASS_NAME}
 					variant="outline"
 					aria-label={t("filter", locale)}
 				>
@@ -261,7 +263,7 @@ export function FilterableColumn<TData, TType extends ColumnDataType, TVal>({
 			onMouseEnter={prefetch}
 		>
 			<div className="flex w-full items-center justify-between">
-				<div className="inline-flex items-center gap-1.5">
+				<div className="inline-flex items-center gap-2">
 					{<column.icon strokeWidth={2.25} className="size-4" />}
 					<span>{column.displayName}</span>
 				</div>

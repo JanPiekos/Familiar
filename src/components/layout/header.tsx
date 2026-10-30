@@ -1,266 +1,47 @@
-import { Link, useLocation } from "@tanstack/react-router";
-import { ShoppingCart } from "lucide-react";
-import { memo, useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { type ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-	OutlineChat,
-	OutlineFileText,
-	OutlineHome,
-	OutlineMenu,
-	OutlineReceipt,
-	SolidChat,
-	SolidFileText,
-	SolidHome,
-	SolidReceipt,
-} from "@/components/icons/icons";
-import { Elevated } from "@/lib/elevated";
-import { localizePath, stripLocaleFromPathname } from "@/lib/i18n";
+import { localizePath } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/providers/auth";
-import { TRoles } from "@/types/user/roles";
-import { Button } from "../ui/button";
-import {
-	Sheet,
-	SheetContent,
-	SheetHeader,
-	SheetTitle,
-	SheetTrigger,
-} from "../ui/sheet";
-import { BasketDropdown } from "./basket-dropdown";
-import UserDropDown from "./profile/drop-down";
-import User from "./profile/user";
-import CurrencySelect from "./select/currency";
-import { Skeleton } from "../ui/skeleton";
-
-function HeaderUserSkeleton() {
-	return (
-		<div
-			aria-hidden="true"
-			className="flex items-center gap-2"
-		>
-			{/* Possible dashboard button */}
-			<Skeleton className="hidden h-10 w-24 rounded-full lg:block" />
-
-			{/* User avatar */}
-			<Skeleton className="size-10 shrink-0 rounded-full" />
-		</div>
-	);
-}
+import { AccountNavigation } from "./account-navigation";
+import { SiteNavigationLinks } from "./site-navigation";
 
 export default function Header() {
 	const { t, i18n } = useTranslation();
-	const { user, isPending } = useAuth();
-
 	return (
 		<header className="sticky top-0 z-50 px-4 lg:px-8">
-			<div className="flex h-16 items-center justify-between gap-4">
-				<div className="flex items-center gap-2">
-					<MobileNav />
-					<NavWrapper className="hidden lg:flex">
-						<Link
-							to={localizePath("/", i18n.language) as any}
-							className="mr-2 ml-3 flex items-center gap-x-2"
-						>
-							<span className="font-bold text-sm uppercase tracking-wider text-primary">
-								{t("header.title")}
-							</span>
-						</Link>
-						<NavLinks />
-					</NavWrapper>
-				</div>
-
-				<div className="flex shrink-0 items-center gap-2">
-					<NavWrapper>
-						{/* <ThemeToggle /> */}
-						{/* <CurrencySelect display={"compact"} variant={"secondary"} /> */}
-						{/* <LanguageSelect /> */}
-
-						{/* <BasketDropdown /> */}
-
-						<Button variant={"secondary"} size={"icon-xl"} asChild>
-							<Link to={localizePath("/chat", i18n.language) as any}>
-								<OutlineChat />
-							</Link>
-						</Button>
-						{isPending ? (
-							<HeaderUserSkeleton />
-						) : user ? (
-							<>
-								{user.roles?.includes(TRoles.Artist) && (
-									<Button size="xl" asChild>
-										<Link to={localizePath("/dashboard", i18n.language)}>
-											{t("header.artist-dashboard", "Dashboard")}
-										</Link>
-									</Button>
-								)}
-
-								<User user={user} showInfo={false} isDropdown />
-							</>
-						) : (
-							<div className="hidden items-center gap-2 lg:flex">
-								<Button asChild variant="secondary" size="xl">
-									<Link to={localizePath("/auth/login", i18n.language) as any}>
-										{t("auth.login.cta")}
-									</Link>
-								</Button>
-
-								<Button asChild size="xl">
-									<Link to={localizePath("/auth/register", i18n.language) as any}>
-										{t("auth.register.cta")}
-									</Link>
-								</Button>
-							</div>
-						)}
-
-					</NavWrapper>
-				</div>
+			<div className="flex h-0 items-center justify-between gap-4 lg:h-16">
+				<NavWrapper className="hidden lg:flex">
+					<Link
+						to={localizePath("/", i18n.language)}
+						className="mr-2 ml-3 flex items-center gap-x-2"
+					>
+						<span className="text-sm font-bold tracking-wider text-primary uppercase">
+							{t("header.title")}
+						</span>
+					</Link>
+					<SiteNavigationLinks layout="header" />
+				</NavWrapper>
+				<AccountNavigation />
 			</div>
 		</header>
 	);
 }
 
-const MobileNav = () => {
-	const { t, i18n } = useTranslation();
-	const { user } = useAuth();
-
-	return (
-		<Sheet>
-			<NavWrapper className="lg:hidden">
-				<SheetTrigger asChild>
-					<Button variant="ghost" size="icon">
-						<OutlineMenu />
-					</Button>
-				</SheetTrigger>
-			</NavWrapper>
-			<SheetContent side="left" className="w-75 sm:w-100">
-				<SheetHeader className="text-left px-4">
-					<SheetTitle className="text-xl font-bold uppercase tracking-wider">
-						{t("header.title")}
-					</SheetTitle>
-				</SheetHeader>
-				<div className="flex flex-col h-full py-6 px-2">
-					<div className="flex flex-col gap-2">
-						<NavLinks />
-					</div>
-
-					<div className="mt-auto space-y-4">
-						<div className="h-px bg-border/50 mx-2" />
-
-						{user ? (
-							<div className="px-2">
-								<div className="flex items-center gap-3 rounded-xl bg-secondary/50">
-									<UserDropDown user={user} showInfo />
-								</div>
-							</div>
-						) : (
-							<div className="grid grid-cols-2 gap-3 px-2">
-								<Button
-									asChild
-									variant="secondary"
-									size={"xl"}
-									className="w-full"
-								>
-									<Link to={localizePath("/auth/login", i18n.language) as any}>
-										{t("auth.login.cta")}
-									</Link>
-								</Button>
-								<Button asChild className="w-full" size={"xl"}>
-									<Link
-										to={localizePath("/auth/register", i18n.language) as any}
-									>
-										{t("auth.register.cta")}
-									</Link>
-								</Button>
-							</div>
-						)}
-					</div>
-				</div>
-			</SheetContent>
-		</Sheet>
-	);
-};
-
-const NavLinks = memo(() => {
-	const { t, i18n } = useTranslation();
-	const location = useLocation();
-	const pathname = stripLocaleFromPathname(location.pathname);
-
-	/**
-	 * Bierzemy odpowiedni state ikon w zależności na jakim url path jest użytkownik
-	 * @param path
-	 * @param isActive
-	 * @returns solid lub outline ikonę
-	 */
-	const getIconState = (path: string, isActive: boolean) => {
-		switch (path) {
-			case "/":
-				return isActive ? <SolidHome /> : <OutlineHome />;
-			// case "/roadmap":
-			// 	return isActive ? <SolidReceipt /> : <OutlineReceipt />;
-			case "/shop":
-				return isActive ? <SolidReceipt /> : <OutlineReceipt />;
-			case "/blog":
-				return isActive ? <SolidFileText /> : <OutlineFileText />;
-			// case "/chat":
-			// 	return isActive ? <SolidChat /> : <OutlineChat />;
-			default:
-				return null;
-		}
-	};
-
-	const navigationLinks = [
-		{ path: "/", label: t("header.navigation.home", "Home") },
-		// { path: "/roadmap", label: t("footer.navigation.roadmap", "Roadmap") },
-		{ path: "/shop", label: t("header.navigation.shop", "Shop") },
-		// { path: "/chat", label: t("header.navigation.messages", "Messages") },
-		// { path: "/blog", label: t("header.navigation.blog") },
-		// { path: "/users", label: t("header.navigation.users") },
-	];
-
-	return (
-		<>
-			{navigationLinks.map((link) => {
-				const isActive = pathname === link.path;
-				const icon = getIconState(link.path, isActive);
-				const isIconOnly = icon && !link.label;
-
-				return (
-					<Button
-						asChild
-						key={link.path}
-						variant={isActive ? "default" : "ghost"}
-						size={"xl"}
-						className={cn(!isIconOnly && "justify-start")}
-					>
-						<Link to={localizePath(link.path, i18n.language) as any}>
-							{icon}
-							{link.label}
-						</Link>
-					</Button>
-				);
-			})}
-		</>
-	);
-});
-
-const NavWrapper = ({
+function NavWrapper({
 	children,
 	className,
 }: {
-	children: React.ReactNode;
+	children: ReactNode;
 	className?: string;
-}) => {
+}) {
 	const [isScrolled, setIsScrolled] = useState(false);
-
 	useEffect(() => {
-		const handleScroll = () => {
-			setIsScrolled(window.scrollY > 0);
-		};
-
+		const handleScroll = () => setIsScrolled(window.scrollY > 0);
+		handleScroll();
 		window.addEventListener("scroll", handleScroll, { passive: true });
 		return () => window.removeEventListener("scroll", handleScroll);
 	}, []);
-
 	return (
 		<nav
 			className={cn(
@@ -272,4 +53,4 @@ const NavWrapper = ({
 			{children}
 		</nav>
 	);
-};
+}

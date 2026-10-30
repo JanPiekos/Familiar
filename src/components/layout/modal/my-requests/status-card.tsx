@@ -84,6 +84,7 @@ export function StatusCard({
 							className="mt-3 w-full"
 							size="xl"
 							variant={action.variant ?? "default"}
+							disabled={!action.onClick}
 							onClick={action.onClick}
 						>
 							{action.label}
