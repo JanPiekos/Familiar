@@ -3,6 +3,7 @@ import { Container } from "@/components/layout/container";
 import FloatingToolbar from "@/components/layout/floating-toolbar";
 import Footer from "@/components/layout/footer";
 import Header from "@/components/layout/header";
+import { PortfolioCreationProvider } from "@/components/layout/profile/portfolio-creation";
 import { detectLocaleFromPathOrParams, setSSRLanguage } from "@/lib/i18n";
 
 export const Route = createFileRoute("/{-$locale}/_main")({
@@ -22,19 +23,21 @@ function MainLayout() {
 		}),
 	);
 	return (
-		<div className={"flex min-h-dvh flex-col"}>
-			<Container className="flex h-full flex-1 flex-col">
-				<Header />
-				<main
-					className={
-						"flex h-full min-h-[calc(100dvh-4rem)] flex-1 flex-col sm:pb-4 sm:pt-2 lg:px-4"
-					}
-				>
-					<Outlet />
-				</main>
-				<FloatingToolbar />
-				{!isAuthPage && <Footer />}
-			</Container>
-		</div>
+		<PortfolioCreationProvider>
+			<div className="mobile-dock-layout flex min-h-dvh flex-col">
+				<Container className="flex h-full flex-1 flex-col">
+					<Header />
+					<main
+						className={
+							"flex h-full min-h-[calc(100dvh-var(--mobile-dock-space,0px))] lg:min-h-[calc(100dvh-4rem)] flex-1 flex-col lg:px-4 lg:pt-2 lg:pb-4"
+						}
+					>
+						<Outlet />
+					</main>
+					<FloatingToolbar />
+					{!isAuthPage && <Footer />}
+				</Container>
+			</div>
+		</PortfolioCreationProvider>
 	);
 }

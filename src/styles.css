@@ -22,6 +22,18 @@
 
 @custom-variant dark (&:where(.dark, .oled, .dark *, .oled *));
 
+/* Reserve space for the mobile account dock, including the home indicator. */
+.mobile-dock-layout {
+  --mobile-dock-space: calc(4rem + max(0.75rem, env(safe-area-inset-bottom, 0px)));
+  padding-bottom: var(--mobile-dock-space);
+}
+
+@media (min-width: 64rem) {
+  .mobile-dock-layout {
+    --mobile-dock-space: 0px;
+  }
+}
+
 @font-face {
   font-family: 'OpenRunde';
   src: url('/assets/fonts/OpenRunde-Regular.woff') format('woff');
