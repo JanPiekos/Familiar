@@ -9,7 +9,7 @@ export const Route = createFileRoute("/{-$locale}/_main/settings/profile")({
 function RouteComponent() {
 	return (
 		<Elevated offset={1} className="flex min-h-0 flex-1 rounded-3xl">
-			<UserSettingsPanel />
+			<UserSettingsPanel layout="page" />
 		</Elevated>
 	);
 }

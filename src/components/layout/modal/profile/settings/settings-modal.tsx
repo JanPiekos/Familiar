@@ -116,6 +116,13 @@ type SettingsSection =
 	| "accessibility"
 	| "connections";
 
+// Only these sections currently apply or persist their changes.
+const SUPPORTED_SETTINGS_SECTIONS = new Set<SettingsSection>([
+	"profile",
+	"appearance",
+	"language",
+]);
+
 interface SettingsNavigationItem {
 	id: SettingsSection;
 	name: string;
@@ -318,12 +325,14 @@ export function UserSettingsModal({
 }
 
 interface UserSettingsPanelProps {
+	layout?: "dialog" | "page";
 	className?: string;
 	onCancel?: () => void;
 	onSave?: () => void;
 }
 
 export function UserSettingsPanel({
+	layout = "dialog",
 	className,
 	onCancel,
 	onSave,
@@ -335,11 +344,14 @@ export function UserSettingsPanel({
 		useState<SettingsSection>("profile");
 	const profileInitialValues = useMemo(
 		() => getProfileEditorValues(user),
-		[user],
+		[user, t],
 	);
 	const accountEmail = authEmail ?? "";
 	const updateProfile = useUpdateProfile();
-	const saveProfile = async (values: ProfileEditorValues, initialValues: ProfileEditorValues) => {
+	const saveProfile = async (
+		values: ProfileEditorValues,
+		initialValues: ProfileEditorValues,
+	) => {
 		const saved = await updateProfile.mutateAsync({
 			values,
 			initialValues,
@@ -390,7 +402,10 @@ export function UserSettingsPanel({
 										<SidebarMenuItem key={item.id}>
 											<SidebarMenuButton
 												type="button"
-												disabled={updateProfile.isPending}
+												disabled={
+													updateProfile.isPending ||
+													!SUPPORTED_SETTINGS_SECTIONS.has(item.id)
+												}
 												isActive={isActive}
 												tooltip={item.name}
 												className="h-auto items-center py-2.5"
@@ -413,7 +428,12 @@ export function UserSettingsPanel({
 				</SidebarContent>
 			</Sidebar>
 
-			<main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+			<main
+				className={cn(
+					"flex min-h-0 min-w-0 flex-1 flex-col",
+					layout === "dialog" && "overflow-hidden",
+				)}
+			>
 				<header className="flex h-16 shrink-0 items-center px-4 pr-20 sm:px-6 xl:h-20 xl:px-8 xl:pr-6">
 					<div className="min-w-0">
 						<p className="truncate font-semibold xl:hidden">
@@ -455,7 +475,11 @@ export function UserSettingsPanel({
 
 						<SelectContent>
 							{navigation.map((item) => (
-								<SelectItem key={item.id} value={item.id}>
+								<SelectItem
+									key={item.id}
+									value={item.id}
+									disabled={!SUPPORTED_SETTINGS_SECTIONS.has(item.id)}
+								>
 									{item.name}
 								</SelectItem>
 							))}
@@ -463,7 +487,12 @@ export function UserSettingsPanel({
 					</Select>
 				</div>
 
-				<div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+				<div
+					className={cn(
+						"min-h-0 flex-1",
+						layout === "dialog" && "overflow-y-auto overscroll-contain",
+					)}
+				>
 					<div className="mx-auto w-full max-w-3xl p-4 sm:p-6 xl:p-8">
 						<SettingsSectionContent
 							section={activeSection}
@@ -475,7 +504,13 @@ export function UserSettingsPanel({
 					</div>
 				</div>
 
-				<footer className="flex shrink-0 items-center justify-end gap-2 border-t bg-background p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4">
+				<footer
+					className={cn(
+						"flex shrink-0 items-center justify-end gap-2 border-t bg-background p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4",
+						layout === "page" &&
+							"sticky bottom-[var(--mobile-dock-space,0px)] z-10",
+					)}
+				>
 					{onCancel && (
 						<Button
 							size="responsive-xl"
@@ -493,7 +528,7 @@ export function UserSettingsPanel({
 						size="responsive-xl"
 						type="submit"
 						form={`${activeSection}-settings-form`}
-						disabled={updateProfile.isPending}
+						disabled={updateProfile.isPending || activeSection !== "profile"}
 						aria-busy={updateProfile.isPending}
 						className="min-w-0 flex-1 sm:flex-none"
 					>
@@ -560,7 +595,11 @@ interface ProfileSettingsProps {
 	onSubmit?: (
 		values: ProfileEditorValues,
 		initialValues: ProfileEditorValues,
-	) => void | ProfileEditorValues | null | Promise<void | ProfileEditorValues | null>;
+	) =>
+		| void
+		| ProfileEditorValues
+		| null
+		| Promise<void | ProfileEditorValues | null>;
 }
 
 export function ProfileSettings({
@@ -1143,6 +1182,7 @@ function LanguageSettings({
 											<Globe />
 										</InputGroupAddon>
 										<InputGroupInput
+											disabled
 											id={field.name}
 											name={field.name}
 											list="settings-region-options"
@@ -1175,6 +1215,7 @@ function LanguageSettings({
 											<Globe />
 										</InputGroupAddon>
 										<InputGroupInput
+											disabled
 											id={field.name}
 											name={field.name}
 											list="settings-time-zone-options"
@@ -1504,6 +1545,7 @@ function SettingSwitch({
 			</FieldContent>
 
 			<Switch
+				disabled
 				id={id}
 				name={id}
 				checked={checked}
