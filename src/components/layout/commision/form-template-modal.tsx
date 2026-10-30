@@ -77,6 +77,8 @@ import {
 	type FormTemplateData,
 } from "@/schemas/commissions/templates";
 import type { FormFieldDto } from "@/types/commissions/templates";
+import { useTranslation } from "react-i18next";
+import appI18n from "@/lib/i18n";
 
 const FLOATING_LABEL_CLASSES =
 	"absolute left-3 top-3 z-10 origin-left -translate-y-2 scale-75 transform text-muted-foreground duration-200 peer-has-placeholder-shown:translate-y-0 peer-has-placeholder-shown:scale-100 peer-focus-within:-translate-y-2! peer-focus-within:scale-75! cursor-text pointer-events-none";
@@ -127,7 +129,10 @@ function fieldTypeHasOptions(type: string) {
 
 function buildDefaultOption(nextIndex: number): FormTemplateOption {
 	return {
-		label: `Option ${nextIndex}`,
+		label: appI18n.t("ui.option_value0", {
+			defaultValue: "Option {{value0}}",
+			value0: nextIndex,
+		}),
 		value: `opt_${nextIndex}`,
 		priceModifier: { type: "NONE", value: 0 },
 	};
@@ -136,7 +141,7 @@ function buildDefaultOption(nextIndex: number): FormTemplateOption {
 function buildDefaultField(type: FormFieldDto["type"]): FormTemplateField {
 	return {
 		type,
-		label: "New Field",
+		label: appI18n.t("ui.new_field", "New Field"),
 		required: false,
 		options: fieldTypeHasOptions(type) ? [buildDefaultOption(1)] : undefined,
 	};
@@ -200,6 +205,7 @@ function OptionLabelField({
 	optionIndex: number;
 	isBusy: boolean;
 }) {
+	const { t } = useTranslation();
 	const { control } = useFormContext<FormTemplateData>();
 
 	return (
@@ -213,7 +219,9 @@ function OptionLabelField({
 							<InputGroupInput placeholder=" " disabled={isBusy} {...field} />
 						</InputGroup>
 					</FormControl>
-					<FormLabel className={FLOATING_LABEL_CLASSES}>Option Label</FormLabel>
+					<FormLabel className={FLOATING_LABEL_CLASSES}>
+						{t("ui.option_label", "Option Label")}
+					</FormLabel>
 					<FormMessage />
 				</FormItem>
 			)}
@@ -230,6 +238,7 @@ function OptionPriceValueField({
 	optionIndex: number;
 	isBusy: boolean;
 }) {
+	const { t } = useTranslation();
 	const { control } = useFormContext<FormTemplateData>();
 
 	return (
@@ -253,7 +262,9 @@ function OptionPriceValueField({
 							/>
 						</InputGroup>
 					</FormControl>
-					<FormLabel className={FLOATING_LABEL_CLASSES}>Value</FormLabel>
+					<FormLabel className={FLOATING_LABEL_CLASSES}>
+						{t("ui.value", "Value")}
+					</FormLabel>
 					<FormMessage />
 				</FormItem>
 			)}
@@ -270,6 +281,7 @@ function OptionPriceTypeField({
 	optionIndex: number;
 	isBusy: boolean;
 }) {
+	const { t } = useTranslation();
 	const { control } = useFormContext<FormTemplateData>();
 
 	return (
@@ -285,13 +297,19 @@ function OptionPriceTypeField({
 					>
 						<FormControl>
 							<SelectTrigger className="w-[130px] text-sm">
-								<SelectValue placeholder="Price Mod" />
+								<SelectValue placeholder={t("ui.price_mod", "Price Mod")} />
 							</SelectTrigger>
 						</FormControl>
 						<SelectContent>
-							<SelectItem value="NONE">No Price</SelectItem>
-							<SelectItem value="FIXED">Fixed (+)</SelectItem>
-							<SelectItem value="PERCENT">Percent (+%)</SelectItem>
+							<SelectItem value="NONE">
+								{t("ui.no_price", "No Price")}
+							</SelectItem>
+							<SelectItem value="FIXED">
+								{t("ui.fixed", "Fixed (+)")}
+							</SelectItem>
+							<SelectItem value="PERCENT">
+								{t("ui.percent", "Percent (+%)")}
+							</SelectItem>
 						</SelectContent>
 					</Select>
 					<FormMessage />
@@ -312,6 +330,7 @@ function DeleteOptionAction({
 	isBusy: boolean;
 	onRemove: RemoveByIndex;
 }) {
+	const { t } = useTranslation();
 	const { getValues } = useFormContext<FormTemplateData>();
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
@@ -330,17 +349,23 @@ function DeleteOptionAction({
 			<ConfirmDialog
 				open={isDeleteOpen}
 				onOpenChange={setIsDeleteOpen}
-				title="Delete Option"
+				title={t("ui.delete_option", "Delete Option")}
 				description={
 					<>
-						Are you sure you want to delete the option{" "}
+						{t(
+							"ui.are_you_sure_you_want_to_delete_the_option",
+							"Are you sure you want to delete the option",
+						)}{" "}
 						<span className="font-semibold text-foreground">
 							"
 							{getValues(`fields.${fieldIndex}.options.${optionIndex}.label`) ||
-								"Unnamed Option"}
+								t("ui.unnamed_option", "Unnamed Option")}
 							"
 						</span>
-						? This action cannot be undone.
+						{t(
+							"ui.this_action_cannot_be_undone",
+							"? This action cannot be undone.",
+						)}
 					</>
 				}
 				onConfirm={() => {
@@ -422,6 +447,7 @@ function FieldRequiredSwitch({
 	fieldIndex: number;
 	isBusy: boolean;
 }) {
+	const { t } = useTranslation();
 	const { control } = useFormContext<FormTemplateData>();
 
 	return (
@@ -438,7 +464,7 @@ function FieldRequiredSwitch({
 						/>
 					</FormControl>
 					<FormLabel className="cursor-pointer text-sm font-medium">
-						Required field
+						{t("ui.required_field", "Required field")}
 					</FormLabel>
 				</FormItem>
 			)}
@@ -464,6 +490,7 @@ function DeleteFieldAction({
 	isBusy: boolean;
 	onRemove: () => void;
 }) {
+	const { t } = useTranslation();
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
 	return (
@@ -481,8 +508,11 @@ function DeleteFieldAction({
 			<ConfirmDialog
 				open={isDeleteOpen}
 				onOpenChange={setIsDeleteOpen}
-				title="Delete Field"
-				description="Are you sure you want to delete this field? This action cannot be undone."
+				title={t("ui.delete_field", "Delete Field")}
+				description={t(
+					"ui.are_you_sure_you_want_to_delete_this_field_this_action_cannot_be_undone",
+					"Are you sure you want to delete this field? This action cannot be undone.",
+				)}
 				onConfirm={() => {
 					setIsDeleteOpen(false);
 					onRemove();
@@ -573,16 +603,17 @@ function FieldBasicSettings({
 	fieldIndex: number;
 	isBusy: boolean;
 }) {
+	const { t } = useTranslation();
 	return (
 		<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 			<FieldTextInput
 				name={`fields.${fieldIndex}.label`}
-				label="Field Label"
+				label={t("ui.field_label", "Field Label")}
 				isBusy={isBusy}
 			/>
 			<FieldTextInput
 				name={`fields.${fieldIndex}.description`}
-				label="Description / Help Text"
+				label={t("ui.description_help_text", "Description / Help Text")}
 				isBusy={isBusy}
 			/>
 		</div>
@@ -634,18 +665,19 @@ function NumberFieldSettings({
 	fieldIndex: number;
 	isBusy: boolean;
 }) {
+	const { t } = useTranslation();
 	return (
 		<div className="grid grid-cols-1 gap-4 pt-2 sm:grid-cols-2">
 			<NumberFieldLimit
 				fieldIndex={fieldIndex}
 				name="minValue"
-				label="Minimum Value"
+				label={t("ui.minimum_value", "Minimum Value")}
 				isBusy={isBusy}
 			/>
 			<NumberFieldLimit
 				fieldIndex={fieldIndex}
 				name="maxValue"
-				label="Maximum Value"
+				label={t("ui.maximum_value", "Maximum Value")}
 				isBusy={isBusy}
 			/>
 		</div>
@@ -659,6 +691,7 @@ function FieldOptionsSection({
 	fieldIndex: number;
 	isBusy: boolean;
 }) {
+	const { t } = useTranslation();
 	const { control } = useFormContext<FormTemplateData>();
 
 	const {
@@ -674,7 +707,7 @@ function FieldOptionsSection({
 	return (
 		<div className="mt-4 space-y-4 rounded-2xl border p-3">
 			<FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-				Options
+				{t("ui.options", "Options")}
 			</FormLabel>
 
 			<Sortable
@@ -704,7 +737,7 @@ function FieldOptionsSection({
 				onClick={() => append(buildDefaultOption(optionFields.length + 1))}
 				disabled={isBusy}
 			>
-				<Plus /> Add Option
+				<Plus /> {t("ui.add_option", "Add Option")}
 			</Button>
 		</div>
 	);
@@ -772,27 +805,34 @@ function TemplateSidebar({
 }
 
 function TemplateSidebarHeader({ template }: { template?: any }) {
+	const { t } = useTranslation();
 	return (
 		<DialogHeader className="mb-6 space-y-1 text-left">
 			<DialogTitle>
-				{template ? "Edit Form Template" : "Create Form Template"}
+				{template
+					? t("ui.edit_form_template", "Edit Form Template")
+					: t("ui.create_form_template", "Create Form Template")}
 			</DialogTitle>
 			<DialogDescription className="text-xs">
-				Define the fields that clients must fill out when requesting a
-				commission.
+				{t(
+					"ui.define_the_fields_that_clients_must_fill_out_when_requesting_a_commission",
+					"Define the fields that clients must fill out when requesting a commission.",
+				)}
 			</DialogDescription>
 		</DialogHeader>
 	);
 }
 
 function TemplateSidebarFields({ isBusy }: { isBusy: boolean }) {
+	const { t } = useTranslation();
 	return (
 		<div className="space-y-6">
 			<FieldTextInput
 				name="name"
 				label={
 					<>
-						Template Name <span className="text-destructive">*</span>
+						{t("ui.template_name", "Template Name")}{" "}
+						<span className="text-destructive">*</span>
 					</>
 				}
 				isBusy={isBusy}
@@ -800,7 +840,7 @@ function TemplateSidebarFields({ isBusy }: { isBusy: boolean }) {
 
 			<FieldTextInput
 				name="description"
-				label="Description"
+				label={t("ui.description", "Description")}
 				isBusy={isBusy}
 				textarea
 			/>
@@ -817,6 +857,7 @@ function TemplateSidebarActions({
 	onClose: () => void;
 	onSubmitClick: (event?: React.BaseSyntheticEvent) => void;
 }) {
+	const { t } = useTranslation();
 	return (
 		<div className="mt-auto flex gap-2 pt-6">
 			<Button
@@ -826,7 +867,7 @@ function TemplateSidebarActions({
 				size="xl"
 				type="button"
 			>
-				Cancel
+				{t("ui.cancel", "Cancel")}
 			</Button>
 
 			<Button
@@ -838,7 +879,8 @@ function TemplateSidebarActions({
 			>
 				{isBusy ? (
 					<span className="flex items-center gap-2">
-						<Loader2 className="size-4 animate-spin" /> Saving&hellip;
+						<Loader2 className="size-4 animate-spin" />{" "}
+						{t("ui.saving", "Saving…")}
 					</span>
 				) : (
 					"Save"
@@ -874,12 +916,13 @@ function AddFieldMenu({
 	isBusy: boolean;
 	onAdd: (type: FormFieldDto["type"]) => void;
 }) {
+	const { t } = useTranslation();
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<Button variant="secondary" disabled={isBusy} type="button">
 					<OutlinePlus />
-					Add Field
+					{t("ui.add_field", "Add Field")}
 				</Button>
 			</DropdownMenuTrigger>
 
@@ -887,43 +930,43 @@ function AddFieldMenu({
 				<FieldTypeMenuItem
 					type="TEXT_INPUT"
 					icon={<Type />}
-					label="Short Text"
+					label={t("ui.short_text", "Short Text")}
 					onAdd={onAdd}
 				/>
 				<FieldTypeMenuItem
 					type="TEXTAREA"
 					icon={<AlignLeft />}
-					label="Long Text"
+					label={t("ui.long_text", "Long Text")}
 					onAdd={onAdd}
 				/>
 				<FieldTypeMenuItem
 					type="NUMBER_INPUT"
 					icon={<Hash />}
-					label="Number"
+					label={t("ui.number", "Number")}
 					onAdd={onAdd}
 				/>
 				<FieldTypeMenuItem
 					type="DATE_INPUT"
 					icon={<OutlineCalendar />}
-					label="Date"
+					label={t("ui.date", "Date")}
 					onAdd={onAdd}
 				/>
 				<FieldTypeMenuItem
 					type="RADIO"
 					icon={<CircleDot />}
-					label="Radio Buttons"
+					label={t("ui.radio_buttons", "Radio Buttons")}
 					onAdd={onAdd}
 				/>
 				<FieldTypeMenuItem
 					type="CHECKBOX"
 					icon={<OutlineCheck />}
-					label="Checkboxes"
+					label={t("ui.checkboxes", "Checkboxes")}
 					onAdd={onAdd}
 				/>
 				<FieldTypeMenuItem
 					type="SELECT"
 					icon={<OutlineListBoxes />}
-					label="Dropdown"
+					label={t("ui.dropdown", "Dropdown")}
 					onAdd={onAdd}
 				/>
 			</DropdownMenuContent>
@@ -944,9 +987,13 @@ function FieldsTopbar({
 	onAddField: (type: FormFieldDto["type"]) => void;
 	onClose: () => void;
 }) {
+	const { t } = useTranslation();
 	return (
 		<div className="flex h-16 shrink-0 items-center justify-between border-b px-6">
-			<h3 className="text-sm font-semibold">Form Fields ({fieldCount})</h3>
+			<h3 className="text-sm font-semibold">
+				{t("ui.form_fields", "Form Fields (")}
+				{fieldCount})
+			</h3>
 
 			<div className="flex gap-2">
 				<Button
@@ -956,7 +1003,7 @@ function FieldsTopbar({
 					onClick={onPreview}
 				>
 					<OutlineEye />
-					Preview
+					{t("ui.preview", "Preview")}
 				</Button>
 
 				<AddFieldMenu isBusy={isBusy} onAdd={onAddField} />
@@ -976,13 +1023,19 @@ function FieldsTopbar({
 }
 
 function EmptyFieldsState() {
+	const { t } = useTranslation();
 	return (
 		<div className="flex h-full flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
 			<div className="mb-4 rounded-full bg-muted p-3">
 				<Plus className="size-6" />
 			</div>
-			<p>No fields added yet.</p>
-			<p>Click "Add Field" to start building your form.</p>
+			<p>{t("ui.no_fields_added_yet", "No fields added yet.")}</p>
+			<p>
+				{t(
+					"ui.click_add_field_to_start_building_your_form",
+					'Click "Add Field" to start building your form.',
+				)}
+			</p>
 		</div>
 	);
 }
@@ -1127,6 +1180,7 @@ function FormTemplateModalContent({
 	onClose,
 	template,
 }: FormTemplateModalProps) {
+	const { t } = useTranslation();
 	const createMutation = useCreateFormTemplate();
 	const updateMutation = useUpdateFormTemplate();
 	const isBusy = createMutation.isPending || updateMutation.isPending;
@@ -1161,10 +1215,20 @@ function FormTemplateModalContent({
 						...cleanData,
 					},
 				});
-				toast.success("Template updated successfully");
+				toast.success(
+					t(
+						"ui.template_updated_successfully",
+						"Template updated successfully",
+					),
+				);
 			} else {
 				await createMutation.mutateAsync(cleanData as any);
-				toast.success("Template created successfully");
+				toast.success(
+					t(
+						"ui.template_created_successfully",
+						"Template created successfully",
+					),
+				);
 			}
 
 			onClose();

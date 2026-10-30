@@ -1,5 +1,6 @@
 import { OutlineReceipt } from "@/components/icons/icons";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface QuickMathItem {
 	label: string;
@@ -23,6 +24,7 @@ export function QuickMath({
 	total,
 	className,
 }: QuickMathProps) {
+	const { t } = useTranslation();
 	const savings = originalPrice ? originalPrice - basePrice : 0;
 	const discountPercentage = originalPrice
 		? Math.round(((originalPrice - basePrice) / originalPrice) * 100)
@@ -37,9 +39,9 @@ export function QuickMath({
 		>
 			<div className="mb-6 flex items-center gap-2 text-muted-foreground">
 				<OutlineReceipt className="size-5" />
-				<h3 className="font-semibold">Quick math</h3>
+				<h3 className="font-semibold">{t("ui.quick_math", "Quick math")}</h3>
 				<span className="ml-auto text-xs opacity-70">
-					Internal reference use only
+					{t("ui.internal_reference_use_only", "Internal reference use only")}
 				</span>
 			</div>
 
@@ -47,8 +49,12 @@ export function QuickMath({
 				{/* Base Price */}
 				<div className="flex items-center justify-between border-border/50 border-b pb-4">
 					<div className="flex flex-col gap-0.5">
-						<span className="font-medium text-sm">Base price</span>
-						<span className="text-muted-foreground text-xs">From service</span>
+						<span className="font-medium text-sm">
+							{t("ui.base_price", "Base price")}
+						</span>
+						<span className="text-muted-foreground text-xs">
+							{t("ui.from_service", "From service")}
+						</span>
 					</div>
 					<div className="rounded-lg bg-secondary/30 px-3 py-1.5 font-mono text-sm">
 						{originalPrice && (
@@ -64,12 +70,15 @@ export function QuickMath({
 				{savings > 0 && (
 					<div className="flex items-center justify-between border-border/50 border-b pb-4">
 						<div className="flex flex-col gap-0.5">
-							<span className="font-medium text-sm">Savings</span>
+							<span className="font-medium text-sm">
+								{t("ui.savings", "Savings")}
+							</span>
 							<div className="flex items-center gap-1 text-primary text-xs">
 								<span className="flex size-3.5 items-center justify-center rounded-full bg-primary/20 font-bold text-[10px]">
 									%
 								</span>
-								{discountPercentage}% off
+								{discountPercentage}
+								{t("ui.off", "% off")}
 							</div>
 						</div>
 						<div className="rounded-lg bg-primary/5 px-3 py-1.5 font-mono text-primary text-sm">
@@ -108,9 +117,11 @@ export function QuickMath({
 				{/* Total */}
 				<div className="flex items-center justify-between pt-2">
 					<div className="flex flex-col gap-0.5">
-						<span className="font-medium text-base">Project subtotal</span>
+						<span className="font-medium text-base">
+							{t("ui.project_subtotal", "Project subtotal")}
+						</span>
 						<span className="text-muted-foreground text-xs">
-							For all services
+							{t("ui.for_all_services", "For all services")}
 						</span>
 					</div>
 					{/* TODO: change USD to exchange */}
@@ -124,8 +135,10 @@ export function QuickMath({
 				<span className="mr-1 inline-block rounded-full border px-1.5 text-[10px]">
 					i
 				</span>
-				Note that this is an auto-generated estimate based on your request and
-				should not be considered as the final price.
+				{t(
+					"ui.note_that_this_is_an_auto_generated_estimate_based_on_your_request_and_shou",
+					"Note that this is an auto-generated estimate based on your request and should not be considered as the final price.",
+				)}
 			</div>
 		</div>
 	);

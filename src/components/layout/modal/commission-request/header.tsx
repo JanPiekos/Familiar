@@ -5,6 +5,7 @@ import {
 	DialogDescription,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
 
 interface CommissionRequestHeaderProps {
 	onBack: () => void;
@@ -17,6 +18,7 @@ export function CommissionRequestHeader({
 	artistName,
 	isPreview = false,
 }: CommissionRequestHeaderProps) {
+	const { t } = useTranslation();
 	return (
 		<div className="z-20 flex shrink-0 items-center justify-between border-b bg-background p-4">
 			<div className="flex items-center gap-2">
@@ -24,15 +26,19 @@ export function CommissionRequestHeader({
 					<OutlineArrowLeft />
 				</Button>
 				<DialogTitle className="flex items-center gap-2">
-					Commission Request
+					{t("ui.commission_request_b8445a", "Commission Request")}
 					{isPreview && (
 						<span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary uppercase tracking-wider">
-							Preview
+							{t("ui.preview", "Preview")}
 						</span>
 					)}
 				</DialogTitle>
 				<DialogDescription className="sr-only">
-					Fill out the form to request a commission from {artistName}
+					{t(
+						"ui.fill_out_the_form_to_request_a_commission_from",
+						"Fill out the form to request a commission from",
+					)}{" "}
+					{artistName}
 				</DialogDescription>
 			</div>
 			<DialogClose asChild>

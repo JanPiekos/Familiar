@@ -117,6 +117,8 @@ import type {
 } from "@/types/commissions";
 import { TCommissionStatus } from "@/types/commissions";
 import { FormTemplateModal } from "./form-template-modal";
+import { useTranslation } from "react-i18next";
+import appI18n from "@/lib/i18n";
 
 type EditorTab = "details" | "media" | "review";
 
@@ -161,20 +163,35 @@ const NAV_ITEMS: Array<{
 }> = [
 	{
 		key: "details",
-		label: "Details",
-		description: "Title, pricing, category & forms",
+		get label() {
+			return appI18n.t("ui.details", "Details");
+		},
+		get description() {
+			return appI18n.t(
+				"ui.title_pricing_category_forms",
+				"Title, pricing, category & forms",
+			);
+		},
 		icon: FileText,
 	},
 	{
 		key: "media",
-		label: "Media",
-		description: "Showcase your work",
+		get label() {
+			return appI18n.t("ui.media", "Media");
+		},
+		get description() {
+			return appI18n.t("ui.showcase_your_work", "Showcase your work");
+		},
 		icon: ImageIcon,
 	},
 	{
 		key: "review",
-		label: "Review",
-		description: "Review and publish",
+		get label() {
+			return appI18n.t("ui.review", "Review");
+		},
+		get description() {
+			return appI18n.t("ui.review_and_publish", "Review and publish");
+		},
 		icon: Eye,
 	},
 ];
@@ -332,16 +349,22 @@ function CommissionFormSidebar({
 	patchState: (patch: Partial<FormState>) => void;
 	stepStatus: Record<string, boolean>;
 }) {
+	const { t } = useTranslation();
 	return (
 		<aside className="flex w-72 shrink-0 flex-col border-r bg-muted/20">
 			<div className="border-b p-5">
 				<h2 className="text-base font-semibold text-foreground">
-					{isEditMode ? "Edit commission" : "New commission"}
+					{isEditMode
+						? t("ui.edit_commission", "Edit commission")
+						: t("ui.new_commission", "New commission")}
 				</h2>
 				<p className="mt-1 text-xs text-muted-foreground">
 					{isEditMode
-						? "Update your offering details"
-						: "Set up a new offering"}
+						? t(
+								"ui.update_your_offering_details",
+								"Update your offering details",
+							)
+						: t("ui.set_up_a_new_offering", "Set up a new offering")}
 				</p>
 				<div className="mt-4 flex items-center gap-2">
 					<Select
@@ -365,9 +388,9 @@ function CommissionFormSidebar({
 							</Badge>
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="ACTIVE">Active</SelectItem>
-							<SelectItem value="PAUSED">Paused</SelectItem>
-							<SelectItem value="DRAFT">Draft</SelectItem>
+							<SelectItem value="ACTIVE">{t("ui.active", "Active")}</SelectItem>
+							<SelectItem value="PAUSED">{t("ui.paused", "Paused")}</SelectItem>
+							<SelectItem value="DRAFT">{t("ui.draft", "Draft")}</SelectItem>
 						</SelectContent>
 					</Select>
 				</div>
@@ -414,7 +437,7 @@ function CommissionFormSidebar({
 						className="w-full"
 					>
 						<OutlineTrash />
-						Delete commission
+						{t("ui.delete_commission", "Delete commission")}
 					</Button>
 				)}
 			</div>
@@ -433,6 +456,7 @@ function MediaCard({
 	disabled: boolean;
 	onRemove: (id: string) => void;
 }) {
+	const { t } = useTranslation();
 	return (
 		<div className="group relative aspect-video overflow-hidden rounded-xl bg-muted border">
 			{item.previewUrl ? (
@@ -476,7 +500,7 @@ function MediaCard({
 					{item.fileName}
 				</p>
 				<p className="text-[10px] text-white/70">
-					{item.fileSizeLabel ?? "Existing media"}
+					{item.fileSizeLabel ?? t("ui.existing_media", "Existing media")}
 				</p>
 				{item.error ? (
 					<p className="text-[10px] text-destructive font-medium">
@@ -514,6 +538,7 @@ export function CommissionForm({
 	commissionId,
 	onClose,
 }: CommissionFormProps) {
+	const { t } = useTranslation();
 	const isEditMode = Boolean(commissionId);
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
@@ -583,7 +608,7 @@ export function CommissionForm({
 				if (item.file) acc.push(item.file);
 				return acc;
 			}, []),
-		[state.uploads],
+		[state.uploads, t],
 	);
 
 	const currentStatus =
@@ -597,7 +622,7 @@ export function CommissionForm({
 		: null;
 	const categoryTree = useMemo(
 		() => buildCategoryTree(categories),
-		[categories],
+		[categories, t],
 	);
 	const visibleCategoryOptions = useMemo(() => {
 		if (uiState.categoryPathStack.length === 0) return categoryTree;
@@ -605,13 +630,13 @@ export function CommissionForm({
 			uiState.categoryPathStack[uiState.categoryPathStack.length - 1];
 		const activeCategory = getCategoryNodeById(categoryTree, activeCategoryId);
 		return activeCategory?.children ?? [];
-	}, [categoryTree, uiState.categoryPathStack]);
+	}, [categoryTree, uiState.categoryPathStack, t]);
 	const activeCategoryLabel = useMemo(() => {
 		if (uiState.categoryPathStack.length === 0) return null;
 		const activeCategoryId =
 			uiState.categoryPathStack[uiState.categoryPathStack.length - 1];
 		return getCategoryNodeById(categoryTree, activeCategoryId)?.name ?? null;
-	}, [categoryTree, uiState.categoryPathStack]);
+	}, [categoryTree, uiState.categoryPathStack, t]);
 
 	const handleCategoryOpenChange = (open: boolean) => {
 		dispatchUi({ isCategoryOpen: open });
@@ -642,16 +667,16 @@ export function CommissionForm({
 
 		const total = state.uploads.reduce((sum, item) => sum + item.progress, 0);
 		return Math.round(total / state.uploads.length);
-	}, [state.uploads]);
+	}, [state.uploads, t]);
 
 	const regularTags = useMemo(
 		() => tags.filter((tag: TTagResponse) => !tag.hasContentWarning),
-		[tags],
+		[tags, t],
 	);
 
 	const contentWarningTags = useMemo(
 		() => tags.filter((tag: TTagResponse) => tag.hasContentWarning),
-		[tags],
+		[tags, t],
 	);
 
 	function patchState(patch: Partial<FormState>) {
@@ -803,7 +828,12 @@ export function CommissionForm({
 					}),
 				]);
 
-				toast.success("Commission updated successfully.");
+				toast.success(
+					t(
+						"ui.commission_updated_successfully",
+						"Commission updated successfully.",
+					),
+				);
 				setState((current) => ({ ...current, activeTab: "review" }));
 				return;
 			}
@@ -843,7 +873,12 @@ export function CommissionForm({
 				}),
 			]);
 
-			toast.success("Commission created and published.");
+			toast.success(
+				t(
+					"ui.commission_created_and_published",
+					"Commission created and published.",
+				),
+			);
 			setState((current) => ({ ...current, activeTab: "review" }));
 		} catch (error) {
 			toast.error(
@@ -861,12 +896,12 @@ export function CommissionForm({
 			media: state.uploads.length > 0,
 			review: false,
 		};
-	}, [state]);
+	}, [state, t]);
 
 	const completionPct = useMemo(() => {
 		const checks = [stepStatus.details, stepStatus.media];
 		return Math.round((checks.filter(Boolean).length / checks.length) * 100);
-	}, [stepStatus]);
+	}, [stepStatus, t]);
 
 	const canPublish = stepStatus.details && stepStatus.media;
 
@@ -897,12 +932,20 @@ export function CommissionForm({
 				className="flex flex-col overflow-hidden rounded-2xl p-0 md:h-[65vh] md:max-w-5xl border bg-background shadow-2xl"
 			>
 				<DialogTitle className="sr-only">
-					{isEditMode ? "Edit commission" : "Create commission"}
+					{isEditMode
+						? t("ui.edit_commission", "Edit commission")
+						: t("ui.create_commission_c13e6f", "Create commission")}
 				</DialogTitle>
 				<DialogDescription className="sr-only">
 					{isEditMode
-						? "Edit your commission offering."
-						: "Create and publish a commission offering."}
+						? t(
+								"ui.edit_your_commission_offering",
+								"Edit your commission offering.",
+							)
+						: t(
+								"ui.create_and_publish_a_commission_offering",
+								"Create and publish a commission offering.",
+							)}
 				</DialogDescription>
 
 				<Stepper
@@ -930,7 +973,8 @@ export function CommissionForm({
 									{currentStep?.label}
 								</h3>
 								<p className="text-xs text-muted-foreground">
-									Step {currentStepIndex + 1} of {NAV_ITEMS.length} -{" "}
+									{t("ui.step", "Step")} {currentStepIndex + 1}{" "}
+									{t("ui.of", "of")} {NAV_ITEMS.length} -{" "}
 									{currentStep?.description}
 								</p>
 							</div>
@@ -961,7 +1005,7 @@ export function CommissionForm({
 									variant="ghost"
 									size={"icon"}
 									onClick={onClose}
-									aria-label="Close"
+									aria-label={t("ui.close", "Close")}
 									disabled={isBusy}
 								>
 									<OutlineClose />
@@ -976,7 +1020,9 @@ export function CommissionForm({
 										<div className="space-y-6">
 											<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 												<div className="space-y-2">
-													<Label htmlFor="commission-title">Title</Label>
+													<Label htmlFor="commission-title">
+														{t("ui.title", "Title")}
+													</Label>
 													<InputGroup>
 														<InputGroupAddon>
 															<Type className="size-4" />
@@ -987,14 +1033,17 @@ export function CommissionForm({
 															onChange={(event) =>
 																patchState({ title: event.target.value })
 															}
-															placeholder="Portrait commission"
+															placeholder={t(
+																"ui.portrait_commission",
+																"Portrait commission",
+															)}
 															disabled={isBusy}
 														/>
 													</InputGroup>
 												</div>
 
 												<div className="space-y-2">
-													<Label>Category</Label>
+													<Label>{t("ui.category", "Category")}</Label>
 													<Popover
 														open={uiState.isCategoryOpen}
 														onOpenChange={handleCategoryOpenChange}
@@ -1014,7 +1063,8 @@ export function CommissionForm({
 																			"text-muted-foreground",
 																	)}
 																>
-																	{selectedCategoryLabel || "Select category"}
+																	{selectedCategoryLabel ||
+																		t("ui.select_category", "Select category")}
 																</span>
 																<OutlineChevronRight className="rotate-90 text-muted-foreground" />
 															</Button>
@@ -1029,10 +1079,18 @@ export function CommissionForm({
 															className="w-(--radix-popover-trigger-width) min-w-[320px] overflow-hidden rounded-(--command-content-radius) p-0"
 														>
 															<Command className="max-h-[min(420px,var(--radix-popover-content-available-height))]">
-																<CommandInput placeholder="Search category..." />
+																<CommandInput
+																	placeholder={t(
+																		"ui.search_category",
+																		"Search category...",
+																	)}
+																/>
 																<CommandList className="max-h-[min(360px,calc(var(--radix-popover-content-available-height)-3rem))] overflow-y-auto overscroll-contain touch-pan-y">
 																	<CommandEmpty>
-																		No category found.
+																		{t(
+																			"ui.no_category_found",
+																			"No category found.",
+																		)}
 																	</CommandEmpty>
 																	{uiState.categoryPathStack.length > 0 && (
 																		<CommandGroup>
@@ -1050,8 +1108,12 @@ export function CommissionForm({
 																			>
 																				<ChevronLeft className="mr-2 size-4" />
 																				{activeCategoryLabel
-																					? `Back from ${activeCategoryLabel}`
-																					: "Back"}
+																					? t("ui.back_from_value0", {
+																							defaultValue:
+																								"Back from {{value0}}",
+																							value0: activeCategoryLabel,
+																						})
+																					: t("ui.back", "Back")}
 																			</CommandItem>
 																			<CommandItem
 																				onSelect={() => {
@@ -1076,7 +1138,10 @@ export function CommissionForm({
 																						{activeCategoryLabel}
 																					</span>
 																					<span className="text-muted-foreground text-xs">
-																						Main category
+																						{t(
+																							"ui.main_category",
+																							"Main category",
+																						)}
 																					</span>
 																				</div>
 																				<div className="ml-2 flex items-center gap-1">
@@ -1162,7 +1227,7 @@ export function CommissionForm({
 
 											<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 												<div className="space-y-2">
-													<Label>Base price</Label>
+													<Label>{t("ui.base_price", "Base price")}</Label>
 													<InputGroup>
 														<InputGroupAddon>
 															{state.currencyCode.toUpperCase()}
@@ -1182,7 +1247,7 @@ export function CommissionForm({
 												</div>
 
 												<div className="space-y-2">
-													<Label>Currency</Label>
+													<Label>{t("ui.currency", "Currency")}</Label>
 													<CurrencySelect
 														value={state.currencyCode}
 														onValueChange={(currencyCode) =>
@@ -1198,11 +1263,13 @@ export function CommissionForm({
 												<div className="flex items-start justify-between gap-4">
 													<div className="space-y-1">
 														<Label className="text-sm font-medium">
-															Form Template
+															{t("ui.form_template", "Form Template")}
 														</Label>
 														<p className="text-xs text-muted-foreground">
-															Choose a form template that clients will fill out
-															when requesting this commission.
+															{t(
+																"ui.choose_a_form_template_that_clients_will_fill_out_when_requesting_this_comm",
+																"Choose a form template that clients will fill out when requesting this commission.",
+															)}
 														</p>
 													</div>
 													{state.selectedTemplateId &&
@@ -1215,7 +1282,7 @@ export function CommissionForm({
 																	dispatchUi({ isTemplateModalOpen: true })
 																}
 															>
-																Edit template
+																{t("ui.edit_template", "Edit template")}
 															</Button>
 														)}
 												</div>
@@ -1236,10 +1303,17 @@ export function CommissionForm({
 														disabled={isBusy}
 													>
 														<SelectTrigger className="w-full">
-															<SelectValue placeholder="Select a form template" />
+															<SelectValue
+																placeholder={t(
+																	"ui.select_a_form_template",
+																	"Select a form template",
+																)}
+															/>
 														</SelectTrigger>
 														<SelectContent>
-															<SelectItem value="none">None</SelectItem>
+															<SelectItem value="none">
+																{t("ui.none", "None")}
+															</SelectItem>
 															{formTemplates?.map((template) => (
 																<SelectItem
 																	key={template.id}
@@ -1258,7 +1332,7 @@ export function CommissionForm({
 
 										<div className="space-y-2">
 											<Label htmlFor="commission-description">
-												Description
+												{t("ui.description", "Description")}
 											</Label>
 											<Textarea
 												id="commission-description"
@@ -1272,11 +1346,11 @@ export function CommissionForm({
 										</div>
 
 										<div className="space-y-3">
-											<Label>Tags</Label>
+											<Label>{t("ui.tags", "Tags")}</Label>
 											<div className="space-y-4">
 												<div className="space-y-2">
 													<p className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wider">
-														General tags
+														{t("ui.general_tags", "General tags")}
 													</p>
 													<div className="flex flex-wrap gap-2">
 														{regularTags.map((tag: TTagResponse) => {
@@ -1301,7 +1375,7 @@ export function CommissionForm({
 
 												<div className="space-y-2">
 													<p className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wider">
-														Content warnings
+														{t("ui.content_warnings", "Content warnings")}
 													</p>
 													<div className="flex flex-wrap gap-2">
 														{contentWarningTags.map((tag: TTagResponse) => {
@@ -1326,7 +1400,7 @@ export function CommissionForm({
 																	// 		: "border-destructive/30 bg-background text-destructive/70 hover:bg-destructive/5",
 																	// )}
 																>
-																	CW: {tag.name}
+																	{t("ui.cw", "CW:")} {tag.name}
 																</Button>
 															);
 														})}
@@ -1345,12 +1419,13 @@ export function CommissionForm({
 											</div>
 											<div>
 												<h4 className="text-sm font-medium text-sky-700 dark:text-sky-100">
-													Show your best work
+													{t("ui.show_your_best_work", "Show your best work")}
 												</h4>
 												<p className="mt-0.5 text-xs leading-relaxed text-sky-600/80 dark:text-sky-200/60">
-													The first image is used as the gallery thumbnail.
-													Upload up to 10 images - drag to reorder. Existing
-													media is loaded here in edit mode.
+													{t(
+														"ui.the_first_image_is_used_as_the_gallery_thumbnail_upload_up_to_10_images_dra",
+														"The first image is used as the gallery thumbnail. Upload up to 10 images - drag to reorder. Existing media is loaded here in edit mode.",
+													)}
 												</p>
 											</div>
 										</div>
@@ -1381,10 +1456,16 @@ export function CommissionForm({
 												</div>
 												<div>
 													<p className="font-medium text-sm">
-														Drag and drop or click to upload
+														{t(
+															"ui.drag_and_drop_or_click_to_upload",
+															"Drag and drop or click to upload",
+														)}
 													</p>
 													<p className="mt-1 text-muted-foreground text-sm">
-														Existing media is loaded here in edit mode.
+														{t(
+															"ui.existing_media_is_loaded_here_in_edit_mode",
+															"Existing media is loaded here in edit mode.",
+														)}
 													</p>
 												</div>
 											</label>
@@ -1394,10 +1475,11 @@ export function CommissionForm({
 											<div className="space-y-3">
 												<div className="flex items-center justify-between">
 													<span className="font-medium text-sm">
-														Media items ({state.uploads.length})
+														{t("ui.media_items", "Media items (")}
+														{state.uploads.length})
 													</span>
 													<span className="text-muted-foreground text-xs">
-														Drag to reorder
+														{t("ui.drag_to_reorder", "Drag to reorder")}
 													</span>
 												</div>
 												<div className="grid grid-cols-3 gap-3">
@@ -1430,7 +1512,9 @@ export function CommissionForm({
 															}}
 														/>
 														<Plus className="mb-1 size-5" />
-														<span className="text-xs">Add more</span>
+														<span className="text-xs">
+															{t("ui.add_more", "Add more")}
+														</span>
 													</label>
 												</div>
 											</div>
@@ -1441,60 +1525,81 @@ export function CommissionForm({
 								{state.activeTab === "review" ? (
 									<div className="space-y-6">
 										<div className="rounded-2xl border p-5">
-											<p className="font-medium text-sm">Summary</p>
+											<p className="font-medium text-sm">
+												{t("ui.summary", "Summary")}
+											</p>
 											<div className="mt-4 space-y-3 text-sm">
 												<div className="flex items-center justify-between border-b border-border/60 pb-3 last:border-0 last:pb-0">
-													<span className="text-muted-foreground">Title</span>
+													<span className="text-muted-foreground">
+														{t("ui.title", "Title")}
+													</span>
 													<span className="font-medium">
 														{state.title || "—"}
 													</span>
 												</div>
 												<div className="flex items-center justify-between border-b border-border/60 pb-3 last:border-0 last:pb-0">
 													<span className="text-muted-foreground">
-														Category
+														{t("ui.category", "Category")}
 													</span>
 													<span className="font-medium">
 														{selectedCategoryLabel || "—"}
 													</span>
 												</div>
 												<div className="flex items-center justify-between border-b border-border/60 pb-3 last:border-0 last:pb-0">
-													<span className="text-muted-foreground">Price</span>
+													<span className="text-muted-foreground">
+														{t("ui.price", "Price")}
+													</span>
 													<span className="font-medium">
 														{state.basePrice} {state.currencyCode.toUpperCase()}
 													</span>
 												</div>
 												<div className="flex items-center justify-between border-b border-border/60 pb-3 last:border-0 last:pb-0">
-													<span className="text-muted-foreground">Media</span>
+													<span className="text-muted-foreground">
+														{t("ui.media", "Media")}
+													</span>
 													<span className="font-medium">
-														{state.uploads.length} items
+														{state.uploads.length} {t("ui.items", "items")}
 													</span>
 												</div>
 												<div className="flex items-center justify-between border-b border-border/60 pb-3 last:border-0 last:pb-0">
 													<span className="text-muted-foreground">
-														Template
+														{t("ui.template", "Template")}
 													</span>
 													<span className="font-medium">
-														{state.selectedTemplateId ? "Assigned" : "None"}
+														{state.selectedTemplateId
+															? t("ui.assigned", "Assigned")
+															: t("ui.none", "None")}
 													</span>
 												</div>
 											</div>
 										</div>
 
 										<div className="rounded-2xl border p-5">
-											<p className="font-medium text-sm">Before publishing</p>
+											<p className="font-medium text-sm">
+												{t("ui.before_publishing", "Before publishing")}
+											</p>
 											<div className="mt-4 space-y-3">
 												{[
 													{
-														label: "Title and description are complete",
+														label: t(
+															"ui.title_and_description_are_complete",
+															"Title and description are complete",
+														),
 														done:
 															state.title.length > 0 &&
 															state.description.length > 0,
 													},
 													{
-														label: "At least one media item uploaded",
+														label: t(
+															"ui.at_least_one_media_item_uploaded",
+															"At least one media item uploaded",
+														),
 														done: state.uploads.length > 0,
 													},
-													{ label: "Price is set", done: state.basePrice > 0 },
+													{
+														label: t("ui.price_is_set", "Price is set"),
+														done: state.basePrice > 0,
+													},
 												].map((item) => (
 													<div
 														key={item.label}
@@ -1533,11 +1638,16 @@ export function CommissionForm({
 											<AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
 											<div>
 												<p className="font-medium text-sm text-warning">
-													Review before publishing
+													{t(
+														"ui.review_before_publishing",
+														"Review before publishing",
+													)}
 												</p>
 												<p className="mt-0.5 text-xs text-warning/80">
-													Once published, your listing will be visible to all
-													users. You can pause or edit it anytime.
+													{t(
+														"ui.once_published_your_listing_will_be_visible_to_all_users_you_can_pause_or_e",
+														"Once published, your listing will be visible to all users. You can pause or edit it anytime.",
+													)}
 												</p>
 											</div>
 										</div>
@@ -1554,7 +1664,7 @@ export function CommissionForm({
 								disabled={currentStepIndex === 0 || isBusy}
 							>
 								<ArrowLeft className="size-4" />
-								Back
+								{t("ui.back", "Back")}
 							</Button>
 
 							{state.activeTab !== "review" ? (
@@ -1564,7 +1674,7 @@ export function CommissionForm({
 									onClick={goNext}
 									disabled={isBusy}
 								>
-									Continue
+									{t("ui.continue", "Continue")}
 									<ChevronRight />
 								</Button>
 							) : (
@@ -1576,7 +1686,9 @@ export function CommissionForm({
 									disabled={!canPublish || isBusy}
 								>
 									{isBusy ? <Loader2 className="animate-spin" /> : <Globe />}
-									{isEditMode ? "Save changes" : "Publish commission"}
+									{isEditMode
+										? t("ui.save_changes", "Save changes")
+										: t("ui.publish_commission", "Publish commission")}
 								</Button>
 							)}
 						</footer>

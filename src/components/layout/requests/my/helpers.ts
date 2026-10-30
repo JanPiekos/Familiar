@@ -4,6 +4,7 @@ import {
 	TCommissionRequestStatus,
 } from "@/types/commissions";
 import { TPaymentStatus } from "@/types/payment";
+import appI18n from "@/lib/i18n";
 
 export type RequestPayment = {
 	paymentStatus: TPaymentStatus;
@@ -20,18 +21,27 @@ export type DetailTab = "details" | "delivery" | "review";
 
 export const ITEMS_PER_PAGE = 10;
 
-const SHORT_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+function localizedDate(options: Intl.DateTimeFormatOptions) {
+	return {
+		format: (date: Date) =>
+			new Intl.DateTimeFormat(appI18n.resolvedLanguage ?? "en", options).format(
+				date,
+			),
+	};
+}
+
+const SHORT_DATE_FORMATTER = localizedDate({
 	month: "short",
 	day: "numeric",
 	year: "numeric",
 });
 
-const TIME_FORMATTER = new Intl.DateTimeFormat("en-US", {
+const TIME_FORMATTER = localizedDate({
 	hour: "numeric",
 	minute: "2-digit",
 });
 
-const DETAILED_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+const DETAILED_DATE_FORMATTER = localizedDate({
 	month: "short",
 	day: "numeric",
 	year: "numeric",
@@ -79,34 +89,34 @@ export function getRequestTimelineFilterValue(
 export function stageLabel(stage: TCommissionRequestStatus): string {
 	switch (stage) {
 		case TCommissionRequestStatus.Pending:
-			return "Pending";
+			return appI18n.t("ui.pending", "Pending");
 		case TCommissionRequestStatus.Accepted:
-			return "Accepted";
+			return appI18n.t("ui.accepted", "Accepted");
 		case TCommissionRequestStatus.In_Progress:
-			return "In Progress";
+			return appI18n.t("ui.in_progress_829ac8", "In Progress");
 		case TCommissionRequestStatus.Delivered:
-			return "Delivered";
+			return appI18n.t("ui.delivered", "Delivered");
 		case TCommissionRequestStatus.Completed:
-			return "Completed";
+			return appI18n.t("ui.completed", "Completed");
 		case TCommissionRequestStatus.Cancelled:
-			return "Cancelled";
+			return appI18n.t("ui.cancelled", "Cancelled");
 		default:
-			return "Unknown";
+			return appI18n.t("ui.unknown", "Unknown");
 	}
 }
 
 export function paymentLabel(payment: TPaymentStatus): string {
 	switch (payment) {
 		case TPaymentStatus.Completed:
-			return "Paid";
+			return appI18n.t("ui.paid", "Paid");
 		case TPaymentStatus.Pending:
-			return "Pending";
+			return appI18n.t("ui.pending", "Pending");
 		case TPaymentStatus.Failed:
-			return "Failed";
+			return appI18n.t("ui.failed", "Failed");
 		case TPaymentStatus.Refunded:
-			return "Refunded";
+			return appI18n.t("ui.refunded", "Refunded");
 		default:
-			return "Pending";
+			return appI18n.t("ui.pending", "Pending");
 	}
 }
 
@@ -156,7 +166,11 @@ export function formatDetailedDate(date: string) {
 
 export function getRequestTitle(request: RequestItem) {
 	const text = request.description?.trim();
-	if (!text) return `Commission request ${request.id}`;
+	if (!text)
+		return appI18n.t("ui.commission_request_id", {
+			defaultValue: `Commission request ${request.id}`,
+			id: request.id,
+		});
 	return text.length > 44 ? `${text.slice(0, 44).trimEnd()}…` : text;
 }
 
@@ -168,42 +182,60 @@ export function getRequestAvatarLabel(request: RequestItem) {
 export function getRequestTimeline(request: RequestItem) {
 	if (request.status === TCommissionRequestStatus.Completed) {
 		return {
-			primary: "Completed",
-			secondary: `Updated ${formatShortDate(request.updatedAt)}`,
+			primary: appI18n.t("ui.completed", "Completed"),
+			secondary: appI18n.t("ui.updated_value0", {
+				defaultValue: "Updated {{value0}}",
+				value0: formatShortDate(request.updatedAt),
+			}),
 		};
 	}
 
 	if (request.status === TCommissionRequestStatus.Delivered) {
 		return {
-			primary: "Ready for review",
-			secondary: `Updated ${formatShortDate(request.updatedAt)}`,
+			primary: appI18n.t("ui.ready_for_review", "Ready for review"),
+			secondary: appI18n.t("ui.updated_value0", {
+				defaultValue: "Updated {{value0}}",
+				value0: formatShortDate(request.updatedAt),
+			}),
 		};
 	}
 
 	if (request.status === TCommissionRequestStatus.In_Progress) {
 		return {
-			primary: "Work in progress",
-			secondary: `Updated ${formatShortDate(request.updatedAt)}`,
+			primary: appI18n.t("ui.work_in_progress", "Work in progress"),
+			secondary: appI18n.t("ui.updated_value0", {
+				defaultValue: "Updated {{value0}}",
+				value0: formatShortDate(request.updatedAt),
+			}),
 		};
 	}
 
 	if (request.status === TCommissionRequestStatus.Accepted) {
 		return {
-			primary: "Accepted",
-			secondary: `Updated ${formatShortDate(request.updatedAt)}`,
+			primary: appI18n.t("ui.accepted", "Accepted"),
+			secondary: appI18n.t("ui.updated_value0", {
+				defaultValue: "Updated {{value0}}",
+				value0: formatShortDate(request.updatedAt),
+			}),
 		};
 	}
 
 	if (request.status === TCommissionRequestStatus.Cancelled) {
 		return {
-			primary: "Cancelled",
-			secondary: `Updated ${formatShortDate(request.updatedAt)}`,
+			primary: appI18n.t("ui.cancelled", "Cancelled"),
+			secondary: appI18n.t("ui.updated_value0", {
+				defaultValue: "Updated {{value0}}",
+				value0: formatShortDate(request.updatedAt),
+			}),
 		};
 	}
 
 	return {
-		primary: "Awaiting review",
-		secondary: `Submitted ${formatShortDate(request.createdAt)}`,
+		primary: appI18n.t("ui.awaiting_review", "Awaiting review"),
+		secondary: appI18n.t("ui.submitted_value0", {
+			defaultValue: "Submitted {{value0}}",
+			value0: formatShortDate(request.createdAt),
+		}),
 	};
 }
 
