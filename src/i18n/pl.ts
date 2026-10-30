@@ -1,3 +1,5 @@
+import type en from "./en";
+
 const pl = {
 	error_preview: {
 		title: "Podgląd stron błędów",
@@ -2422,6 +2424,6 @@ const pl = {
 		review_tab: "Opinia",
 		no_categories_found: "Nie znaleziono kategorii.",
 	},
-};
+} satisfies typeof en;
 
 export default pl;
