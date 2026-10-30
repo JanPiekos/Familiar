@@ -2,18 +2,16 @@ import {
 	createFileRoute,
 	Link,
 	notFound,
-	redirect,
 	Outlet,
+	redirect,
 	useLocation,
-	useNavigate,
 	useMatch,
+	useNavigate,
 } from "@tanstack/react-router";
 import { t } from "i18next";
 
 import { OutlineUser } from "@/components/icons/icons";
 import { EmptyPage } from "@/components/layout/empty-page";
-import { AvatarFavicon } from "@/components/layout/profile/avatar-favicon";
-import { FacehashFavicon } from "@/components/layout/profile/facehash-favicon";
 import { ProfileCommissions } from "@/components/layout/profile/feed/commissions";
 import { ProfilePortfolio } from "@/components/layout/profile/feed/portfolio";
 import {
@@ -30,7 +28,6 @@ import { useIsMobile } from "@/hooks/ui/use-mobile";
 import { useProfileContent } from "@/hooks/user/use-profile-content";
 import { userByUsernameQueryOptions } from "@/hooks/user/use-user";
 import i18n from "@/lib/i18n";
-import { getSeoLinks, seo } from "@/lib/seo";
 
 type ProfileFaviconUser = {
 	avatarPath?: string | null;
@@ -103,27 +100,7 @@ export const Route = createFileRoute("/{-$locale}/_main/user/$username")({
 			},
 		};
 	},
-	head: ({ loaderData, params }) => ({
-		meta: seo({
-			title: loaderData?.seo.title ?? "",
-			description: loaderData?.seo.description ?? "",
-			pathname: `/${params.username}`,
-			locale: params.locale,
-		}),
-		links: [
-			...getSeoLinks(`/${params.username}`, params.locale),
-			...(loaderData?.faviconUrl
-				? [
-						{
-							rel: "icon" as const,
-							href: loaderData.faviconUrl,
-							type: "image/svg+xml",
-							sizes: "any",
-						},
-					]
-				: []),
-		],
-	}),
+
 	pendingComponent: UserProfileSkeleton,
 	notFoundComponent: UserNotFoundComponent,
 	component: RouteComponent,
@@ -202,7 +179,7 @@ export function DefaultPortfolioTabContent({ username }: { username: string }) {
 // FIXME: when user is not logged in and opens a portfolio detail page,
 // there is no creator information.
 function RouteComponent() {
-	const { user, username, faviconUrl } = Route.useLoaderData();
+	const { user, username } = Route.useLoaderData();
 
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -213,17 +190,6 @@ function RouteComponent() {
 		shouldThrow: false,
 		select: (match) => match.params.tab,
 	});
-	const profileFavicon = !user.avatarPath ? (
-		<FacehashFavicon
-			name={
-				user.displayName?.trim() ||
-				user.username?.trim() ||
-				user.userId ||
-				username
-			}
-			backgroundColor={user.accentColor}
-		/>
-	) : <AvatarFavicon src={faviconUrl} />;
 
 	const activeTab = routeTab ?? "portfolio";
 	const hasPortfolio = hasArtistPortfolio(user);
@@ -239,36 +205,28 @@ function RouteComponent() {
 
 	// Direct visits and mobile post pages use the dedicated route layout.
 	if (isAnyPostRoute && (!isModal || isMobile)) {
-		return (
-			<>
-				{profileFavicon}
-				<Outlet />
-			</>
-		);
+		return <Outlet />;
 	}
 
 	return (
-		<>
-			{profileFavicon}
-			<UserProfile
-				user={user}
-				activeTab={activeTab}
-				onTabChange={(tab) => {
-					if (tab === activeTab) return;
+		<UserProfile
+			user={user}
+			activeTab={activeTab}
+			onTabChange={(tab) => {
+				if (tab === activeTab) return;
 
-					void navigate({
-						to: "/{-$locale}/user/$username/$tab",
-						params: {
-							locale: params.locale,
-							username,
-							tab,
-						},
-						replace: isModal,
-					});
-				}}
-			>
-				<Outlet />
-			</UserProfile>
-		</>
+				void navigate({
+					to: "/{-$locale}/user/$username/$tab",
+					params: {
+						locale: params.locale,
+						username,
+						tab,
+					},
+					replace: isModal,
+				});
+			}}
+		>
+			<Outlet />
+		</UserProfile>
 	);
 }

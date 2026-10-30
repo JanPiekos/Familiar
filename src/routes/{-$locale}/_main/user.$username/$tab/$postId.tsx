@@ -3,6 +3,7 @@ import {
 	useLocation,
 	useNavigate,
 } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { CommissionForm } from "@/components/layout/commision/commission-form";
 import { CommissionModal } from "@/components/layout/modal/commission";
 import {
@@ -15,16 +16,20 @@ import {
 } from "@/components/layout/profile/feed/portfolio-unavailable";
 import { useIsMobile } from "@/hooks/ui/use-mobile";
 import { useUserByUsername } from "@/hooks/user/use-user";
+import { loadPostSeo } from "@/lib/content-seo";
 import type { TUserProfile } from "@/types/user";
 import { UserFeedContent } from "../$tab";
 
 export const Route = createFileRoute(
 	"/{-$locale}/_main/user/$username/$tab/$postId",
 )({
+	loader: ({ params, context }) => loadPostSeo(context.queryClient, params),
+
 	component: RouteComponent,
 });
 
 function RouteComponent() {
+	const { t } = useTranslation();
 	const { locale, username, tab, postId } = Route.useParams();
 	const location = useLocation();
 
@@ -81,7 +86,7 @@ function RouteComponent() {
 					{!isMobile && user && (
 						<div className="mx-auto w-full max-w-[1440px] md:px-4 lg:px-6 mb-12 border-t pt-8">
 							<h2 className="text-xl font-semibold mb-6">
-								More from {user.username}
+								{t("ui.more_from", "More from")} {user.username}
 							</h2>
 							<UserFeedContent user={user as TUserProfile} tab={tab} />
 						</div>

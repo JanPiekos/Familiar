@@ -8,103 +8,100 @@ import i18n, {
 import type { Meta } from "@/types/seo";
 
 const siteUrl =
-	(import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, "") ||
+	(import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, "") ||
 	"https://www.familiar.art";
+const localeTags: Record<string, string> = { en: "en_US", pl: "pl_PL" };
 
-export const getMetaDefaults = (): Meta => ({
-	title: i18n.t("seo.defaults.title"),
-	description: i18n.t("seo.defaults.description", {
-		defaultValue: i18n.t("seo.defaults.description"),
-	}),
-	keywords: i18n.t("seo.defaults.keywords", {
-		defaultValue: i18n.t("seo.defaults.keywords"),
-	}),
-	image: `https://og-image.vercel.app/${encodeURIComponent(i18n.t("seo.defaults.title"))}.png`,
-});
+export const getMetaDefaults = (locale?: string): Meta => {
+	const t = i18n.getFixedT(resolveLocale(locale ?? getCurrentLocale()));
+	return {
+		title: t("seo.defaults.title"),
+		description: t("seo.defaults.description"),
+		keywords: t("seo.defaults.keywords"),
+		image: `${siteUrl}/og-image.png`,
+		imageAlt: "Familiar",
+	};
+};
 
 export function getLocalizedUrl(pathname: string, locale?: string) {
-	return `${siteUrl}${localizePath(pathname, locale)}`;
+	// Tracking, filters, authentication tokens and anchors never belong in canonicals.
+	const path = pathname.split(/[?#]/)[0].replace(/\/+$/, "") || "/";
+	return `${siteUrl}${localizePath(path, resolveLocale(locale))}`;
 }
 
 export function getSeoLinks(pathname: string, locale?: string) {
-	const resolvedLocale = resolveLocale(locale);
-
 	return [
-		{
-			rel: "canonical" as const,
-			href: getLocalizedUrl(pathname, resolvedLocale),
-		},
+		{ rel: "canonical" as const, href: getLocalizedUrl(pathname, locale) },
 		...languages.map((language) => ({
 			rel: "alternate" as const,
-			hrefLang: language.value === defaultLocale ? "x-default" : language.value,
+			hrefLang: language.value,
 			href: getLocalizedUrl(pathname, language.value),
 		})),
+		{
+			rel: "alternate" as const,
+			hrefLang: "x-default",
+			href: getLocalizedUrl(pathname, defaultLocale),
+		},
 	];
 }
 
-function getAlternateLocaleTags(currentLang: string) {
-	const tags: Array<{ property: "og:locale:alternate"; content: string }> = [];
-
-	for (const lang of languages) {
-		if (lang.value === currentLang) {
-			continue;
-		}
-
-		tags.push({
-			property: "og:locale:alternate",
-			content: lang.value,
-		});
-	}
-
-	return tags;
-}
-
-const seo = ({
+export function seo({
 	title,
 	description,
 	keywords,
 	image,
+	imageAlt,
 	url,
 	pathname,
 	locale,
-}: Meta) => {
-	const defaults = getMetaDefaults();
-	// TODO: do we need  | Familiar?
-	// FIXME: on hover, it show Familiar Work
+	type = "website",
+	noIndex,
+}: Meta) {
+	const currentLang = resolveLocale(locale ?? getCurrentLocale());
+	const defaults = getMetaDefaults(currentLang);
+	const pageTitle = title.trim() || defaults.title;
 	const mergedTitle =
-		title === defaults.title ? title : `${title} | ${defaults.title}`; // | ${defaults.title}
+		pageTitle === defaults.title || pageTitle.endsWith(` | ${defaults.title}`)
+			? pageTitle
+			: `${pageTitle} | ${defaults.title}`;
 	const mergedImage = image || defaults.image;
-
-	const currentLang = resolveLocale(locale || getCurrentLocale());
-	const resolvedDescription = description || defaults.description;
-	const resolvedKeywords = keywords || defaults.keywords;
+	const resolvedDescription = description?.trim() || defaults.description;
 	const resolvedUrl =
 		url || (pathname ? getLocalizedUrl(pathname, currentLang) : undefined);
-
-	const tags = [
+	return [
 		{ title: mergedTitle },
 		{ name: "description", content: resolvedDescription },
-		{ name: "keywords", content: resolvedKeywords },
+		{ name: "keywords", content: keywords || defaults.keywords },
 		{ name: "twitter:title", content: mergedTitle },
+		{ name: "twitter:description", content: resolvedDescription },
 		{
-			name: "twitter:description",
-			content: resolvedDescription,
+			name: "twitter:card",
+			content: mergedImage ? "summary_large_image" : "summary",
 		},
-		{ name: "twitter:creator", content: "@" },
-		{ name: "twitter:site", content: "@" },
-		{ property: "og:type", content: "website" },
+		{ property: "og:type", content: type },
+		{ property: "og:site_name", content: defaults.title },
 		{ property: "og:title", content: mergedTitle },
-		{
-			property: "og:description",
-			content: resolvedDescription,
-		},
-		{ property: "og:locale", content: currentLang },
-		...getAlternateLocaleTags(currentLang),
+		{ property: "og:description", content: resolvedDescription },
+		{ property: "og:locale", content: localeTags[currentLang] ?? currentLang },
+		...languages
+			.filter((language) => language.value !== currentLang)
+			.map((language) => ({
+				property: "og:locale:alternate",
+				content: localeTags[language.value] ?? language.value,
+			})),
 		...(mergedImage
 			? [
 					{ name: "twitter:image", content: mergedImage },
-					{ name: "twitter:card", content: "summary_large_image" },
+					{ name: "twitter:image:alt", content: imageAlt || defaults.imageAlt },
 					{ property: "og:image", content: mergedImage },
+					{ property: "og:image:alt", content: imageAlt || defaults.imageAlt },
+					...(!image
+						? [
+								{ property: "og:image:type", content: "image/png" },
+								{ property: "og:image:width", content: "1200" },
+								{ property: "og:image:height", content: "630" },
+							]
+						: []),
 				]
 			: []),
 		...(resolvedUrl
@@ -113,9 +110,6 @@ const seo = ({
 					{ name: "twitter:url", content: resolvedUrl },
 				]
 			: []),
+		...(noIndex ? [{ name: "robots", content: "noindex, nofollow" }] : []),
 	];
-
-	return tags;
-};
-
-export { seo };
+}

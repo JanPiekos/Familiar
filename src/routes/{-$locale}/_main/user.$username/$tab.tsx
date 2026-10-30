@@ -14,6 +14,7 @@ import { useProfileContent } from "@/hooks/user/use-profile-content";
 import { useUserByUsername } from "@/hooks/user/use-user";
 import type { TUserProfile } from "@/types/user";
 import { DefaultProfileTabContent } from "../user.$username";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/{-$locale}/_main/user/$username/$tab")({
 	component: RouteComponent,
@@ -63,6 +64,7 @@ export function UserFeedContent({
 	user: TUserProfile;
 	tab: string;
 }) {
+	const { t } = useTranslation();
 	const portfolioUnavailable = tab === "portfolio" && !hasArtistPortfolio(user);
 	const {
 		data: content,
@@ -91,11 +93,16 @@ export function UserFeedContent({
 	if (isError) {
 		return (
 			<div className="flex min-h-64 flex-col items-center justify-center gap-2 p-6 text-center">
-				<h2 className="font-semibold">Could not load profile content</h2>
+				<h2 className="font-semibold">
+					{t(
+						"ui.could_not_load_profile_content",
+						"Could not load profile content",
+					)}
+				</h2>
 				<p className="max-w-md text-sm text-muted-foreground">
 					{error instanceof Error
 						? error.message
-						: "An unknown error occurred."}
+						: t("ui.an_unknown_error_occurred", "An unknown error occurred.")}
 				</p>
 			</div>
 		);
@@ -128,8 +135,11 @@ export function UserFeedContent({
 				<div className="flex h-full flex-1 flex-col items-center justify-center">
 					<EmptyPage
 						icon={OutlineReceipt}
-						title="Shop"
-						description="Shop feature is coming soon!"
+						title={t("ui.shop", "Shop")}
+						description={t(
+							"ui.shop_feature_is_coming_soon",
+							"Shop feature is coming soon!",
+						)}
 					/>
 				</div>
 			);
@@ -141,7 +151,7 @@ export function UserFeedContent({
 		default:
 			return (
 				<div className="p-4 text-center text-muted-foreground">
-					Tab not found
+					{t("ui.tab_not_found", "Tab not found")}
 				</div>
 			);
 	}
