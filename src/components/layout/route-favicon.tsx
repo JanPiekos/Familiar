@@ -1,5 +1,5 @@
 import { useMatch } from "@tanstack/react-router";
-import { APP_FAVICON } from "@/lib/favicon";
+import { APP_FAVICONS } from "@/lib/favicon";
 import { AvatarFavicon } from "./profile/avatar-favicon";
 import { FacehashFavicon } from "./profile/facehash-favicon";
 
@@ -11,7 +11,14 @@ export function RouteFavicon() {
 		select: (match) =>
 			match.status === "success" ? match.loaderData : undefined,
 	});
-	if (!profile) return <link {...APP_FAVICON} />;
+	if (!profile)
+		return (
+			<>
+				{APP_FAVICONS.map((icon) => (
+					<link key={icon.href} {...icon} />
+				))}
+			</>
+		);
 	if (profile.user.avatarPath) {
 		return <AvatarFavicon key={profile.faviconUrl} src={profile.faviconUrl} />;
 	}

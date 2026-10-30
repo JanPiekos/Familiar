@@ -93,7 +93,7 @@ function FooterBrand() {
 
 	return (
 		<div className="w-full space-y-4 md:w-auto">
-			<SolidLogoText size={80} />
+			<SolidLogoText size={80} className="text-primary" aria-hidden="true" />
 
 			<div className="space-y-2">
 				<Typography.Heading level={3}>
