@@ -56,6 +56,8 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import { getSelectedValues } from "./commissions_requests";
 import { type TCommission, TCommissionStatus } from "@/types/commissions";
+import { useTranslation } from "react-i18next";
+import appI18n from "@/lib/i18n";
 
 export const Route = createFileRoute("/{-$locale}/dashboard/services")({
 	component: DashboardServices,
@@ -114,21 +116,50 @@ type DashboardServicesAction =
 const SERVICE_FILTER_GROUPS: FilterGroup<TCommission>[] = [
 	{
 		id: "status",
-		label: "Status",
+		get label() {
+			return appI18n.t("ui.status", "Status");
+		},
 		type: "select",
 		icon: ListFilterIcon,
 		getItemValue: (commission) => commission.commissionStatus,
 		options: [
-			{ id: TCommissionStatus.Active, label: "Active" },
-			{ id: TCommissionStatus.Draft, label: "Draft" },
-			{ id: TCommissionStatus.Paused, label: "Paused" },
-			{ id: TCommissionStatus.OnHold, label: "On Hold" },
-			{ id: TCommissionStatus.Archived, label: "Archived" },
+			{
+				id: TCommissionStatus.Active,
+				get label() {
+					return appI18n.t("ui.active", "Active");
+				},
+			},
+			{
+				id: TCommissionStatus.Draft,
+				get label() {
+					return appI18n.t("ui.draft", "Draft");
+				},
+			},
+			{
+				id: TCommissionStatus.Paused,
+				get label() {
+					return appI18n.t("ui.paused", "Paused");
+				},
+			},
+			{
+				id: TCommissionStatus.OnHold,
+				get label() {
+					return appI18n.t("ui.on_hold", "On Hold");
+				},
+			},
+			{
+				id: TCommissionStatus.Archived,
+				get label() {
+					return appI18n.t("ui.archived", "Archived");
+				},
+			},
 		],
 	},
 	{
 		id: "createdDate",
-		label: "Created date",
+		get label() {
+			return appI18n.t("ui.created_date", "Created date");
+		},
 		type: "date",
 		icon: CalendarIcon,
 		getItemValue: (commission) => new Date(commission.createdAt),
@@ -349,6 +380,7 @@ function useFilteredCommissions(
 const ITEMS_PER_PAGE = 100;
 
 function DashboardServices() {
+	const { t } = useTranslation();
 	const [state, dispatch] = useReducer(
 		dashboardServicesReducer,
 		INITIAL_DASHBOARD_SERVICES_STATE,
@@ -378,7 +410,7 @@ function DashboardServices() {
 			groups[catName].push(commission);
 		}
 		return groups;
-	}, [filteredCommissions]);
+	}, [filteredCommissions, t]);
 
 	const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
@@ -387,7 +419,7 @@ function DashboardServices() {
 			status: state.filterState.status,
 			createdDate: state.filterState.createdDate,
 		}),
-		[state.filterState],
+		[state.filterState, t],
 	);
 
 	// const handleDelete = async (id: string) => {
@@ -418,9 +450,9 @@ function DashboardServices() {
 				commissionId: id,
 				data: { commissionStatus: status },
 			});
-			toast.success("Status updated");
+			toast.success(t("ui.status_updated", "Status updated"));
 		} catch {
-			toast.error("Failed to update status");
+			toast.error(t("ui.failed_to_update_status", "Failed to update status"));
 		}
 	};
 
@@ -433,17 +465,17 @@ function DashboardServices() {
 
 	return (
 		<div className="flex flex-1 flex-col h-full bg-muted/40">
-			<DashboardHeader title="Services" />
+			<DashboardHeader title={t("ui.services", "Services")} />
 
 			<div className="flex flex-1 flex-col gap-4 p-6">
 				<div className="flex items-center justify-between mb-2">
 					<h1 className="text-3xl font-semibold tracking-tight text-foreground">
-						Services
+						{t("ui.services", "Services")}
 					</h1>
 					<div className="flex items-center gap-3">
 						<Button size="xl" variant="secondary">
 							<OutlinePlus />
-							Category
+							{t("ui.category", "Category")}
 						</Button>
 						<Button
 							size="xl"
@@ -452,7 +484,7 @@ function DashboardServices() {
 							}
 						>
 							<OutlinePlus />
-							Service
+							{t("ui.service", "Service")}
 						</Button>
 					</div>
 				</div>
@@ -511,7 +543,7 @@ function DashboardServices() {
 													size={"lg"}
 													className="rounded-full"
 												>
-													Edit
+													{t("ui.edit", "Edit")}
 												</Button>
 												<Button
 													size={"lg"}
@@ -520,7 +552,7 @@ function DashboardServices() {
 														dispatch({ type: "setCreateModalOpen", open: true })
 													}
 												>
-													<OutlinePlus /> Service
+													<OutlinePlus /> {t("ui.service", "Service")}
 												</Button>
 
 												<Button variant={"destructive_ghost"} size="icon-lg">
@@ -614,8 +646,11 @@ function DashboardServices() {
 				onOpenChange={(open) =>
 					!open && dispatch({ type: "closeArchiveModal" })
 				}
-				title="Archive Service"
-				description="Are you sure you want to archive this service? This action cannot be undone and you will not be able to unarchive it later."
+				title={t("ui.archive_service", "Archive Service")}
+				description={t(
+					"ui.are_you_sure_you_want_to_archive_this_service_this_action_cannot_be_undone_",
+					"Are you sure you want to archive this service? This action cannot be undone and you will not be able to unarchive it later.",
+				)}
 				onConfirm={() => {
 					if (state.selectedCommissionToArchive) {
 						handleStatusChange(
@@ -643,6 +678,7 @@ function ServiceCategoryItem({
 	onEdit: () => void;
 	onArchive: () => void;
 }) {
+	const { t } = useTranslation();
 	const { user } = useAuth();
 
 	return (
@@ -668,7 +704,7 @@ function ServiceCategoryItem({
 
 			<div className="flex items-center gap-6 shrink-0">
 				<div className="text-sm font-medium text-muted-foreground w-28">
-					From {item.currencyCode} {item.basePrice}
+					{t("ui.from_218bca", "From")} {item.currencyCode} {item.basePrice}
 				</div>
 
 				{item.commissionStatus === TCommissionStatus.Archived ? (
@@ -678,7 +714,7 @@ function ServiceCategoryItem({
 					>
 						<div className="flex items-center gap-2">
 							<div className="size-2 rounded-full bg-destructive" />
-							Archived
+							{t("ui.archived", "Archived")}
 						</div>
 					</Badge>
 				) : (
@@ -690,25 +726,25 @@ function ServiceCategoryItem({
 							<SelectItem value={TCommissionStatus.Draft}>
 								<div className="flex items-center gap-2">
 									<div className="size-2 rounded-full bg-muted-foreground" />
-									Draft
+									{t("ui.draft", "Draft")}
 								</div>
 							</SelectItem>
 							<SelectItem value={TCommissionStatus.Active}>
 								<div className="flex items-center gap-2">
 									<div className="size-2 rounded-full bg-success" />
-									Active
+									{t("ui.active", "Active")}
 								</div>
 							</SelectItem>
 							<SelectItem value={TCommissionStatus.Paused}>
 								<div className="flex items-center gap-2">
 									<div className="size-2 rounded-full bg-warning" />
-									Paused
+									{t("ui.paused", "Paused")}
 								</div>
 							</SelectItem>
 							<SelectItem value={TCommissionStatus.OnHold}>
 								<div className="flex items-center gap-2">
 									<div className="size-2 rounded-full bg-primary" />
-									On Hold
+									{t("ui.on_hold", "On Hold")}
 								</div>
 							</SelectItem>
 						</SelectContent>

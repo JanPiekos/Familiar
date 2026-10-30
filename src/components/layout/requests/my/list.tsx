@@ -36,6 +36,7 @@ import {
 	getRequestTimeline,
 	type RequestItem,
 } from "./helpers";
+import { useTranslation } from "react-i18next";
 
 export type UserPreview = Partial<TUserProfile> & {
 	userId: string;
@@ -101,6 +102,7 @@ function UserIdentity({
 }
 
 function RequestIdentityCell({ request }: { request: RequestListItem }) {
+	const { t } = useTranslation();
 	const commissionQuery = useCommission(request.commissionId);
 	const artistQuery = useUserById(request.artistId);
 
@@ -130,7 +132,7 @@ function RequestIdentityCell({ request }: { request: RequestListItem }) {
 					/>
 				) : (
 					<div className="flex h-full w-full items-center justify-center text-[10px] font-medium text-muted-foreground">
-						No image
+						{t("ui.no_image", "No image")}
 					</div>
 				)}
 			</div>
@@ -143,7 +145,7 @@ function RequestIdentityCell({ request }: { request: RequestListItem }) {
 				<div className="mt-1">
 					{artistQuery.isPending && !artist ? (
 						<span className="text-xs text-muted-foreground">
-							Loading artist&hellip;
+							{t("ui.loading_artist", "Loading artist…")}
 						</span>
 					) : (
 						<UserIdentity user={artist} showUsername={false} />
@@ -155,6 +157,7 @@ function RequestIdentityCell({ request }: { request: RequestListItem }) {
 }
 
 function ArtistRequestIdentityCell({ request }: { request: RequestListItem }) {
+	const { t } = useTranslation();
 	const commissionQuery = useCommission(request.commissionId);
 	const clientQuery = useUserById(request.clientId);
 
@@ -171,7 +174,7 @@ function ArtistRequestIdentityCell({ request }: { request: RequestListItem }) {
 		<div className="flex min-w-0 flex-col justify-center py-0">
 			{clientQuery.isPending && !client ? (
 				<span className="text-sm text-muted-foreground">
-					Loading client&hellip;
+					{t("ui.loading_client", "Loading client…")}
 				</span>
 			) : (
 				<UserIdentity
@@ -222,6 +225,7 @@ function RequestRowActions({
 	viewType: "client" | "artist";
 	onAction?: (action: RequestAction, request: RequestListItem) => void;
 }) {
+	const { t } = useTranslation();
 	const status = request.status;
 	const payment = getPaymentStatus(request);
 	const isAcceptedPaid =
@@ -232,6 +236,7 @@ function RequestRowActions({
 		<div className="flex w-full items-center justify-end gap-2 pr-2">
 			{viewType === "client" ? (
 				<Button
+					disabled
 					size="lg"
 					variant="secondary"
 					className="bg-muted/60 hover:bg-muted font-medium"
@@ -241,7 +246,7 @@ function RequestRowActions({
 					}}
 				>
 					<Download className="mr-2 size-4" />
-					Invoice
+					{t("ui.invoice", "Invoice")}
 				</Button>
 			) : (
 				<>
@@ -255,12 +260,13 @@ function RequestRowActions({
 								onAction?.("review", request);
 							}}
 						>
-							Review
+							{t("ui.review", "Review")}
 						</Button>
 					)}
 
 					{isAcceptedPaid && (
 						<Button
+							disabled
 							size="lg"
 							variant="secondary"
 							className="bg-muted/60 hover:bg-muted font-medium"
@@ -269,12 +275,13 @@ function RequestRowActions({
 								onAction?.("set_wip", request);
 							}}
 						>
-							Set to WIP
+							{t("ui.set_to_wip", "Set to WIP")}
 						</Button>
 					)}
 
 					{status === TCommissionRequestStatus.In_Progress && (
 						<Button
+							disabled
 							size="lg"
 							variant="secondary"
 							className="bg-muted/60 hover:bg-muted font-medium"
@@ -283,7 +290,7 @@ function RequestRowActions({
 								onAction?.("final_delivery", request);
 							}}
 						>
-							Final delivery
+							{t("ui.final_delivery", "Final delivery")}
 						</Button>
 					)}
 				</>
@@ -292,6 +299,7 @@ function RequestRowActions({
 			{status !== TCommissionRequestStatus.Pending &&
 				status !== TCommissionRequestStatus.Cancelled && (
 					<Button
+						disabled
 						size="icon-lg"
 						variant="ghost"
 						onClick={(event) => {
@@ -305,6 +313,7 @@ function RequestRowActions({
 
 			{status === TCommissionRequestStatus.Cancelled && (
 				<Button
+					disabled
 					size="icon-lg"
 					variant="destructive"
 					onClick={(event) => {
@@ -326,6 +335,7 @@ function useRequestListColumns({
 	viewType: "client" | "artist";
 	onAction?: (action: RequestAction, request: RequestListItem) => void;
 }) {
+	const { t } = useTranslation();
 	return useMemo<ColumnDef<RequestListItem>[]>(() => {
 		if (viewType === "artist") {
 			return [
@@ -334,7 +344,7 @@ function useRequestListColumns({
 					id: "client",
 					header: ({ column }) => (
 						<DataGridColumnHeader
-							title="Client"
+							title={t("ui.client", "Client")}
 							visibility={true}
 							column={column}
 						/>
@@ -350,7 +360,7 @@ function useRequestListColumns({
 					id: "status",
 					header: ({ column }) => (
 						<DataGridColumnHeader
-							title="Status"
+							title={t("ui.status", "Status")}
 							visibility={true}
 							column={column}
 						/>
@@ -364,7 +374,7 @@ function useRequestListColumns({
 					id: "submitted",
 					header: ({ column }) => (
 						<DataGridColumnHeader
-							title="Submitted"
+							title={t("ui.submitted", "Submitted")}
 							visibility={true}
 							column={column}
 						/>
@@ -377,7 +387,7 @@ function useRequestListColumns({
 					id: "payment",
 					header: ({ column }) => (
 						<DataGridColumnHeader
-							title="Payment"
+							title={t("ui.payment", "Payment")}
 							visibility={true}
 							column={column}
 						/>
@@ -393,7 +403,7 @@ function useRequestListColumns({
 					id: "confirmed",
 					header: ({ column }) => (
 						<DataGridColumnHeader
-							title="Confirmed"
+							title={t("ui.confirmed", "Confirmed")}
 							visibility={true}
 							column={column}
 						/>
@@ -411,7 +421,7 @@ function useRequestListColumns({
 					id: "timeline",
 					header: ({ column }) => (
 						<DataGridColumnHeader
-							title="Timeline"
+							title={t("ui.timeline", "Timeline")}
 							visibility={true}
 							column={column}
 						/>
@@ -450,7 +460,7 @@ function useRequestListColumns({
 				id: "status",
 				header: ({ column }) => (
 					<DataGridColumnHeader
-						title="Status"
+						title={t("ui.status", "Status")}
 						visibility={true}
 						column={column}
 					/>
@@ -464,7 +474,7 @@ function useRequestListColumns({
 				id: "submitted",
 				header: ({ column }) => (
 					<DataGridColumnHeader
-						title="Submitted"
+						title={t("ui.submitted", "Submitted")}
 						visibility={true}
 						column={column}
 					/>
@@ -477,7 +487,7 @@ function useRequestListColumns({
 				id: "payment",
 				header: ({ column }) => (
 					<DataGridColumnHeader
-						title="Payment"
+						title={t("ui.payment", "Payment")}
 						visibility={true}
 						column={column}
 					/>
@@ -493,7 +503,7 @@ function useRequestListColumns({
 				id: "confirmed",
 				header: ({ column }) => (
 					<DataGridColumnHeader
-						title="Confirmed"
+						title={t("ui.confirmed", "Confirmed")}
 						visibility={true}
 						column={column}
 					/>
@@ -511,7 +521,7 @@ function useRequestListColumns({
 				id: "timeline",
 				header: ({ column }) => (
 					<DataGridColumnHeader
-						title="Timeline"
+						title={t("ui.timeline", "Timeline")}
 						visibility={true}
 						column={column}
 					/>
@@ -534,7 +544,7 @@ function useRequestListColumns({
 				enableSorting: false,
 			},
 		];
-	}, [viewType, onAction]);
+	}, [viewType, onAction, t]);
 }
 
 function RequestListTable({
@@ -638,24 +648,31 @@ function RequestListSummary({
 	endItem: number;
 	isRefreshing: boolean;
 }) {
+	const { t } = useTranslation();
 	return (
 		<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
 			<span>
-				Showing <span className="font-medium text-foreground">{startItem}</span>
-				–<span className="font-medium text-foreground">{endItem}</span> of{" "}
+				{t("ui.showing", "Showing")}{" "}
+				<span className="font-medium text-foreground">{startItem}</span>–
+				<span className="font-medium text-foreground">{endItem}</span>{" "}
+				{t("ui.of", "of")}{" "}
 				<span className="font-medium text-foreground">
 					{totalCount ?? requests.length}
 				</span>{" "}
-				requests
+				{t("ui.requests_8f5fc4", "requests")}
 			</span>
 
 			<span>
-				Page <span className="font-medium text-foreground">{currentPage}</span>{" "}
-				of <span className="font-medium text-foreground">{totalPages}</span>
+				{t("ui.page", "Page")}{" "}
+				<span className="font-medium text-foreground">{currentPage}</span>{" "}
+				{t("ui.of", "of")}{" "}
+				<span className="font-medium text-foreground">{totalPages}</span>
 			</span>
 
 			{isRefreshing ? (
-				<span className="inline-flex items-center gap-1.5">Refreshing</span>
+				<span className="inline-flex items-center gap-1.5">
+					{t("ui.refreshing", "Refreshing")}
+				</span>
 			) : null}
 		</div>
 	);
@@ -746,12 +763,13 @@ export function RequestList({
 	onPageChange,
 	onAction,
 }: RequestListProps) {
+	const { t } = useTranslation();
 	const columns = useRequestListColumns({ viewType, onAction });
 
 	if (requests.length === 0 && !isPending) {
 		return (
 			<div className={cn("w-full", className)}>
-				<EmptyPage title="No requests found" />
+				<EmptyPage title={t("ui.no_requests_found", "No requests found")} />
 			</div>
 		);
 	}

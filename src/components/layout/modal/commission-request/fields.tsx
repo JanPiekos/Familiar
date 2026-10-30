@@ -51,6 +51,7 @@ import { cn } from "@/lib/utils";
 import type { FormValues } from "./types";
 import type { FormFieldDto } from "@/types/commissions/templates";
 import { PreviewCustomFields } from "./preview-custom-fields";
+import { useTranslation } from "react-i18next";
 
 interface CommissionRequestFieldsProps {
 	control: Control<FormValues>;
@@ -69,6 +70,7 @@ export function CommissionRequestFields({
 	artistName,
 	previewFields,
 }: CommissionRequestFieldsProps) {
+	const { t } = useTranslation();
 	const hasCustomFields = previewFields && previewFields.length > 0;
 
 	return (
@@ -88,8 +90,12 @@ export function CommissionRequestFields({
 									className="w-full justify-between"
 								>
 									{/* TODO: add translation + check if it's required */}
-									<span className="flex-1 w-full">Your name</span>
-									<span className="w-fit text-destructive">Required *</span>
+									<span className="flex-1 w-full">
+										{t("ui.your_name", "Your name")}
+									</span>
+									<span className="w-fit text-destructive">
+										{t("ui.required", "Required *")}
+									</span>
 								</FieldLabel>
 								<InputGroup className="h-12">
 									<InputGroupAddon>
@@ -97,7 +103,7 @@ export function CommissionRequestFields({
 									</InputGroupAddon>
 									<InputGroupInput
 										id={field.name}
-										placeholder="Name / nickname"
+										placeholder={t("ui.name_nickname", "Name / nickname")}
 										{...field}
 									/>
 								</InputGroup>
@@ -109,9 +115,13 @@ export function CommissionRequestFields({
 					{/* Contact Information */}
 					<Field className="space-y-4">
 						<FieldLabel className="w-full justify-between">
-							<span className="flex-1 w-full">Your email</span>
+							<span className="flex-1 w-full">
+								{t("ui.your_email", "Your email")}
+							</span>
 							{/* TODO: add translation + check if it's required */}
-							<span className="w-fit text-destructive">Required *</span>
+							<span className="w-fit text-destructive">
+								{t("ui.required", "Required *")}
+							</span>
 						</FieldLabel>
 						<FormField
 							control={control}
@@ -123,15 +133,16 @@ export function CommissionRequestFields({
 											<OutlineMail />
 										</InputGroupAddon>
 										<InputGroupInput
-											placeholder="your@email.com"
+											placeholder={t("ui.your_email_com", "your@email.com")}
 											className="placeholder:text-foreground"
 											{...field}
 										/>
 										<InputGroupButton
+											disabled
 											variant="secondary"
 											className="mr-1.5 px-4 font-medium"
 										>
-											Verify email
+											{t("ui.verify_email", "Verify email")}
 										</InputGroupButton>
 									</InputGroup>
 									<FieldError errors={[fieldState.error]} />
@@ -149,7 +160,10 @@ export function CommissionRequestFields({
 											<InputGroupAddon>
 												<OutlineDiscord />
 											</InputGroupAddon>
-											<InputGroupInput placeholder="username" {...field} />
+											<InputGroupInput
+												placeholder={t("ui.username", "username")}
+												{...field}
+											/>
 										</InputGroup>
 										<FieldError errors={[fieldState.error]} />
 									</Field>
@@ -207,19 +221,24 @@ export function CommissionRequestFields({
 					<Field className="space-y-4">
 						<div className="space-y-2">
 							<FieldLabel className="font-medium text-base">
-								References and files
+								{t("ui.references_and_files", "References and files")}
 							</FieldLabel>
 							<FieldDescription>
-								Character reference sheets, PSD for rigging, mood boards, etc.
+								{t(
+									"ui.character_reference_sheets_psd_for_rigging_mood_boards_etc",
+									"Character reference sheets, PSD for rigging, mood boards, etc.",
+								)}
 							</FieldDescription>
 						</div>
 
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<div className="flex h-12 items-center justify-center gap-2 rounded-full border border-dashed text-muted-foreground text-sm hover:bg-muted/50 cursor-pointer">
-								<OutlineLink className="size-4" /> Link a file
+								<OutlineLink className="size-4" />{" "}
+								{t("ui.link_a_file", "Link a file")}
 							</div>
 							<div className="flex h-12 items-center justify-center gap-2 rounded-full border border-dashed text-muted-foreground text-sm hover:bg-muted/50 cursor-pointer">
-								<Upload className="size-4" /> Upload file
+								<Upload className="size-4" />{" "}
+								{t("ui.upload_file", "Upload file")}
 							</div>
 						</div>
 					</Field>
@@ -231,14 +250,17 @@ export function CommissionRequestFields({
 						render={({ field, fieldState }) => (
 							<Field className="space-y-2">
 								<FieldLabel className="font-medium text-base">
-									Extra info
+									{t("ui.extra_info", "Extra info")}
 								</FieldLabel>
 								<FieldDescription>
-									Pose, traits, multiple characters, add-ons, etc.
+									{t(
+										"ui.pose_traits_multiple_characters_add_ons_etc",
+										"Pose, traits, multiple characters, add-ons, etc.",
+									)}
 								</FieldDescription>
 								<InputGroup className="rounded-xl">
 									<Textarea
-										placeholder="Your answer"
+										placeholder={t("ui.your_answer", "Your answer")}
 										className="min-h-[100px] w-full resize-none"
 										{...field}
 									/>
@@ -267,8 +289,15 @@ export function CommissionRequestFields({
 									htmlFor="terms"
 									className="font-normal text-sm leading-snug"
 								>
-									I understand that submitting this request does not guarantee
-									that {artistName} will accept my commission
+									{t(
+										"ui.i_understand_that_submitting_this_request_does_not_guarantee_that",
+										"I understand that submitting this request does not guarantee that",
+									)}{" "}
+									{artistName}{" "}
+									{t(
+										"ui.will_accept_my_commission",
+										"will accept my commission",
+									)}
 									<span className="text-destructive">*</span>
 								</FieldLabel>
 							</FieldContent>
@@ -290,7 +319,10 @@ export function CommissionRequestFields({
 									htmlFor="marketing"
 									className="font-normal text-sm leading-snug"
 								>
-									I agree to receive marketing emails
+									{t(
+										"ui.i_agree_to_receive_marketing_emails",
+										"I agree to receive marketing emails",
+									)}
 								</FieldLabel>
 							</FieldContent>
 						</Field>

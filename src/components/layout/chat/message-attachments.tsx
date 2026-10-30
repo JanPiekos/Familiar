@@ -4,6 +4,7 @@ import type { TChatMessageAttachment } from "@/api/chat/chat-types";
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import { Message, MessageContent } from "@/components/ui/message";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type MessageAttachmentBubbleProps = {
 	attachment: TChatMessageAttachment;
@@ -22,6 +23,7 @@ export function MessageAttachmentBubble({
 	isFirstInGroup,
 	isLastInGroup,
 }: MessageAttachmentBubbleProps) {
+	const { t } = useTranslation();
 	const isMine = align === "end";
 	const title = getAttachmentTitle(attachment, index);
 	const imageUrl = getAttachmentImageUrl(attachment);
@@ -65,7 +67,9 @@ export function MessageAttachmentBubble({
 								>
 									{title}
 								</a>
-								<p className="text-xs text-muted-foreground">File attachment</p>
+								<p className="text-xs text-muted-foreground">
+									{t("ui.file_attachment", "File attachment")}
+								</p>
 							</div>
 
 							<span className="self-end text-[11px] text-muted-foreground">
@@ -94,6 +98,7 @@ function ImageAttachmentBubble({
 	imageUrl,
 	time,
 }: ImageAttachmentBubbleProps) {
+	const { t } = useTranslation();
 	const [isLoaded, setIsLoaded] = useState(false);
 	const isMine = align === "end";
 
@@ -119,7 +124,10 @@ function ImageAttachmentBubble({
 					target="_blank"
 					rel="noreferrer"
 					className="group/image relative block w-fit max-w-full overflow-hidden rounded-[inherit] outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-					aria-label={`Open ${title}`}
+					aria-label={t("ui.open_value0", {
+						defaultValue: "Open {{value0}}",
+						value0: title,
+					})}
 				>
 					<img
 						src={imageUrl}

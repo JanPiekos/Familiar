@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/providers/auth";
 import type { FileRoutesByTo } from "@/routeTree.gen";
+import { useTranslation } from "react-i18next";
+import appI18n from "@/lib/i18n";
 
 type ValidRoute = keyof FileRoutesByTo;
 
@@ -41,65 +43,96 @@ interface NavItem {
 
 const topNav: NavItem[] = [
 	{
-		title: "Portfolio",
+		get title() {
+			return appI18n.t("ui.portfolio", "Portfolio");
+		},
 		url: "#",
 		icon: Briefcase,
-		badge: "Coming soon",
+		get badge() {
+			return appI18n.t("ui.coming_soon", "Coming soon");
+		},
 	},
 	{
-		title: "Wallet",
+		get title() {
+			return appI18n.t("ui.wallet", "Wallet");
+		},
 		url: "#",
 		icon: Wallet,
-		badge: "Coming soon",
+		get badge() {
+			return appI18n.t("ui.coming_soon", "Coming soon");
+		},
 	},
 	{
-		title: "Quests",
+		get title() {
+			return appI18n.t("ui.quests", "Quests");
+		},
 		url: "#",
 		icon: Target,
-		badge: "Coming soon",
+		get badge() {
+			return appI18n.t("ui.coming_soon", "Coming soon");
+		},
 	},
 ];
 
 const commissionsNav: NavItem[] = [
 	{
-		title: "Commissions Requests",
+		get title() {
+			return appI18n.t("ui.commissions_requests", "Commissions Requests");
+		},
 		url: "/dashboard/commissions_requests",
 		icon: OutlineListBoxes,
 	},
 	{
-		title: "Services",
+		get title() {
+			return appI18n.t("ui.services", "Services");
+		},
 		url: "/dashboard/services",
 		icon: Settings,
 	},
 	{
-		title: "Forms",
+		get title() {
+			return appI18n.t("ui.forms", "Forms");
+		},
 		url: "/dashboard/forms_templates",
 		icon: FileText,
 	},
 	{
-		title: "Policies",
+		get title() {
+			return appI18n.t("ui.policies", "Policies");
+		},
 		url: "#",
 		icon: ShieldCheck,
-		badge: "Coming soon",
+		get badge() {
+			return appI18n.t("ui.coming_soon", "Coming soon");
+		},
 	},
 ];
 
 const pipelineNav: NavItem[] = [
 	{
-		title: "Queue",
+		get title() {
+			return appI18n.t("ui.queue", "Queue");
+		},
 		url: "#",
 		icon: Clock,
-		badge: "Coming soon",
+		get badge() {
+			return appI18n.t("ui.coming_soon", "Coming soon");
+		},
 	},
 	{
-		title: "Shop",
+		get title() {
+			return appI18n.t("ui.shop", "Shop");
+		},
 		url: "#",
 		icon: ShoppingBag,
-		badge: "Coming soon",
+		get badge() {
+			return appI18n.t("ui.coming_soon", "Coming soon");
+		},
 	},
 ];
 
 export function DashboardSidebar() {
+	const { t } = useTranslation();
 	const location = useLocation();
 	const { user } = useAuth();
 
@@ -107,7 +140,7 @@ export function DashboardSidebar() {
 		<Sidebar variant="inset">
 			<SidebarHeader className="p-4">
 				<div className="flex items-center gap-2 font-bold text-xl text-primary">
-					Dashboard
+					{t("ui.dashboard", "Dashboard")}
 				</div>
 			</SidebarHeader>
 
@@ -115,7 +148,7 @@ export function DashboardSidebar() {
 				<div className="px-4 py-2">
 					<Button asChild size={"xl"} className="w-full">
 						<Link to={`/user/${user?.username}` as string}>
-							Go to my profile
+							{t("ui.go_to_my_profile", "Go to my profile")}
 						</Link>
 					</Button>
 				</div>
@@ -158,7 +191,9 @@ export function DashboardSidebar() {
 				</SidebarGroup>
 
 				<SidebarGroup>
-					<SidebarGroupLabel>Commissions</SidebarGroupLabel>
+					<SidebarGroupLabel>
+						{t("ui.commissions", "Commissions")}
+					</SidebarGroupLabel>
 					<SidebarGroupContent>
 						<SidebarMenu>
 							{commissionsNav.map((item) => {
@@ -196,7 +231,7 @@ export function DashboardSidebar() {
 				</SidebarGroup>
 
 				<SidebarGroup>
-					<SidebarGroupLabel>Pipeline</SidebarGroupLabel>
+					<SidebarGroupLabel>{t("ui.pipeline", "Pipeline")}</SidebarGroupLabel>
 					<SidebarGroupContent>
 						<SidebarMenu>
 							{pipelineNav.map((item) => {

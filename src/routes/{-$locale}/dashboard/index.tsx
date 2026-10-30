@@ -7,10 +7,15 @@ export const Route = createFileRoute("/{-$locale}/dashboard/")({
 
 function DashboardIndexRedirect() {
 	const navigate = useNavigate();
+	const { locale } = Route.useParams();
 
 	useEffect(() => {
-		navigate({ to: "/dashboard/commissions_requests", replace: true });
-	}, [navigate]);
+		navigate({
+			to: "/{-$locale}/dashboard/commissions_requests",
+			params: { locale },
+			replace: true,
+		});
+	}, [navigate, locale]);
 
 	return null;
 }

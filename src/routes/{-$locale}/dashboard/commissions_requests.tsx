@@ -33,6 +33,8 @@ import { useIncomingCommissionRequests } from "@/hooks/commissions/use-commissio
 import { useAuth } from "@/providers/auth";
 import { TCommissionRequestStatus } from "@/types/commissions";
 import { TPaymentStatus } from "@/types/payment";
+import { useTranslation } from "react-i18next";
+import appI18n from "@/lib/i18n";
 
 export const Route = createFileRoute(
 	"/{-$locale}/dashboard/commissions_requests",
@@ -114,7 +116,9 @@ interface DashboardRequestsActions {
 const REQUEST_FILTER_GROUPS: FilterGroup<RequestItem>[] = [
 	{
 		id: "status",
-		label: "Status",
+		get label() {
+			return appI18n.t("ui.status", "Status");
+		},
 		type: "select",
 		icon: ListFilterIcon,
 		getItemValue: (request) => request.status,
@@ -147,51 +151,95 @@ const REQUEST_FILTER_GROUPS: FilterGroup<RequestItem>[] = [
 	},
 	{
 		id: "payment",
-		label: "Payment",
+		get label() {
+			return appI18n.t("ui.payment", "Payment");
+		},
 		type: "select",
 		icon: CreditCard,
 		getItemValue: (request) => getPaymentFilterValue(request),
 		options: [
 			{
 				id: TPaymentStatus.Pending,
-				label: "Pending",
+				get label() {
+					return appI18n.t("ui.pending", "Pending");
+				},
 				icon: OutlineClock03,
 			},
 			{
 				id: TPaymentStatus.Completed,
-				label: "Paid",
+				get label() {
+					return appI18n.t("ui.paid", "Paid");
+				},
 				icon: OutlineCheck,
 			},
 			{
 				id: TPaymentStatus.Failed,
-				label: "Failed",
+				get label() {
+					return appI18n.t("ui.failed", "Failed");
+				},
 				icon: OutlineClose,
 			},
 			{
 				id: TPaymentStatus.Refunded,
-				label: "Refunded",
+				get label() {
+					return appI18n.t("ui.refunded", "Refunded");
+				},
 				icon: OutlineClose,
 			},
 		],
 	},
 	{
 		id: "timeline",
-		label: "Timeline",
+		get label() {
+			return appI18n.t("ui.timeline", "Timeline");
+		},
 		type: "select",
 		icon: Flag,
 		getItemValue: (request) => getRequestTimelineFilterValue(request),
 		options: [
-			{ id: "awaiting_review", label: "Awaiting review" },
-			{ id: "accepted", label: "Accepted" },
-			{ id: "in_progress", label: "In progress" },
-			{ id: "delivered", label: "Delivered" },
-			{ id: "completed", label: "Completed" },
-			{ id: "cancelled", label: "Cancelled" },
+			{
+				id: "awaiting_review",
+				get label() {
+					return appI18n.t("ui.awaiting_review", "Awaiting review");
+				},
+			},
+			{
+				id: "accepted",
+				get label() {
+					return appI18n.t("ui.accepted", "Accepted");
+				},
+			},
+			{
+				id: "in_progress",
+				get label() {
+					return appI18n.t("ui.in_progress", "In progress");
+				},
+			},
+			{
+				id: "delivered",
+				get label() {
+					return appI18n.t("ui.delivered", "Delivered");
+				},
+			},
+			{
+				id: "completed",
+				get label() {
+					return appI18n.t("ui.completed", "Completed");
+				},
+			},
+			{
+				id: "cancelled",
+				get label() {
+					return appI18n.t("ui.cancelled", "Cancelled");
+				},
+			},
 		],
 	},
 	{
 		id: "submittedDate",
-		label: "Submitted date",
+		get label() {
+			return appI18n.t("ui.submitted_date", "Submitted date");
+		},
 		type: "date",
 		icon: CalendarIcon,
 		getItemValue: (request) => new Date(request.createdAt),
@@ -641,6 +689,7 @@ function DashboardCommissionsRequestsPage({
 	filteredRequests,
 	selectedRequest,
 }: DashboardCommissionsRequestsPageProps) {
+	const { t } = useTranslation();
 	const detailsModalOpen = state.detailsOpen && selectedRequest !== null;
 
 	const handleRequestAction = useCallback(
@@ -659,7 +708,7 @@ function DashboardCommissionsRequestsPage({
 				console.log("Final delivery clicked for", request.id);
 			}
 		},
-		[actions],
+		[actions, t],
 	);
 
 	return (
@@ -669,7 +718,7 @@ function DashboardCommissionsRequestsPage({
 			<div className="flex flex-1 flex-col gap-4 p-6">
 				<div className="flex items-center justify-between mb-2">
 					<h1 className="text-3xl font-semibold tracking-tight text-foreground">
-						Commissions Requests
+						{t("ui.commissions_requests", "Commissions Requests")}
 					</h1>
 					<div className="flex items-center gap-3">
 						<Button
@@ -679,7 +728,9 @@ function DashboardCommissionsRequestsPage({
 							}
 						>
 							<OutlinePlus className="size-4 mr-2" />
-							<span className="hidden sm:inline">Create Commission</span>
+							<span className="hidden sm:inline">
+								{t("ui.create_commission", "Create Commission")}
+							</span>
 						</Button>
 					</div>
 				</div>
@@ -729,10 +780,16 @@ function DashboardCommissionsRequestsPage({
 }
 
 function CommissionsRequestsHeader() {
-	return <DashboardHeader title="Commissions Requests" />;
+	const { t } = useTranslation();
+	return (
+		<DashboardHeader
+			title={t("ui.commissions_requests", "Commissions Requests")}
+		/>
+	);
 }
 
 function RequestsErrorBanner({ error }: { error: unknown }) {
+	const { t } = useTranslation();
 	if (!error) {
 		return null;
 	}
@@ -741,7 +798,10 @@ function RequestsErrorBanner({ error }: { error: unknown }) {
 		<div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
 			{error instanceof Error
 				? error.message
-				: "Failed to load commission requests."}
+				: t(
+						"ui.failed_to_load_commission_requests",
+						"Failed to load commission requests.",
+					)}
 		</div>
 	);
 }

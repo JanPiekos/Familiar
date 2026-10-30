@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
 	OutlineLogout,
 	OutlineSettings,
@@ -21,6 +22,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
 import { useIsMobile, useIsTablet } from "@/hooks/ui/use-mobile";
 import { getLocaleParam, localizePath } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -34,7 +36,7 @@ type UserButtonContentProps = {
 	showAvatar?: boolean;
 	showUsername?: boolean;
 	description?: ReactNode;
-	avatarSize?: "sm" | "default" | "lg" | "xl";
+	avatarSize?: "sm" | "md" | "default" | "lg" | "xl";
 	status?: string;
 	isOnline?: boolean;
 	avatarBadgeClassName?: string;
@@ -51,6 +53,7 @@ function UserButtonContent({
 	isOnline,
 	avatarBadgeClassName,
 }: UserButtonContentProps) {
+	const { t } = useTranslation();
 	return (
 		<>
 			{showAvatar ? (
@@ -72,7 +75,7 @@ function UserButtonContent({
 								: "text-foreground",
 						)}
 					>
-						{user.displayName || "Unknown"}
+						{user.displayName || t("ui.unknown", "Unknown")}
 					</span>
 
 					{description ? (
@@ -106,7 +109,7 @@ function UserButtonContent({
 									: "text-muted-foreground",
 							)}
 						>
-							@{user.username || "Unknown"}
+							@{user.username || t("ui.unknown", "Unknown")}
 						</span>
 					) : null}
 				</div>
@@ -121,7 +124,7 @@ type UserProps = {
 	showAvatar?: boolean;
 	showUsername?: boolean;
 	description?: ReactNode;
-	avatarSize?: "sm" | "default" | "lg" | "xl";
+	avatarSize?: "sm" | "md" | "default" | "lg" | "xl";
 	isDropdown?: boolean;
 	open?: boolean;
 	onOpenChange?: (open: boolean) => void;
@@ -129,6 +132,7 @@ type UserProps = {
 	nonDropdownButtonClassName?: string;
 	dropdownContentClassName?: string;
 	drawerTitle?: string;
+	mobileNavigation?: (close: () => void) => ReactNode;
 	status?: string;
 	isOnline?: boolean;
 	avatarBadgeClassName?: string;
@@ -147,11 +151,14 @@ export default function User({
 	buttonClassName,
 	nonDropdownButtonClassName,
 	dropdownContentClassName,
-	drawerTitle = "User Menu",
+	drawerTitle,
+	mobileNavigation,
 	status,
 	isOnline,
 	avatarBadgeClassName,
 }: UserProps) {
+	const { t } = useTranslation();
+	const menuTitle = drawerTitle ?? t("ui.user_menu", "User Menu");
 	const resolvedUser = user ?? {
 		displayName: "Unknown",
 		username: "unknown",
@@ -216,49 +223,57 @@ export default function User({
 
 	const menuItems = [
 		{
-			label: "Profile",
+			label: t("ui.profile", "Profile"),
 			icon: <OutlineUser />,
 			to: localizePath(`/user/${resolvedUser.username || ""}`, locale),
 		},
 	];
 
 	const menuItemsContent = (
-		<>
-			<div className="flex flex-col gap-1 p-1">
-				{menuItems.map((item) => (
-					<Button key={item.label} variant="ghost" size="xl" asChild>
-						<Link to={item.to} preload={false} onClick={() => setOpen(false)}>
-							{item.icon}
-							<span>{item.label}</span>
-						</Link>
-					</Button>
-				))}
-			</div>
-
-			<DropdownMenuSeparator />
-
-			<div className="flex flex-col gap-1 p-1">
-				<Button variant="ghost" size="xl" onClick={handleOpenSettings}>
-					<OutlineSettings />
-					<span>Settings</span>
-				</Button>
-			</div>
-
-			<DropdownMenuSeparator />
-
-			<div className="p-1">
+		<nav
+			aria-label={menuTitle}
+			className="flex flex-col gap-1 px-3 pb-[max(1rem,env(safe-area-inset-bottom))]"
+		>
+			{mobileNavigation?.(() => setOpen(false))}
+			{menuItems.map((item) => (
 				<Button
-					variant="destructive"
-					onClick={() => {
-						logout();
-						setOpen(false);
-					}}
+					key={item.label}
+					variant="ghost"
+					size="xl"
+					className="w-full justify-start gap-3 rounded-xl px-3"
+					asChild
 				>
-					<OutlineLogout className="size-4" />
-					<span>Logout</span>
+					<Link to={item.to} preload={false} onClick={() => setOpen(false)}>
+						{item.icon}
+						<span>{item.label}</span>
+					</Link>
 				</Button>
-			</div>
-		</>
+			))}
+			<Button
+				type="button"
+				variant="ghost"
+				size="xl"
+				className="w-full justify-start gap-3 rounded-xl px-3"
+				onClick={handleOpenSettings}
+			>
+				<OutlineSettings />
+				<span>{t("ui.settings", "Settings")}</span>
+			</Button>
+			<Separator className="my-2" />
+			<Button
+				type="button"
+				variant="ghost"
+				size="xl"
+				className="w-full justify-start gap-3 rounded-xl px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
+				onClick={() => {
+					logout();
+					setOpen(false);
+				}}
+			>
+				<OutlineLogout />
+				<span>{t("ui.logout", "Logout")}</span>
+			</Button>
+		</nav>
 	);
 
 	if (!isDropdown) {
@@ -276,56 +291,54 @@ export default function User({
 
 	if (!isTablet) {
 		return (
-			<>
-				<DropdownMenu open={open} onOpenChange={setOpen}>
-					<DropdownMenuTrigger asChild>
-						<Button type="button" variant="ghost" className={triggerClassName}>
-							{triggerContent}
-						</Button>
-					</DropdownMenuTrigger>
+			<DropdownMenu open={open} onOpenChange={setOpen}>
+				<DropdownMenuTrigger asChild>
+					<Button type="button" variant="ghost" className={triggerClassName}>
+						{triggerContent}
+					</Button>
+				</DropdownMenuTrigger>
 
-					<DropdownMenuContent
-						className={cn("w-56", dropdownContentClassName)}
-						align="end"
+				<DropdownMenuContent
+					className={cn("w-56", dropdownContentClassName)}
+					align="end"
+				>
+					<DropdownMenuGroup>
+						{menuItems.map((item) => (
+							<DropdownMenuItem key={item.label} asChild>
+								<Link
+									to={item.to}
+									preload={false}
+									className="w-full cursor-pointer"
+									onClick={() => setOpen(false)}
+								>
+									{item.icon}
+									{item.label}
+								</Link>
+							</DropdownMenuItem>
+						))}
+					</DropdownMenuGroup>
+
+					<DropdownMenuSeparator />
+
+					<DropdownMenuItem onSelect={handleOpenSettings}>
+						<OutlineSettings />
+						{t("ui.settings", "Settings")}
+					</DropdownMenuItem>
+
+					<DropdownMenuSeparator />
+
+					<DropdownMenuItem
+						variant="destructive"
+						onClick={() => {
+							logout();
+							setOpen(false);
+						}}
 					>
-						<DropdownMenuGroup>
-							{menuItems.map((item) => (
-								<DropdownMenuItem key={item.label} asChild>
-									<Link
-										to={item.to}
-										preload={false}
-										className="w-full cursor-pointer"
-										onClick={() => setOpen(false)}
-									>
-										{item.icon}
-										{item.label}
-									</Link>
-								</DropdownMenuItem>
-							))}
-						</DropdownMenuGroup>
-
-						<DropdownMenuSeparator />
-
-						<DropdownMenuItem onSelect={handleOpenSettings}>
-							<OutlineSettings />
-							Settings
-						</DropdownMenuItem>
-
-						<DropdownMenuSeparator />
-
-						<DropdownMenuItem
-							variant="destructive"
-							onClick={() => {
-								logout();
-								setOpen(false);
-							}}
-						>
-							<OutlineLogout />
-							Logout
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			</>
+						<OutlineLogout />
+						{t("ui.logout", "Logout")}
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
 		);
 	}
 
@@ -338,11 +351,16 @@ export default function User({
 					</Button>
 				</DrawerTrigger>
 
-				<DrawerContent>
-					<DrawerHeader className="text-left">
-						<DrawerTitle>{drawerTitle}</DrawerTitle>
+				<DrawerContent
+					className="max-h-[calc(100dvh-2rem)]! overflow-hidden"
+					aria-describedby={undefined}
+				>
+					<DrawerHeader className="px-6 pt-4 pb-3 text-left!">
+						<DrawerTitle>{menuTitle}</DrawerTitle>
 					</DrawerHeader>
-					<div className="pb-4">{menuItemsContent}</div>
+					<div className="min-h-0 overflow-y-auto overscroll-contain">
+						{menuItemsContent}
+					</div>
 				</DrawerContent>
 			</Drawer>
 		</>

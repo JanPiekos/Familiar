@@ -2,6 +2,7 @@
 @import "shadcn/tailwind.css";
 @plugin "@tailwindcss/typography";
 @import 'tw-animate-css';
+@import "./accessibility.css";
 
 /* Base requirements */
 @import "@heroui/styles/base";
@@ -20,6 +21,18 @@
 @import "@heroui/styles/utilities";
 
 @custom-variant dark (&:where(.dark, .oled, .dark *, .oled *));
+
+/* Reserve space for the mobile account dock, including the home indicator. */
+.mobile-dock-layout {
+  --mobile-dock-space: calc(4rem + max(0.75rem, env(safe-area-inset-bottom, 0px)));
+  padding-bottom: var(--mobile-dock-space);
+}
+
+@media (min-width: 64rem) {
+  .mobile-dock-layout {
+    --mobile-dock-space: 0px;
+  }
+}
 
 @font-face {
   font-family: 'OpenRunde';
@@ -71,7 +84,7 @@ body {
   /* font-family:
     'OpenRunde', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
     'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; */
-    font-family: 'OpenRunde', sans-serif;
+    font-family: var(--app-font, 'OpenRunde'), sans-serif;
     font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

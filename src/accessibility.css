@@ -1,0 +1,128 @@
+/* OpenDyslexic, copyright Abbie Gonzalez; SIL Open Font License in assets/fonts/opendyslexic/OFL.txt. */
+@font-face {
+	font-family: OpenDyslexic;
+	src: url("/assets/fonts/opendyslexic/OpenDyslexic-Regular.woff2")
+		format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: OpenDyslexic;
+	src: url("/assets/fonts/opendyslexic/OpenDyslexic-Bold.woff2") format("woff2");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: OpenDyslexic;
+	src: url("/assets/fonts/opendyslexic/OpenDyslexic-Italic.woff2")
+		format("woff2");
+	font-weight: 400;
+	font-style: italic;
+	font-display: swap;
+}
+@font-face {
+	font-family: OpenDyslexic;
+	src: url("/assets/fonts/opendyslexic/OpenDyslexic-BoldItalic.woff2")
+		format("woff2");
+	font-weight: 700;
+	font-style: italic;
+	font-display: swap;
+}
+:root[data-a11y-font="dyslexic"] {
+	--app-font: OpenDyslexic;
+	--font-sans: OpenDyslexic, sans-serif;
+}
+:root[data-a11y-font="system"] {
+	--app-font: system-ui;
+	--font-sans: system-ui, sans-serif;
+}
+:root[data-a11y-text-size="112"] {
+	font-size: 112.5%;
+}
+:root[data-a11y-text-size="125"] {
+	font-size: 125%;
+}
+:root[data-a11y-text-size="150"] {
+	font-size: 150%;
+}
+:root[data-a11y-spacious-text="true"]
+	:where(p, li, textarea, [role="textbox"]) {
+	line-height: 1.8 !important;
+	letter-spacing: 0.035em;
+	word-spacing: 0.12em;
+}
+:root[data-a11y-underline-links="true"] a[href] {
+	text-decoration: underline !important;
+	text-underline-offset: 0.2em;
+}
+:root[data-a11y-reduce-motion="true"] *,
+:root[data-a11y-reduce-motion="true"] *::before,
+:root[data-a11y-reduce-motion="true"] *::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+	scroll-behavior: auto !important;
+}
+/* Palettes affect interface tokens, never apply a color filter to artists' work. */
+:root[data-a11y-color-vision="red-green"] {
+	--accent: #005fcc;
+	--accent-foreground: #fff;
+	--link: #005fcc;
+	--link-hover: #003d85;
+	--destructive: #a33a00;
+	--destructive-foreground: #fff;
+	--ring: #005fcc;
+}
+:root.dark[data-a11y-color-vision="red-green"] {
+	--accent: #8ec5ff;
+	--accent-foreground: #101217;
+	--link: #8ec5ff;
+	--link-hover: #c4e1ff;
+	--destructive: #ffbc80;
+	--destructive-foreground: #101217;
+	--ring: #8ec5ff;
+}
+:root[data-a11y-color-vision="blue-yellow"] {
+	--accent: #9c204e;
+	--accent-foreground: #fff;
+	--link: #9c204e;
+	--link-hover: #6f1536;
+	--destructive: #006b67;
+	--destructive-foreground: #fff;
+	--ring: #9c204e;
+}
+:root.dark[data-a11y-color-vision="blue-yellow"] {
+	--accent: #ffa4c4;
+	--accent-foreground: #101217;
+	--link: #ffa4c4;
+	--link-hover: #ffd1e1;
+	--destructive: #7bded6;
+	--destructive-foreground: #101217;
+	--ring: #ffa4c4;
+}
+:root[data-a11y-high-contrast="true"] {
+	--foreground: #111;
+	--card-foreground: #111;
+	--popover-foreground: #111;
+	--muted-foreground: #454545;
+	--border: #686868;
+	--input: #dcdcdc;
+	--sidebar-foreground: #111;
+	--ring: #005fcc;
+}
+:root.dark[data-a11y-high-contrast="true"] {
+	--foreground: #fff;
+	--card-foreground: #fff;
+	--popover-foreground: #fff;
+	--muted-foreground: #d7d7d7;
+	--border: #aaa;
+	--input: #3b3b3b;
+	--sidebar-foreground: #fff;
+	--ring: #8ec5ff;
+}
+:root[data-a11y-high-contrast="true"] :focus-visible {
+	outline: 3px solid var(--ring) !important;
+	outline-offset: 3px !important;
+}

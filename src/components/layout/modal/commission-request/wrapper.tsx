@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "react-i18next";
 
 interface RequestFieldBlockShellProps {
 	label?: string;
@@ -14,6 +15,7 @@ export function RequestFieldBlockShell({
 	required,
 	children,
 }: RequestFieldBlockShellProps) {
+	const { t } = useTranslation();
 	return (
 		<div className="space-y-3">
 			{label ? (
@@ -21,7 +23,9 @@ export function RequestFieldBlockShell({
 					<div className="flex items-center justify-between gap-4">
 						<Label className="font-medium text-base">{label}</Label>
 						{required ? (
-							<span className="text-destructive text-sm">Required *</span>
+							<span className="text-destructive text-sm">
+								{t("ui.required", "Required *")}
+							</span>
 						) : null}
 					</div>
 					{description ? (

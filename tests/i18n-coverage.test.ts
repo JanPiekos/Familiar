@@ -53,7 +53,7 @@ describe("application translations", () => {
             visit(ast);
         }
         expect(missing).toEqual([]);
-    });
+    }, 15_000);
 
     it("keeps both languages in sync and preserves interpolation values", () => {
         const english = flatten(en);
@@ -61,6 +61,38 @@ describe("application translations", () => {
         expect(Object.keys(polish).sort()).toEqual(Object.keys(english).sort());
         const mismatches = Object.keys(english).filter((key) => JSON.stringify(placeholders(english[key])) !== JSON.stringify(placeholders(polish[key] ?? "")));
         expect(mismatches).toEqual([]);
+    });
+
+    it("has no empty translations, including keys not yet used by the frontend", () => {
+        const empty: string[] = [];
+        for (const [language, resource] of Object.entries({ ...locales, filterEn, filterPl })) {
+            for (const [key, value] of Object.entries(flatten(resource))) {
+                if (!value.trim()) empty.push(`${language}: ${key}`);
+            }
+        }
+        expect(empty).toEqual([]);
+    });
+
+    it("does not silently overwrite duplicate dictionary keys", () => {
+        const duplicates: string[] = [];
+        for (const path of ["i18n/en.ts", "i18n/pl.ts", "components/data-table-filter/locales/en.json", "components/data-table-filter/locales/pl.json"]) {
+            const ast = ts.createSourceFile(path, readFileSync(join(sourceDirectory, path), "utf8"), ts.ScriptTarget.Latest, false, path.endsWith("json") ? ts.ScriptKind.JSON : ts.ScriptKind.TS);
+            function visit(node: ts.Node) {
+                if (ts.isObjectLiteralExpression(node)) {
+                    const seen = new Set<string>();
+                    for (const property of node.properties) {
+                        if (!ts.isPropertyAssignment(property)) continue;
+                        const name = property.name;
+                        if (!ts.isIdentifier(name) && !ts.isStringLiteralLike(name)) continue;
+                        if (seen.has(name.text)) duplicates.push(`${path}: ${name.text}`);
+                        seen.add(name.text);
+                    }
+                }
+                ts.forEachChild(node, visit);
+            }
+            visit(ast);
+        }
+        expect(duplicates).toEqual([]);
     });
 
     it("covers dynamic commission and language labels", () => {

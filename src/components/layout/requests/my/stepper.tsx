@@ -11,6 +11,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { TCommissionRequestStatus } from "@/types/commissions";
+import appI18n from "@/lib/i18n";
 
 const REQUEST_STEPS: TCommissionRequestStatus[] = [
 	TCommissionRequestStatus.Pending,
@@ -23,19 +24,19 @@ const REQUEST_STEPS: TCommissionRequestStatus[] = [
 function getStepLabel(status: TCommissionRequestStatus) {
 	switch (status) {
 		case TCommissionRequestStatus.Pending:
-			return "Pending";
+			return appI18n.t("ui.pending", "Pending");
 		case TCommissionRequestStatus.Accepted:
-			return "Accepted";
+			return appI18n.t("ui.accepted", "Accepted");
 		case TCommissionRequestStatus.In_Progress:
-			return "In progress";
+			return appI18n.t("ui.in_progress", "In progress");
 		case TCommissionRequestStatus.Delivered:
-			return "Delivered";
+			return appI18n.t("ui.delivered", "Delivered");
 		// case TCommissionRequestStatus.Completed:
 		// 	return "Completed";
 		case TCommissionRequestStatus.Cancelled:
-			return "Cancelled";
+			return appI18n.t("ui.cancelled", "Cancelled");
 		default:
-			return "Unknown";
+			return appI18n.t("ui.unknown", "Unknown");
 	}
 }
 
