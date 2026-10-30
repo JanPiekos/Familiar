@@ -18,15 +18,18 @@ export class ApiFetchError extends Error {
 	readonly body: string;
 
 	constructor(response: Response, body: string) {
-		super(
-			`Request failed: ${response.status} ${response.statusText}${
-				body ? ` - ${body}` : ""
-			}`,
-		);
+		super(`Request failed: ${response.status}`);
 		this.name = "ApiFetchError";
 		this.status = response.status;
 		this.statusText = response.statusText;
 		this.body = body;
+	}
+}
+
+export class ApiNetworkError extends Error {
+	constructor(cause: unknown) {
+		super("Network request failed", { cause });
+		this.name = "ApiNetworkError";
 	}
 }
 
@@ -178,6 +181,14 @@ export async function apiFetch<T = unknown>(
 			headers,
 		});
 	} catch (error) {
+		if (
+			fetchInit.signal?.aborted ||
+			(typeof error === "object" &&
+				error !== null &&
+				"name" in error &&
+				error.name === "AbortError")
+		)
+			throw error;
 		console.error("apiFetch network request failed", {
 			url,
 			origin:
@@ -186,7 +197,7 @@ export async function apiFetch<T = unknown>(
 			isFormData,
 			error,
 		});
-		throw error;
+		throw new ApiNetworkError(error);
 	}
 
 	const contentType = response.headers.get("content-type") ?? "";
