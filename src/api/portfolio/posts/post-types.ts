@@ -13,6 +13,13 @@ export interface PortfolioPostImageResponse {
 	position?: number;
 }
 
+export interface PortfolioPostTag {
+	id: string;
+	name: string;
+	hasContentWarning?: boolean;
+	isAdultOnly?: boolean;
+}
+
 export interface PortfolioPostResponse {
 	id?: string; // UUID
 	userId?: string; // UUID
@@ -20,6 +27,8 @@ export interface PortfolioPostResponse {
 	description?: string;
 	visibility?: PortfolioVisibility;
 	tags?: string[];
+	tagDetails?: PortfolioPostTag[];
+	tagIds?: string[];
 	contentWarnings?: string[];
 	images?: PortfolioPostImageResponse[];
 	catalogIds?: string[]; // UUIDs
@@ -49,8 +58,7 @@ export interface CreatePortfolioPostRequest {
 	title: string;
 	description?: string;
 	visibility?: PortfolioVisibility;
-	tags?: string[];
-	contentWarnings?: string[];
+	tagIds?: string[];
 	catalogIds?: string[];
 }
 
@@ -58,8 +66,7 @@ export interface UpdatePortfolioPostRequest {
 	title?: string;
 	description?: string;
 	visibility?: PortfolioVisibility;
-	tags?: string[];
-	contentWarnings?: string[];
+	tagIds?: string[];
 }
 
 export interface ReorderRequest {
@@ -86,3 +93,11 @@ export interface PostPageableParams {
 	size?: number;
 	sort?: string[];
 }
+
+export type PortfolioPostApiResponse = Omit<PortfolioPostResponse, "tags"> & {
+	tags?: (string | PortfolioPostTag)[];
+};
+export type PagePortfolioPostApiResponse = Omit<
+	PagePortfolioPostResponse,
+	"content"
+> & { content?: PortfolioPostApiResponse[] };
