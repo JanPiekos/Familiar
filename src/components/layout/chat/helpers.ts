@@ -1,3 +1,4 @@
+import appI18n from "@/lib/i18n";
 import type { TChatConversation, TChatMessage } from "@/api/chat/chat-types";
 import {
 	CHAT_SIDEBAR_SKELETON_DATE,
@@ -33,7 +34,7 @@ export function getConversationUser(conversation: TChatConversation) {
 }
 
 export function getMessageDateLabel(message: TChatMessage) {
-	return new Intl.DateTimeFormat(undefined, {
+	return new Intl.DateTimeFormat(appI18n.resolvedLanguage ?? "en", {
 		day: "numeric",
 		month: "short",
 		year: "numeric",
@@ -45,7 +46,7 @@ export function formatMessageTime(value: string | null | undefined) {
 		return "";
 	}
 
-	return new Intl.DateTimeFormat(undefined, {
+	return new Intl.DateTimeFormat(appI18n.resolvedLanguage ?? "en", {
 		hour: "2-digit",
 		minute: "2-digit",
 	}).format(new Date(value));

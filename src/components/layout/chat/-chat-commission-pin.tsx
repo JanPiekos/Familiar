@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { TChatCommissionReferenceSummary } from "@/hooks/chat/types";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 // TODO: get and display commission info like image, title ect.
 
@@ -43,6 +44,7 @@ function CommissionPinAction({
 	getRequestHref?: (requestId: string) => string;
 	onOpenRequest?: (requestId: string) => void;
 }) {
+	const { t } = useTranslation();
 	const href = requestHref ?? getRequestHref?.(requestId);
 
 	if (href) {
@@ -51,7 +53,7 @@ function CommissionPinAction({
 				asChild
 				variant="ghost"
 				size="icon"
-				aria-label="Open commission request"
+				aria-label={t("ui.open_commission_request", "Open commission request")}
 			>
 				<a href={href}>
 					<ArrowUpRightIcon data-icon="inline-start" />
@@ -65,7 +67,7 @@ function CommissionPinAction({
 			<Button
 				variant="ghost"
 				size="icon"
-				aria-label="Open commission request"
+				aria-label={t("ui.open_commission_request", "Open commission request")}
 				onClick={() => onOpenRequest(requestId)}
 			>
 				<ArrowUpRightIcon data-icon="inline-start" />
@@ -86,6 +88,7 @@ export function ChatCommissionPin({
 	showDebugBadges = false,
 	className,
 }: ChatCommissionPinProps) {
+	const { t } = useTranslation();
 	const { data, isLoading, isError, requestNotFound } =
 		useChatCommissionReference({
 			commissionRequestId,
@@ -125,7 +128,10 @@ export function ChatCommissionPin({
 				)}
 			>
 				<PinIcon aria-hidden="true" className="shrink-0" />
-				<span className="truncate">Commission request #{srequestId}</span>
+				<span className="truncate">
+					{t("ui.commission_request", "Commission request #")}
+					{srequestId}
+				</span>
 				<CommissionPinAction
 					requestId={requestId}
 					requestHref={requestHref}
@@ -162,10 +168,14 @@ export function ChatCommissionPin({
 			<div className="flex min-w-0 flex-1 flex-col gap-1">
 				<div className="text-muted-foreground flex min-w-0 items-center gap-2 text-xs">
 					<PinIcon aria-hidden="true" className="shrink-0" />
-					<span className="truncate">Commission request</span>
+					<span className="truncate">
+						{t("ui.commission_request_7fac7a", "Commission request")}
+					</span>
 					{label ? <Badge variant="secondary">{label}</Badge> : null}
 					{showDebugBadges && requestNotFound ? (
-						<Badge variant="outline">request lookup failed</Badge>
+						<Badge variant="outline">
+							{t("ui.request_lookup_failed", "request lookup failed")}
+						</Badge>
 					) : null}
 				</div>
 

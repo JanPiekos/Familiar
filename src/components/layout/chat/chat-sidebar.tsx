@@ -1,7 +1,14 @@
 import { Skeleton as BoneyardSkeleton } from "boneyard-js/react";
-import { Inbox, MessageCircle, Search } from "lucide-react";
+import type { TFunction } from "i18next";
+import {
+	CircleAlert,
+	Inbox,
+	type LucideIcon,
+	MessageCircle,
+	Search,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { OutlineUser } from "@/components/icons/icons";
+import { useTranslation } from "react-i18next";
 import { EmptyPage } from "@/components/layout/empty-page";
 import {
 	InputGroup,
@@ -18,17 +25,6 @@ import type { ChatSidebarProps } from "./types";
 
 type ChatSidebarTab = "direct" | "requests";
 type ChatSidebarConversation = ChatSidebarProps["conversations"][number];
-
-const chatSidebarTabs = [
-	{
-		value: "direct",
-		label: "DMs",
-	},
-	{
-		value: "requests",
-		label: "Requests",
-	},
-] satisfies { value: ChatSidebarTab; label: string }[];
 
 function isRequestConversation(conversation: ChatSidebarConversation) {
 	return Boolean(conversation.commissionRequestId);
@@ -65,23 +61,31 @@ function filterConversations(
 	});
 }
 
-function getEmptyState(tab: ChatSidebarTab, searchQuery: string) {
+function getEmptyState(tab: ChatSidebarTab, searchQuery: string, t: TFunction) {
 	const hasSearch = searchQuery.trim().length > 0;
+	if (hasSearch) {
+		return {
+			title: t("ui.no_conversations_found", "No matching conversations"),
+			description: t("ui.try_a_different_search", "Try a different search."),
+		};
+	}
 
 	if (tab === "requests") {
 		return {
-			title: "No request chats found.",
-			description: hasSearch
-				? "Try a different search."
-				: "Request conversations will show up here.",
+			title: t("ui.no_request_chats_found", "No inquiries yet"),
+			description: t(
+				"ui.request_conversations_will_show_up_here",
+				"Request conversations will show up here.",
+			),
 		};
 	}
 
 	return {
-		title: "No direct messages found.",
-		description: hasSearch
-			? "Try a different search."
-			: "Start a new conversation.",
+		title: t("ui.no_direct_messages_found", "No conversations yet"),
+		description: t(
+			"ui.start_a_new_conversation",
+			"Start a conversation from someone’s profile.",
+		),
 	};
 }
 
@@ -90,6 +94,7 @@ function SidebarConversationScroller({
 	conversations,
 	emptyDescription,
 	emptyTitle,
+	emptyIcon,
 	error,
 	isPending,
 	onSelectConversation,
@@ -98,10 +103,12 @@ function SidebarConversationScroller({
 	conversations: ChatSidebarConversation[];
 	emptyDescription: string;
 	emptyTitle: string;
+	emptyIcon: LucideIcon;
 	error: Error | null;
 	isPending: boolean;
 	onSelectConversation: (conversationId: string) => void;
 }) {
+	const { t } = useTranslation();
 	const visibleConversations =
 		isPending && conversations.length === 0
 			? createSidebarLayoutConversations()
@@ -118,7 +125,7 @@ function SidebarConversationScroller({
 				stagger={35}
 				transition={180}
 				fixture={
-					<div className="flex flex-col gap-1 p-2">
+					<div className="flex flex-col gap-1 p-3">
 						<ChatSidebarList
 							conversations={visibleConversations}
 							activeConversationId={activeConversationId}
@@ -133,23 +140,37 @@ function SidebarConversationScroller({
 				}}
 			>
 				{error ? (
-					<div className="flex flex-col gap-1 p-2">
+					<div className="flex flex-col gap-1 p-3">
 						<EmptyPage
-							title="Could not load conversations."
-							icon={OutlineUser}
-							description="Check console for more details."
+							className="px-2 py-8"
+							iconContainerClassName="size-10 rounded-lg"
+							titleClassName="text-base! leading-snug!"
+							descriptionClassName="text-sm! leading-relaxed!"
+							title={t(
+								"ui.could_not_load_conversations",
+								"Could not load conversations.",
+							)}
+							icon={CircleAlert}
+							description={t(
+								"ui.check_console_for_more_details",
+								"Check console for more details.",
+							)}
 						/>
 					</div>
 				) : !isPending && conversations.length === 0 ? (
-					<div className="flex flex-col gap-1 p-2">
+					<div className="flex flex-col gap-1 p-3">
 						<EmptyPage
+							className="px-2 py-8"
+							iconContainerClassName="size-10 rounded-lg"
+							titleClassName="text-base! leading-snug!"
+							descriptionClassName="text-sm! leading-relaxed!"
 							title={emptyTitle}
-							icon={OutlineUser}
+							icon={emptyIcon}
 							description={emptyDescription}
 						/>
 					</div>
 				) : (
-					<div className="flex flex-col gap-1 p-2">
+					<div className="flex flex-col gap-1 p-3">
 						<ChatSidebarList
 							conversations={visibleConversations}
 							activeConversationId={activeConversationId}
@@ -171,6 +192,7 @@ export function ChatSidebar({
 	onSearchChange,
 	onSelectConversation,
 }: ChatSidebarProps) {
+	const { t } = useTranslation();
 	const [activeTab, setActiveTab] = useState<ChatSidebarTab>("direct");
 
 	const activeConversation = useMemo(() => {
@@ -203,15 +225,27 @@ export function ChatSidebar({
 		return filterConversations(requestConversations, searchQuery);
 	}, [requestConversations, searchQuery]);
 
-	const directEmptyState = getEmptyState("direct", searchQuery);
-	const requestEmptyState = getEmptyState("requests", searchQuery);
+	const chatSidebarTabs = [
+		{
+			value: "direct",
+			label: t("ui.dms", "DMs"),
+			title: t("ui.direct_messages", "Direct messages"),
+		},
+		{
+			value: "requests",
+			label: t("ui.requests", "Requests"),
+			title: t("ui.requests", "Requests"),
+		},
+	] satisfies { value: ChatSidebarTab; label: string; title: string }[];
+	const directEmptyState = getEmptyState("direct", searchQuery, t);
+	const requestEmptyState = getEmptyState("requests", searchQuery, t);
 
 	if (error) console.error(error);
 
 	return (
 		<aside
 			className={cn(
-				"flex min-h-0 w-full shrink-0 flex-col border-r md:w-20 lg:w-96",
+				"flex min-h-0 w-full shrink-0 flex-col md:w-72 md:border-r lg:w-96",
 				activeConversationId ? "hidden md:flex" : "flex",
 			)}
 		>
@@ -220,8 +254,9 @@ export function ChatSidebar({
 				onValueChange={(value) => setActiveTab(value as ChatSidebarTab)}
 				className="min-h-0 flex-1 gap-0"
 			>
-				<div className="flex flex-col gap-3 p-5 pb-2 md:px-2 lg:px-5">
-					<InputGroup className="md:hidden lg:flex">
+				{/* Concentric corners: 24px shell - 12px inset = 12px controls; 4px tab padding leaves 8px buttons. */}
+				<div className="flex flex-col gap-3 p-3 pb-0">
+					<InputGroup className="h-11 rounded-xl">
 						<InputGroupAddon align="inline-start">
 							<Search />
 						</InputGroupAddon>
@@ -229,11 +264,11 @@ export function ChatSidebar({
 						<InputGroupInput
 							value={searchQuery}
 							onChange={(event) => onSearchChange(event.target.value)}
-							placeholder="Search messages..."
+							placeholder={t("ui.search_messages", "Search messages...")}
 						/>
 					</InputGroup>
 
-					<TabsList className="w-full md:h-auto md:flex-col lg:h-9 lg:flex-row">
+					<TabsList className="grid h-13 w-full grid-cols-2 rounded-xl p-1">
 						{chatSidebarTabs.map((tab) => {
 							const count =
 								tab.value === "requests"
@@ -244,21 +279,15 @@ export function ChatSidebar({
 								<TabsTrigger
 									key={tab.value}
 									value={tab.value}
-									title={tab.label}
-									className="md:h-9 md:w-full md:py-2 lg:h-full lg:w-auto"
+									title={tab.title}
+									aria-label={`${tab.title} (${count})`}
+									className="h-11 min-w-0 gap-1.5 rounded-lg px-2 text-sm whitespace-nowrap"
 								>
+									<span className="min-w-0 truncate">{tab.label}</span>
 									<span
-										className="hidden md:block lg:hidden"
 										aria-hidden="true"
+										className="shrink-0 rounded-full bg-background/60 px-1.5 text-[11px] leading-5 text-muted-foreground tabular-nums"
 									>
-										{tab.value === "direct" ? (
-											<MessageCircle className="size-4" />
-										) : (
-											<Inbox className="size-4" />
-										)}
-									</span>
-									<span className="md:sr-only lg:not-sr-only">{tab.label}</span>
-									<span className="text-xs text-muted-foreground md:hidden lg:inline">
 										{count}
 									</span>
 								</TabsTrigger>
@@ -275,6 +304,7 @@ export function ChatSidebar({
 						activeConversationId={activeConversationId}
 						conversations={filteredDirectConversations}
 						emptyTitle={directEmptyState.title}
+						emptyIcon={searchQuery.trim() ? Search : MessageCircle}
 						emptyDescription={directEmptyState.description}
 						error={error}
 						isPending={isPending}
@@ -290,6 +320,7 @@ export function ChatSidebar({
 						activeConversationId={activeConversationId}
 						conversations={filteredRequestConversations}
 						emptyTitle={requestEmptyState.title}
+						emptyIcon={searchQuery.trim() ? Search : Inbox}
 						emptyDescription={requestEmptyState.description}
 						error={error}
 						isPending={isPending}
