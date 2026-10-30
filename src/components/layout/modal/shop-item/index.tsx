@@ -2,6 +2,7 @@ import { Chip, ScrollShadow, Typography } from "@heroui/react";
 import { Check, Download, MessageCircle, Tag, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { OutlineChat, OutlineClose, SolidStar } from "@/components/icons/icons";
+import { EmptyPage } from "@/components/layout/empty-page";
 import User from "@/components/layout/profile/user";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,7 @@ export function ShopItemModal({
 	const { t } = useTranslation();
 	const { data: item, isLoading } = useShopItem(itemId);
 
-	if (isLoading || !item) {
+	if (isLoading) {
 		return (
 			<UniversalModalLayout
 				open={open}
@@ -50,6 +51,23 @@ export function ShopItemModal({
 						<Skeleton className="h-4 w-1/2" />
 						<Skeleton className="h-4 w-full" />
 					</div>
+				}
+			/>
+		);
+	}
+
+	if (!item) {
+		return (
+			<UniversalModalLayout
+				open={open}
+				onOpenChange={onOpenChange}
+				title={t("ui.shop")}
+				mediaContent={null}
+				detailsContent={
+					<EmptyPage
+						title={t("ui.no_items_found")}
+						description={t("ui.shop_feature_is_coming_soon")}
+					/>
 				}
 			/>
 		);
