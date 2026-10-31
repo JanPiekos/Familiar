@@ -34,22 +34,22 @@ function AuthPageLayout() {
 	const isRegister = pathname.endsWith("/auth/register");
 
 	return (
-		<div className="mx-auto my-auto flex w-full max-w-6xl min-w-0 flex-col px-4 py-6 sm:px-6 lg:px-0 lg:py-8">
+		<div className="mx-auto my-auto flex w-full max-w-6xl min-w-0 flex-col px-4 py-6 sm:px-6 lg:px-0 lg:py-4">
 			<div className="mb-8 flex items-center justify-center gap-2.5 lg:hidden">
 				<SolidLogo size={28} aria-hidden="true" />
 				<span className="text-sm font-bold tracking-wider">FAMILIAR</span>
 			</div>
-			<div className="grid min-w-0 lg:grid-cols-2 lg:overflow-hidden lg:rounded-4xl lg:border lg:bg-card lg:shadow-sm">
+			<div className="grid min-w-0 lg:h-[min(52rem,calc(100dvh-8rem))] lg:grid-cols-2 lg:overflow-hidden lg:rounded-4xl lg:border lg:bg-card lg:shadow-sm">
 				<section
 					aria-labelledby="auth-page-title"
 					className="flex min-h-0 min-w-0 flex-col lg:p-10 xl:p-12"
 				>
-					<div className="flex flex-1 flex-col lg:items-center lg:justify-center">
+					<div className="flex min-h-0 flex-1 flex-col lg:items-center lg:justify-center">
 						<div className="flex min-h-0 min-w-0 w-full flex-1 flex-col lg:max-w-md">
 							{(isLogin || isRegister) && (
 								<nav
 									aria-label={t("auth.navigation")}
-									className="mb-6 grid grid-cols-2 gap-1 rounded-full bg-secondary/60 p-1"
+									className="mb-6 grid shrink-0 grid-cols-2 gap-1 rounded-full bg-secondary/60 p-1"
 								>
 								{([
 										{
@@ -80,7 +80,7 @@ function AuthPageLayout() {
 									))}
 								</nav>
 							)}
-							<Outlet />
+							<div className="min-h-0 flex-1 lg:overflow-y-auto lg:overscroll-contain lg:px-1 lg:pb-1"><Outlet /></div>
 						</div>
 					</div>
 				</section>
@@ -96,7 +96,7 @@ function AuthPageLayout() {
 					</p>
 					<AuthArtworkImage
 						artwork={artwork}
-						className="my-8 min-h-64 flex-1"
+						className="my-6 min-h-0 flex-1"
 					/>
 					<div className="relative">
 						<p className="max-w-sm text-3xl font-semibold leading-tight tracking-tight text-foreground xl:text-4xl">

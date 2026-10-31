@@ -124,7 +124,7 @@ export function AuthArtworkImage({
 				/>
 			) : (
 				<SolidLogo
-					className="h-auto w-2/5 max-w-48 text-foreground"
+					className="h-auto max-h-full w-2/5 max-w-48 text-foreground"
 					aria-hidden="true"
 				/>
 			)}

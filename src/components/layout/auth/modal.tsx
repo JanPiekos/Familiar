@@ -82,7 +82,7 @@ function AuthModal({ defaultTab = "login" }: AuthModalProps) {
 								</Button>
 							</DrawerClose>
 						</DrawerHeader>
-						<div className="px-4 pb-4">
+						<div className="min-h-0 overflow-y-auto px-4 pb-4">
 							<AuthContent
 								tab={tab}
 								setTab={setTab}
@@ -102,7 +102,7 @@ function AuthModal({ defaultTab = "login" }: AuthModalProps) {
 								{t("ui.reset_your_password", "Reset your password")}
 							</DrawerTitle>
 						</DrawerHeader>
-						<div className="px-4 pb-4">
+						<div className="min-h-0 overflow-y-auto px-4 pb-4">
 							<ForgotForm
 								onModeChange={() => {
 									setForgotOpen(false);
