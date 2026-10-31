@@ -1,6 +1,5 @@
 import {
 	type ErrorComponentProps,
-	type NotFoundRouteProps,
 	useLocation,
 	useRouter,
 } from "@tanstack/react-router";
@@ -224,11 +223,15 @@ export function RouteErrorPage({ error, reset }: ErrorComponentProps) {
 	);
 }
 
-export function RouteNotFoundPage({
-	embedded = false,
-}: Partial<NotFoundRouteProps> & {
-	embedded?: boolean;
-} = {}) {
+export function RouteNotFoundPage() {
+	return <NotFoundPage />;
+}
+
+export function EmbeddedRouteNotFoundPage() {
+	return <NotFoundPage embedded />;
+}
+
+function NotFoundPage({ embedded = false }: { embedded?: boolean }) {
 	const router = useRouter();
 	return (
 		<ErrorPage

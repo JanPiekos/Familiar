@@ -8,7 +8,7 @@ import {
 	useNavigate,
 } from "@tanstack/react-router";
 
-import { RouteNotFoundPage } from "@/components/layout/error-page";
+import { EmbeddedRouteNotFoundPage } from "@/components/layout/error-page";
 import { ProfileCommissions } from "@/components/layout/profile/feed/commissions";
 import { ProfilePortfolio } from "@/components/layout/profile/feed/portfolio";
 import {
@@ -102,7 +102,7 @@ export const Route = createFileRoute("/{-$locale}/_main/user/$username")({
 	},
 
 	pendingComponent: UserProfileSkeleton,
-	notFoundComponent: () => <RouteNotFoundPage embedded />,
+	notFoundComponent: EmbeddedRouteNotFoundPage,
 	component: RouteComponent,
 });
 
