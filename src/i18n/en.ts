@@ -317,6 +317,12 @@ const en = {
 		},
 	},
 	accessibility: {
+		guide_title: "Focus reading guide",
+		guide_help:
+			"Dim the page above and below a clear reading strip. It follows your pointer, touch, or keyboard focus. Press Esc or use the exit button to turn it off.",
+		guide_height: "Reading strip height",
+		guide_pixels: "{{height}} px",
+		guide_exit: "Exit reading guide",
 		reading: "Reading",
 		save_hint:
 			"Changes apply when you save and are remembered in this browser.",
