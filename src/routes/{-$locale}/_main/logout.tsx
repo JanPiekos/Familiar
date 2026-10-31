@@ -1,12 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/{-$locale}/_main/logout")({
 	component: LogoutPage,
 });
 
 function LogoutPage() {
+	const { t } = useTranslation();
 	const { locale } = Route.useParams();
 	const navigate = useNavigate();
 
@@ -31,7 +33,7 @@ function LogoutPage() {
 
 	return (
 		<div className="flex items-center justify-center min-h-screen">
-			<p>Logging out&hellip;</p>
+			<p>{t("ui.logging_out", "Logging out…")}</p>
 		</div>
 	);
 }

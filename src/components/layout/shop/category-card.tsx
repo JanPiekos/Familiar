@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { generateTailwindPalette, getTextColor } from "@/lib/colors";
 import { Elevated } from "@/lib/elevated";
 import { useTheme } from "@/providers/theme";
+import { useTranslation } from "react-i18next";
 
 // Simple deterministic hash to get a consistent color for the same category name
 function getHash(str: string): number {
@@ -48,6 +49,7 @@ export function CategoryCard({
 	onSeeAll?: () => void;
 	count?: string;
 }) {
+	const { t } = useTranslation();
 	const { isDark } = useTheme();
 
 	// Generate consistent deterministic colors based on category title
@@ -70,7 +72,7 @@ export function CategoryCard({
 				button: isDark ? palette[200] || "#e5e7eb" : palette[900] || "#111827",
 				patternIndex: pIndex,
 			};
-		}, [title, isDark]);
+		}, [title, isDark, t]);
 
 	const buttonText = isDark
 		? getTextColor({ 200: button }, 200)
@@ -151,7 +153,7 @@ export function CategoryCard({
 					className="w-fit"
 					style={{ backgroundColor: button, color: buttonText }}
 				>
-					See all
+					{t("ui.see_all", "See all")}
 					<OutlineArrowRight />
 				</Button>
 			</div>

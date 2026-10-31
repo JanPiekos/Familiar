@@ -12,14 +12,17 @@ import { getMarkerWidth } from "./lifeline-utils";
 import type { LifelineEventImage, LifelineProps } from "./types";
 import { useLifelineIntro } from "./use-lifeline-intro";
 import { useLifelineScroll } from "./use-lifeline-scroll";
+import appI18n from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 
 export function LifelineDesktop({
 	markers,
 	birthYear,
 	className,
-	title = "Lifeline",
+	title = appI18n.t("ui.lifeline", "Lifeline"),
 	mode = "auto",
 }: LifelineProps) {
+	useTranslation();
 	const widths = useMemo(
 		() =>
 			markers.map((marker, index) =>

@@ -13,6 +13,7 @@ import {
 } from "src/components/reui/data-grid/data-grid-column-header-utils";
 import { Button } from "src/components/ui/button";
 import { cn } from "src/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface DataGridColumnHeaderProps<TData, TValue>
 	extends HTMLAttributes<HTMLDivElement> {
@@ -41,6 +42,7 @@ function DataGridColumnHeaderInner<TData, TValue>({
 	filter,
 	visibility = false,
 }: DataGridColumnHeaderProps<TData, TValue>) {
+	const { t } = useTranslation();
 	const { isLoading, table, props, recordCount } = useDataGrid();
 	const resolvedTitle = title ?? getColumnHeaderLabel(column);
 
@@ -126,8 +128,14 @@ function DataGridColumnHeaderInner<TData, TValue>({
 						variant="ghost"
 						className="-me-1 size-7 rounded-md"
 						onClick={() => column.pin(false)}
-						aria-label={`Unpin ${resolvedTitle} column`}
-						title={`Unpin ${resolvedTitle} column`}
+						aria-label={t("ui.unpin_value0_column", {
+							defaultValue: "Unpin {{value0}} column",
+							value0: resolvedTitle,
+						})}
+						title={t("ui.unpin_value0_column", {
+							defaultValue: "Unpin {{value0}} column",
+							value0: resolvedTitle,
+						})}
 					>
 						<PinOffIcon className="size-3.5! opacity-50!" aria-hidden="true" />
 					</Button>

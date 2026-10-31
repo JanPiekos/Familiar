@@ -167,7 +167,7 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 				shouldValidate: true,
 			});
 		},
-		[setValue],
+		[setValue, t],
 	);
 
 	const validateStep = useCallback(
@@ -200,7 +200,7 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 					return true;
 			}
 		},
-		[trigger],
+		[trigger, t],
 	);
 
 	const goNext = useCallback(async () => {
@@ -236,7 +236,7 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 		} finally {
 			setIsChangingStep(false);
 		}
-	}, [isChangingStep, step, validateStep]);
+	}, [isChangingStep, step, validateStep, t]);
 
 	const handleStepChange = useCallback(
 		async (nextStep: number) => {
@@ -269,7 +269,7 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 				setIsChangingStep(false);
 			}
 		},
-		[furthestFormStep, isChangingStep, isPending, step, validateStep],
+		[furthestFormStep, isChangingStep, isPending, step, validateStep, t],
 	);
 
 	const goBack = useCallback(() => {
@@ -278,7 +278,7 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 		}
 
 		setStep((currentStep) => Math.max(currentStep - 1, 0) as FormStep);
-	}, [isChangingStep, isPending]);
+	}, [isChangingStep, isPending, t]);
 
 	const onFinalSubmit = useCallback(
 		async (data: RegisterData) => {
@@ -314,7 +314,7 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 				}
 			}
 		},
-		[authRegister, setError, setFocus],
+		[authRegister, setError, setFocus, t],
 	);
 
 	const handleInvalidSubmit = useCallback(
@@ -357,11 +357,12 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 		isPending,
 		onFinalSubmit,
 		step,
+		t,
 	]);
 
 	const checkVerification = useCallback(() => {
 		void refreshSession();
-	}, [refreshSession]);
+	}, [refreshSession, t]);
 
 	useEffect(() => {
 		if (!isAwaitingVerification || registeredEmailVerified) {
@@ -387,14 +388,17 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 		};
 	}, [checkVerification, isAwaitingVerification, registeredEmailVerified]);
 
-	const blockNativeSubmit = useCallback((event: FormEvent<HTMLFormElement>) => {
-		/*
-		 * Native form submission is always disabled.
-		 * Registration is started only by submitRegistration().
-		 */
-		event.preventDefault();
-		event.stopPropagation();
-	}, []);
+	const blockNativeSubmit = useCallback(
+		(event: FormEvent<HTMLFormElement>) => {
+			/*
+			 * Native form submission is always disabled.
+			 * Registration is started only by submitRegistration().
+			 */
+			event.preventDefault();
+			event.stopPropagation();
+		},
+		[t],
+	);
 
 	const handleKeyDown = useCallback(
 		(event: KeyboardEvent<HTMLFormElement>) => {
@@ -423,7 +427,7 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 
 			void goNext();
 		},
-		[goNext, isChangingStep, isPending, step, submitRegistration],
+		[goNext, isChangingStep, isPending, step, submitRegistration, t],
 	);
 
 	const steps = [

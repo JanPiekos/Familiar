@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { ReactNode } from "react";
 import { OutlineClose } from "../icons/icons";
+import appI18n from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 
 export interface ConfirmDialogProps {
 	open: boolean;
@@ -35,11 +37,12 @@ export function ConfirmDialog({
 	title,
 	description,
 	onConfirm,
-	confirmText = "Confirm",
-	cancelText = "Cancel",
+	confirmText = appI18n.t("ui.confirm", "Confirm"),
+	cancelText = appI18n.t("ui.cancel", "Cancel"),
 	isPending = false,
 	variant = "destructive",
 }: ConfirmDialogProps) {
+	useTranslation();
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent showCloseButton={false} className="max-w-md p-3">

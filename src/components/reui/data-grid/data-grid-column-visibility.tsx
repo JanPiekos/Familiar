@@ -10,6 +10,7 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuTrigger,
 } from "src/components/ui/dropdown-menu";
+import { useTranslation } from "react-i18next";
 
 function getColumnVisibilityItems<TData>(table: Table<TData>): ReactNode[] {
 	const items: ReactNode[] = [];
@@ -42,6 +43,7 @@ function DataGridColumnVisibility<TData>({
 	table: Table<TData>;
 	trigger: ReactElement<Record<string, unknown>>;
 }) {
+	const { t } = useTranslation();
 	const columnVisibilityItems = getColumnVisibilityItems(table);
 
 	return (
@@ -50,7 +52,7 @@ function DataGridColumnVisibility<TData>({
 			<DropdownMenuContent align="end" className="min-w-[150px]">
 				<DropdownMenuGroup>
 					<DropdownMenuLabel className="font-medium">
-						Toggle Columns
+						{t("ui.toggle_columns", "Toggle Columns")}
 					</DropdownMenuLabel>
 					{columnVisibilityItems}
 				</DropdownMenuGroup>

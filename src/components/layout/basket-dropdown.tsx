@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import UserAvatar from "./profile/avatar";
 
 export function BasketDropdown() {
+	const { t } = useTranslation();
 	const { i18n } = useTranslation();
 	const isTablet = useIsTablet();
 	const [open, setOpen] = useState(false);
@@ -38,10 +39,13 @@ export function BasketDropdown() {
 	const BasketContent = (
 		<div className="flex flex-col max-h-[85vh] lg:max-h-[80vh]">
 			<div className="flex items-center justify-between p-3 border-b border-border">
-				<Typography.Heading level={4}>Basket</Typography.Heading>
+				<Typography.Heading level={4}>
+					{t("ui.basket", "Basket")}
+				</Typography.Heading>
 				<div className="flex items-center gap-2">
 					<Typography.Paragraph size={"sm"} className="text-muted-foreground">
-						{basketItems.length} item{basketItems.length !== 1 ? "s" : ""} from
+						{basketItems.length} {t("ui.item", "item")}
+						{basketItems.length !== 1 ? "s" : ""} {t("ui.from", "from")}
 					</Typography.Paragraph>
 					<UserAvatar user={basketItems[0]?.author} size="sm" />
 				</div>
@@ -74,7 +78,7 @@ export function BasketDropdown() {
 								>
 									#{item.id}
 								</Typography.Paragraph>
-								<Button variant={"destructive"} size={"icon-sm"}>
+								<Button disabled variant={"destructive"} size={"icon-sm"}>
 									<OutlineTrash />
 								</Button>
 							</div>
@@ -86,9 +90,14 @@ export function BasketDropdown() {
 			<div className="p-3 border-t space-y-6">
 				<div className="flex items-end justify-between">
 					<div className="flex flex-col">
-						<Typography.Heading level={5}>Subtotal</Typography.Heading>
+						<Typography.Heading level={5}>
+							{t("ui.subtotal", "Subtotal")}
+						</Typography.Heading>
 						<Typography.Paragraph size={"sm"} className="text-muted-foreground">
-							Sales tax calculated at checkout
+							{t(
+								"ui.sales_tax_calculated_at_checkout",
+								"Sales tax calculated at checkout",
+							)}
 						</Typography.Paragraph>
 					</div>
 					<Typography.Heading level={4}>
@@ -106,7 +115,7 @@ export function BasketDropdown() {
 						to={localizePath("/basket", i18n.language) as any}
 						preload={false}
 					>
-						Checkout
+						{t("ui.checkout", "Checkout")}
 					</Link>
 				</Button>
 			</div>

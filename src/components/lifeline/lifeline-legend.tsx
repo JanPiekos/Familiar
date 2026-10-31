@@ -1,4 +1,5 @@
 import type { LifelineLegendItem } from "./types";
+import appI18n from "@/lib/i18n";
 
 const LEGEND_DOT_CLASS: Record<LifelineLegendItem["type"], string> = {
 	mentor: "bg-blue-500",
@@ -6,8 +7,18 @@ const LEGEND_DOT_CLASS: Record<LifelineLegendItem["type"], string> = {
 };
 
 const DEFAULT_ITEMS: LifelineLegendItem[] = [
-	{ type: "mentor", label: "Mentors" },
-	{ type: "met", label: "Met in person" },
+	{
+		type: "mentor",
+		get label() {
+			return appI18n.t("ui.mentors", "Mentors");
+		},
+	},
+	{
+		type: "met",
+		get label() {
+			return appI18n.t("ui.met_in_person", "Met in person");
+		},
+	},
 ];
 
 export function LifelineLegend({

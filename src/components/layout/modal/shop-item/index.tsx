@@ -42,7 +42,7 @@ export function ShopItemModal({
 			<UniversalModalLayout
 				open={open}
 				onOpenChange={onOpenChange}
-				title="Loading shop item..."
+				title={t("ui.loading_shop_item", "Loading shop item...")}
 				mediaContent={<Skeleton className="w-full h-full min-h-[300px]" />}
 				detailsContent={
 					<div className="flex flex-col gap-4 p-4">
@@ -118,7 +118,7 @@ export function ShopItemModal({
 										avatarSize="sm"
 										buttonClassName="py-0 h-fit w-fit"
 									/>
-									<Button>Follow</Button>
+									<Button disabled>{t("ui.follow", "Follow")}</Button>
 								</div>
 
 								{item.discountPct && (
@@ -127,7 +127,8 @@ export function ShopItemModal({
 										className="bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-950/50 dark:text-fuchsia-400 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-950/50 px-2 py-0.5 w-fit"
 									>
 										<Tag className="size-3 mr-1" />
-										{item.discountPct}% off
+										{item.discountPct}
+										{t("ui.off", "% off")}
 									</Badge>
 								)}
 
@@ -140,7 +141,7 @@ export function ShopItemModal({
 											{item.rating.toFixed(1)}
 										</Typography.Paragraph>
 										<Typography.Paragraph size={"sm"}>
-											• 1 review
+											{t("ui.1_review", "• 1 review")}
 										</Typography.Paragraph>
 									</div>
 									<div className="flex items-center gap-1.5">
@@ -149,7 +150,7 @@ export function ShopItemModal({
 											size={"sm"}
 											className="text-muted-foreground"
 										>
-											{item.salesCount} sold
+											{item.salesCount} {t("ui.sold", "sold")}
 										</Typography.Paragraph>
 									</div>
 								</div>
@@ -160,14 +161,19 @@ export function ShopItemModal({
 								<Field className="space-y-4">
 									<FieldLabel className="w-full justify-between">
 										<Typography.Heading level={5}>
-											How much would you like to pay?
+											{t(
+												"ui.how_much_would_you_like_to_pay",
+												"How much would you like to pay?",
+											)}
 										</Typography.Heading>
 									</FieldLabel>
 									<InputGroup>
 										<InputGroupAddon className="font-bold text-lg">
 											zł
 										</InputGroupAddon>
-										<InputGroupNumberInput placeholder="25.72 or more" />
+										<InputGroupNumberInput
+											placeholder={t("ui.25_72_or_more", "25.72 or more")}
+										/>
 									</InputGroup>
 								</Field>
 
@@ -178,14 +184,15 @@ export function ShopItemModal({
 											className="bg-transparent border-none text-fuchsia-500 p-0 font-bold"
 										>
 											<Tag className="size-4 mr-1.5" />
-											Was {item.currencyCode} {item.originalPrice?.toFixed(2)} (
-											{item.discountPct}% off)
+											{t("ui.was", "Was")} {item.currencyCode}{" "}
+											{item.originalPrice?.toFixed(2)} ({item.discountPct}
+											{t("ui.off_1a3fb5", "% off)")}
 										</Badge>
 										<div className="flex items-center gap-1.5 text-muted-foreground ml-2">
 											<MessageCircle className="size-4" />
 											<span>
-												{item.author.username} suggests {item.currencyCode}{" "}
-												{item.price.toFixed(2)}
+												{item.author.username} {t("ui.suggests", "suggests")}{" "}
+												{item.currencyCode} {item.price.toFixed(2)}
 											</span>
 										</div>
 									</div>
@@ -201,7 +208,7 @@ export function ShopItemModal({
 													htmlFor="license-personal"
 													className="cursor-not-allowed font-normal text-muted-foreground/70"
 												>
-													Personal
+													{t("ui.personal", "Personal")}
 												</FieldLabel>
 												<div className="flex items-baseline gap-2 whitespace-nowrap">
 													<Typography.Paragraph
@@ -229,7 +236,7 @@ export function ShopItemModal({
 													htmlFor="license-commercial"
 													className="cursor-pointer font-normal"
 												>
-													Commercial: Content
+													{t("ui.commercial_content", "Commercial: Content")}
 												</FieldLabel>
 												<Typography.Paragraph
 													size={"xs"}
@@ -252,7 +259,10 @@ export function ShopItemModal({
 													htmlFor="license-merch"
 													className="cursor-not-allowed font-normal text-muted-foreground/70 line-through"
 												>
-													Commercial: Merchandising
+													{t(
+														"ui.commercial_merchandising",
+														"Commercial: Merchandising",
+													)}
 												</FieldLabel>
 											</div>
 										</FieldContent>
@@ -272,10 +282,14 @@ export function ShopItemModal({
 									<Download className="size-5" />
 								</div>
 								<div className="flex flex-col gap-1 flex-1">
-									<h4 className="font-semibold">Digital download</h4>
+									<h4 className="font-semibold">
+										{t("ui.digital_download", "Digital download")}
+									</h4>
 									<p className="text-sm text-muted-foreground leading-relaxed">
-										Files are instantly available after purchase. Returns and
-										exchanges are not accepted.
+										{t(
+											"ui.files_are_instantly_available_after_purchase_returns_and_exchanges_are_not_",
+											"Files are instantly available after purchase. Returns and exchanges are not accepted.",
+										)}
 									</p>
 								</div>
 							</Elevated>
@@ -283,7 +297,9 @@ export function ShopItemModal({
 							{/* Description Section */}
 							<Elevated shadowLevel={0} className="p-6 rounded-3xl space-y-6">
 								<div className="flex items-center justify-between">
-									<h3 className="font-bold text-lg">Details</h3>
+									<h3 className="font-bold text-lg">
+										{t("ui.details", "Details")}
+									</h3>
 								</div>
 
 								<div className="leading-relaxed text-[15px] space-y-4">
@@ -291,14 +307,17 @@ export function ShopItemModal({
 										<MarkdownDisplay content={item.description} />
 									) : (
 										<p className="text-muted-foreground text-base italic">
-											No description provided.
+											{t(
+												"ui.no_description_provided",
+												"No description provided.",
+											)}
 										</p>
 									)}
 								</div>
 
 								{item.description && (
-									<Button variant="ghost" className="w-full">
-										Read more
+									<Button disabled variant="ghost" className="w-full">
+										{t("ui.read_more", "Read more")}
 									</Button>
 								)}
 							</Elevated>
@@ -310,12 +329,14 @@ export function ShopItemModal({
 							<div className="flex flex-col gap-3">
 								<div className="flex min-w-0 gap-3">
 									<Button
+										disabled
 										size="xl"
 										className="min-w-0 flex-1 bg-accent text-accent-foreground hover:bg-accent/90"
 									>
-										Buy now
+										{t("ui.buy_now", "Buy now")}
 									</Button>
 									<Button
+										disabled
 										size="icon-xl"
 										variant="secondary"
 										className="shrink-0"
@@ -324,11 +345,12 @@ export function ShopItemModal({
 									</Button>
 								</div>
 								<Button
+									disabled
 									size="xl"
 									variant="default"
 									className="w-full bg-foreground text-background hover:bg-foreground/90"
 								>
-									Add to basket
+									{t("ui.add_to_basket", "Add to basket")}
 								</Button>
 							</div>
 						</div>
