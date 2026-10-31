@@ -593,6 +593,38 @@ const pl = {
 		},
 		"artist-dashboard": "Panel artysty",
 	},
+	image_crop: {
+		close: "Zamknij edytor obrazu",
+		avatar_title: "Kadruj zdjęcie profilowe",
+		cover_title: "Kadruj zdjęcie w tle",
+		cover_size_hint: "Zalecane tło: {{width}} × {{height}} px.",
+		avatar_size_hint: "Zalecany awatar: {{size}} × {{size}} px.",
+		description: "Wybierz, co będzie widoczne na Twoim profilu.",
+		position: "Ustaw położenie obrazu",
+		position_help:
+			"Przeciągnij obraz lub użyj strzałek, aby go przesunąć. Zbliżaj palcami lub kółkiem myszy.",
+		image_alt: "Kadrowany obraz",
+		zoom: "Zbliżenie",
+		zoom_in: "Przybliż",
+		zoom_out: "Oddal",
+		rotate: "Obróć",
+		reset: "Resetuj",
+		guides: "Obszary ekranów",
+		guide_help:
+			"Ważne elementy umieść w ramce telefonu. Kliknij ekran ponownie, aby ukryć ramkę.",
+		desktop: "Komputer",
+		tablet: "Tablet",
+		mobile: "Telefon",
+		cancel: "Anuluj",
+		apply: "Zastosuj kadr",
+		loading: "Wczytywanie obrazu",
+		failed:
+			"Nie udało się wykadrować obrazu. Spróbuj ponownie lub wybierz inny obraz.",
+		load_failed: "Nie udało się otworzyć obrazu. Wybierz inny obraz.",
+		animation:
+			"Kadrowanie zapisuje pojedynczą klatkę. Zachowaj oryginał, aby zachować animację.",
+		original: "Użyj oryginału",
+	},
 	auth: {
 		login: {
 			cta: "Zaloguj",
