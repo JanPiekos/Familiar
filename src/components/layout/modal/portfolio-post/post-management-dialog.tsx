@@ -1,0 +1,363 @@
+import { FolderMinus, Trash2 } from "lucide-react";
+import { useId, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+import type { CatalogResponse } from "@/api/portfolio/catalogs/catalog-types";
+import type {
+	PortfolioPostResponse,
+	PortfolioVisibility,
+	UpdatePortfolioPostRequest,
+} from "@/api/portfolio/posts/post-types";
+import { CreationDialogLayout } from "@/components/layout/creation-dialog-layout";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+	InputGroup,
+	InputGroupInput,
+	InputGroupTextArea,
+} from "@/components/ui/input-group";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import {
+	useAddPortfolioPostToCatalog,
+	useDeletePortfolioPost,
+	useRemovePortfolioPostFromCatalog,
+	useUpdatePortfolioPost,
+} from "@/hooks/portfolio/use-portfolio";
+
+export type PostManagementAction = "edit" | "move" | "delete" | "remove";
+
+export function PostManagementDialog({
+	post,
+	action,
+	folders,
+	folder,
+	onClose,
+}: {
+	post: PortfolioPostResponse;
+	action: PostManagementAction;
+	folders: CatalogResponse[];
+	folder?: CatalogResponse;
+	onClose: () => void;
+}) {
+	const { t } = useTranslation();
+	const id = useId();
+	const [title, setTitle] = useState(post.title ?? "");
+	const [description, setDescription] = useState(post.description ?? "");
+	const [visibility, setVisibility] = useState<PortfolioVisibility>(
+		post.visibility ?? "PUBLIC",
+	);
+	const [destination, setDestination] = useState("");
+	const [busy, setBusy] = useState(false);
+	const [error, setError] = useState("");
+	const lock = useRef(false);
+	// Remember completed membership requests so retrying a partial move is safe.
+	const memberships = useRef(new Set(post.catalogIds ?? []));
+	const update = useUpdatePortfolioPost();
+	const remove = useDeletePortfolioPost();
+	const addToFolder = useAddPortfolioPostToCatalog();
+	const removeFromFolder = useRemovePortfolioPostFromCatalog();
+	const isConfirmation = action === "delete" || action === "remove";
+	const confirmationPrefix = `components.portfolio.post.${action === "remove" ? "remove_from_folder" : "delete"}`;
+	const ConfirmationIcon = action === "remove" ? FolderMinus : Trash2;
+	const changed =
+		action === "edit"
+			? title.trim() !== (post.title ?? "").trim() ||
+				description !== (post.description ?? "") ||
+				visibility !== (post.visibility ?? "PUBLIC")
+			: Boolean(destination) &&
+				(!memberships.current.has(destination) ||
+					memberships.current.size !== 1);
+	const close = () => {
+		if (!lock.current) onClose();
+	};
+	const save = async () => {
+		if (
+			lock.current ||
+			!post.id ||
+			(action === "remove" && !folder?.id) ||
+			(!isConfirmation && !changed) ||
+			(action === "edit" && !title.trim())
+		)
+			return;
+		lock.current = true;
+		setBusy(true);
+		setError("");
+		try {
+			if (action === "delete") await remove.mutateAsync(post.id);
+			else if (action === "remove" && folder) {
+				await removeFromFolder.mutateAsync({
+					postId: post.id,
+					catalogId: folder.id,
+				});
+			} else if (action === "edit") {
+				const data: UpdatePortfolioPostRequest = {};
+				if (title.trim() !== (post.title ?? "").trim())
+					data.title = title.trim();
+				if (description !== (post.description ?? ""))
+					data.description = description;
+				if (visibility !== (post.visibility ?? "PUBLIC"))
+					data.visibility = visibility;
+				await update.mutateAsync({
+					postId: post.id,
+					data,
+				});
+			} else {
+				// Keep the post in at least one folder if a later removal fails.
+				if (!memberships.current.has(destination)) {
+					await addToFolder.mutateAsync({
+						postId: post.id,
+						catalogId: destination,
+					});
+					memberships.current.add(destination);
+				}
+				for (const catalogId of [...memberships.current]) {
+					if (catalogId === destination) continue;
+					await removeFromFolder.mutateAsync({ postId: post.id, catalogId });
+					memberships.current.delete(catalogId);
+				}
+			}
+			toast.success(
+				t(
+					isConfirmation
+						? `${confirmationPrefix}.success`
+						: `components.portfolio.post.manage.${action}_success`,
+				),
+			);
+			onClose();
+		} catch {
+			setError(
+				t(
+					isConfirmation
+						? `${confirmationPrefix}.error`
+						: action === "move" && memberships.current.has(destination)
+							? "components.portfolio.post.manage.move_partial"
+							: "components.portfolio.post.manage.save_error",
+				),
+			);
+		} finally {
+			lock.current = false;
+			setBusy(false);
+		}
+	};
+	const errorMessage = error ? (
+		<p role="alert" className="text-sm text-destructive">
+			{error}
+		</p>
+	) : null;
+	if (isConfirmation)
+		return (
+			<AlertDialog
+				open
+				onOpenChange={(open) => {
+					if (!open) close();
+				}}
+			>
+				<AlertDialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-3xl bg-background p-0 outline-none data-[size=default]:sm:max-w-md">
+					<div className="min-h-0 overflow-y-auto p-5 text-left sm:p-6">
+						<div
+							className="mb-4 flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive"
+							aria-hidden="true"
+						>
+							<ConfirmationIcon className="size-5" />
+						</div>
+						<AlertDialogTitle className="text-xl leading-snug text-foreground">
+							{t(`${confirmationPrefix}.title`)}
+						</AlertDialogTitle>
+						<AlertDialogDescription className="mt-2 text-pretty leading-relaxed text-foreground/70">
+							{t(`${confirmationPrefix}.description`, { folder: folder?.name })}
+						</AlertDialogDescription>
+						{post.title && (
+							<div className="mt-4 rounded-2xl bg-muted/50 px-4 py-3">
+								<p className="line-clamp-2 break-words text-sm font-medium text-foreground">
+									{post.title}
+								</p>
+							</div>
+						)}
+						{error && <div className="mt-4">{errorMessage}</div>}
+					</div>
+					<AlertDialogFooter className="shrink-0 flex-row border-t bg-muted/20 p-4 sm:px-6">
+						<AlertDialogCancel
+							size="2xl"
+							className="flex-1 sm:flex-none"
+							disabled={busy}
+						>
+							{t("ui.cancel")}
+						</AlertDialogCancel>
+						<AlertDialogAction
+							variant="destructive"
+							size="2xl"
+							disabled={
+								busy || !post.id || (action === "remove" && !folder?.id)
+							}
+							className="flex-1 sm:flex-none"
+							onClick={(event) => {
+								event.preventDefault();
+								void save();
+							}}
+						>
+							{t(
+								busy
+									? `${confirmationPrefix}.${action === "remove" ? "removing" : "deleting"}`
+									: `${confirmationPrefix}.confirm`,
+							)}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+		);
+	return (
+		<CreationDialogLayout
+			open
+			onOpenChange={(open) => {
+				if (!open) close();
+			}}
+			title={t(`components.portfolio.post.manage.${action}`)}
+			description={t(`components.portfolio.post.manage.${action}_description`)}
+			isBusy={busy}
+			className="max-w-lg sm:max-w-lg"
+			footer={
+				<div className="flex justify-end gap-2 p-4 sm:px-6">
+					<Button size="2xl" variant="outline" disabled={busy} onClick={close}>
+						{t("ui.cancel")}
+					</Button>
+					<Button
+						size="2xl"
+						type="submit"
+						form={id}
+						disabled={
+							busy ||
+							!changed ||
+							!post.id ||
+							(action === "edit" && !title.trim())
+						}
+					>
+						{t(
+							busy
+								? "ui.saving"
+								: action === "move"
+									? "components.portfolio.post.manage.move"
+									: "ui.save_changes",
+						)}
+					</Button>
+				</div>
+			}
+		>
+			<form
+				id={id}
+				className="space-y-5 p-5 sm:p-6"
+				onSubmit={(event) => {
+					event.preventDefault();
+					void save();
+				}}
+			>
+				<fieldset disabled={busy} className="space-y-5">
+					<legend className="sr-only">
+						{t(`components.portfolio.post.manage.${action}`)}
+					</legend>
+					{action === "edit" ? (
+						<>
+							<div className="space-y-2">
+								<label htmlFor={`${id}-title`} className="text-sm font-medium">
+									{t("components.portfolio.post.create.fields.title")}
+								</label>
+								<InputGroup>
+									<InputGroupInput
+										id={`${id}-title`}
+										value={title}
+										maxLength={100}
+										required
+										onChange={(event) => setTitle(event.target.value)}
+									/>
+								</InputGroup>
+							</div>
+							<div className="space-y-2">
+								<label
+									htmlFor={`${id}-description`}
+									className="text-sm font-medium"
+								>
+									{t("components.portfolio.post.create.fields.description")}
+								</label>
+								<InputGroup className="rounded-2xl">
+									<InputGroupTextArea
+										id={`${id}-description`}
+										value={description}
+										className="min-h-28"
+										onChange={(event) => setDescription(event.target.value)}
+									/>
+								</InputGroup>
+							</div>
+							<div className="space-y-2">
+								<label
+									htmlFor={`${id}-visibility`}
+									className="text-sm font-medium"
+								>
+									{t("components.portfolio.post.create.fields.visibility")}
+								</label>
+								<Select
+									value={visibility}
+									onValueChange={(value) =>
+										setVisibility(value as PortfolioVisibility)
+									}
+								>
+									<SelectTrigger id={`${id}-visibility`} className="w-full">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{(["PUBLIC", "PRIVATE"] as const).map((value) => (
+											<SelectItem key={value} value={value}>
+												{t(
+													`components.portfolio.post.create.visibility.${value.toLowerCase()}`,
+												)}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+						</>
+					) : folders.length ? (
+						<div className="space-y-2">
+							<label htmlFor={`${id}-folder`} className="text-sm font-medium">
+								{t("components.portfolio.post.manage.destination")}
+							</label>
+							<Select value={destination} onValueChange={setDestination}>
+								<SelectTrigger id={`${id}-folder`} className="w-full">
+									<SelectValue
+										placeholder={t(
+											"components.portfolio.post.manage.choose_folder",
+										)}
+									/>
+								</SelectTrigger>
+								<SelectContent>
+									{folders.map((folder) => (
+										<SelectItem key={folder.id} value={folder.id}>
+											{folder.name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+					) : (
+						<p className="text-sm text-muted-foreground">
+							{t("components.portfolio.post.manage.no_folders")}
+						</p>
+					)}
+				</fieldset>
+				{errorMessage}
+			</form>
+		</CreationDialogLayout>
+	);
+}

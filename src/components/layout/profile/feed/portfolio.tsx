@@ -21,6 +21,10 @@ import {
 	type ManagedFilterValue,
 } from "@/components/layout/filter-bar";
 import { CreatePostModal } from "@/components/layout/modal/profile/portfolio/create-post-modal";
+import {
+	PostManagementDialog,
+	type PostManagementAction,
+} from "@/components/layout/modal/portfolio-post/post-management-dialog";
 import { AddFolderPostsModal } from "@/components/layout/modal/profile/portfolio/add-folder-posts-modal";
 import {
 	CreateCatalogModal,
@@ -47,7 +51,6 @@ import {
 import {
 	useAddPortfolioPostToCatalog,
 	useDeleteCatalog,
-	useRemovePortfolioPostFromCatalog,
 	useUpdateCatalog,
 } from "@/hooks/portfolio/use-portfolio";
 import { useIsTablet } from "@/hooks/ui/use-mobile";
@@ -243,10 +246,30 @@ export function ProfilePortfolio({
 	const [renameCatalogOpen, setRenameCatalogOpen] = useState(false);
 	const [deleteCatalogOpen, setDeleteCatalogOpen] = useState(false);
 	const [addPostsOpen, setAddPostsOpen] = useState(false);
+	const [management, setManagement] = useState<{
+		post: PortfolioPostResponse;
+		action: PostManagementAction;
+		folder?: CatalogResponse;
+	} | null>(null);
+	const managePost = useCallback(
+		(post: PortfolioPostResponse, action: PostManagementAction) => {
+			if (canManageCatalogs && post.id) setManagement({ post, action });
+		},
+		[canManageCatalogs],
+	);
+	// Keep the dialog mounted if a refetch removes the last visible post.
+	const managementDialog =
+		canManageCatalogs && management ? (
+			<PostManagementDialog
+				key={`${management.post.id}-${management.action}`}
+				{...management}
+				folders={folders}
+				onClose={() => setManagement(null)}
+			/>
+		) : null;
 
 	const updateCatalogMutation = useUpdateCatalog();
 	const deleteCatalogMutation = useDeleteCatalog();
-	const removePostMutation = useRemovePortfolioPostFromCatalog();
 	const addPostMutation = useAddPortfolioPostToCatalog();
 
 	const canCreateCatalog = canManageCatalogs && Boolean(onCreateCatalog);
@@ -382,13 +405,10 @@ export function ProfilePortfolio({
 		});
 	};
 
-	const handleRemovePostFromCatalog = async (postId: string) => {
-		if (!currentFolder) return;
-
-		await removePostMutation.mutateAsync({
-			postId,
-			catalogId: currentFolder.id,
-		});
+	const handleRemovePostFromCatalog = (postId: string) => {
+		const post = posts.find((item) => item.id === postId);
+		if (!canManageCatalogs || !currentFolder || !post) return;
+		setManagement({ post, action: "remove", folder: currentFolder });
 	};
 
 	const availableTags = useMemo(
@@ -643,50 +663,55 @@ export function ProfilePortfolio({
 		) : undefined;
 
 		return (
-			<PortfolioFolderView
-				folder={currentFolder}
-				username={username ?? ""}
-				locale={locale}
-				postCount={currentFolderPosts.length}
-				isOwner={canManageCatalogs}
-				actions={folderActions}
-				isFiltered={hasSearchOrFilters}
-				onClearFilters={handleClearAll}
-				onAddPosts={
-					canManageCatalogs &&
-					posts.some(
-						(post) => post.id && !post.catalogIds?.includes(currentFolder.id),
-					)
-						? () => setAddPostsOpen(true)
-						: undefined
-				}
-				toolbar={
-					<FilterBar
-						data={currentFolderPosts}
-						groups={filterGroups}
-						values={filters}
-						onFilterChange={handleFilterChange}
-						searchQuery={searchQuery}
-						onSearchChange={setSearchQuery}
-						onClearAll={handleClearAll}
-						searchPlaceholder={t(
-							"components.portfolio.folder.filters.search_placeholder",
-							"Search this folder...",
-						)}
-					/>
-				}
-			>
-				{filteredPosts.length > 0 ? (
-					<ProfileFeed
-						posts={filteredPosts}
-						onPostClick={handlePostClick}
-						variant="portfolio"
-						onRemoveFromCatalog={
-							canManageCatalogs ? handleRemovePostFromCatalog : undefined
-						}
-					/>
-				) : undefined}
-			</PortfolioFolderView>
+			<>
+				<PortfolioFolderView
+					folder={currentFolder}
+					username={username ?? ""}
+					locale={locale}
+					postCount={currentFolderPosts.length}
+					isOwner={canManageCatalogs}
+					actions={folderActions}
+					isFiltered={hasSearchOrFilters}
+					onClearFilters={handleClearAll}
+					onAddPosts={
+						canManageCatalogs &&
+						posts.some(
+							(post) => post.id && !post.catalogIds?.includes(currentFolder.id),
+						)
+							? () => setAddPostsOpen(true)
+							: undefined
+					}
+					toolbar={
+						<FilterBar
+							data={currentFolderPosts}
+							groups={filterGroups}
+							values={filters}
+							onFilterChange={handleFilterChange}
+							searchQuery={searchQuery}
+							onSearchChange={setSearchQuery}
+							onClearAll={handleClearAll}
+							searchPlaceholder={t(
+								"components.portfolio.folder.filters.search_placeholder",
+								"Search this folder...",
+							)}
+						/>
+					}
+				>
+					{filteredPosts.length > 0 ? (
+						<ProfileFeed
+							posts={filteredPosts}
+							onPostClick={handlePostClick}
+							variant="portfolio"
+							isOwner={canManageCatalogs}
+							onManagePost={managePost}
+							onRemoveFromCatalog={
+								canManageCatalogs ? handleRemovePostFromCatalog : undefined
+							}
+						/>
+					) : undefined}
+				</PortfolioFolderView>
+				{managementDialog}
+			</>
 		);
 	}
 
@@ -764,6 +789,8 @@ export function ProfilePortfolio({
 					emptyDescription={emptyDescription}
 					onPostClick={handlePostClick}
 					variant="portfolio"
+					isOwner={canManageCatalogs}
+					onManagePost={managePost}
 					className="lg:mx-0 xl:mx-4"
 				/>
 			</div>
@@ -786,6 +813,7 @@ export function ProfilePortfolio({
 					catalogs={folders}
 				/>
 			)}
+			{managementDialog}
 		</>
 	);
 }

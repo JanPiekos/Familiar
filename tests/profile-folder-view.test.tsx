@@ -40,6 +40,8 @@ vi.mock("@/hooks/portfolio/use-portfolio", () => ({
 		mutateAsync: state.add,
 		isPending: false,
 	}),
+	useUpdatePortfolioPost: () => ({ mutateAsync: vi.fn() }),
+	useDeletePortfolioPost: () => ({ mutateAsync: vi.fn() }),
 	useUpdateCatalog: () => ({ mutateAsync: state.update, isPending: false }),
 	useDeleteCatalog: () => ({ mutateAsync: state.delete, isPending: false }),
 	useRemovePortfolioPostFromCatalog: () => ({
@@ -55,15 +57,31 @@ vi.mock("@/components/layout/profile/feed/profile-feed", () => ({
 	ProfileFeed: ({
 		posts,
 		onPostClick,
+		isOwner,
+		onManagePost,
+		onRemoveFromCatalog,
 	}: {
 		posts: PortfolioPostResponse[];
 		onPostClick: (post: PortfolioPostResponse) => void;
+		isOwner: boolean;
+		onManagePost: (post: PortfolioPostResponse, action: "move") => void;
+		onRemoveFromCatalog?: (postId: string) => void;
 	}) => (
-		<section aria-label="Folder posts">
+		<section aria-label="Folder posts" data-owner={isOwner}>
 			{posts.map((post) => (
-				<button key={post.id} onClick={() => onPostClick(post)}>
-					{post.title}
-				</button>
+				<div key={post.id}>
+					<button onClick={() => onPostClick(post)}>{post.title}</button>
+					{isOwner && (
+						<button onClick={() => onManagePost(post, "move")}>
+							Move post
+						</button>
+					)}
+					{onRemoveFromCatalog && post.id && (
+						<button onClick={() => onRemoveFromCatalog(post.id!)}>
+							Remove post
+						</button>
+					)}
+				</div>
 			))}
 		</section>
 	),
@@ -103,6 +121,7 @@ beforeEach(() => {
 	state.delete.mockReset();
 	state.add.mockReset().mockResolvedValue(undefined);
 	window.scrollTo = vi.fn();
+	window.HTMLElement.prototype.scrollIntoView = vi.fn();
 });
 afterEach(cleanup);
 
@@ -171,6 +190,75 @@ const artwork = (
 ): PortfolioPostResponse => ({ id, title, catalogIds });
 
 describe("folder contents", () => {
+	it.each(["en", "pl"])(
+		"confirms folder removal and lets the user cancel in %s",
+		async (locale) => {
+			state.posts = [artwork("a", "Fox portrait", ["folder-1", "folder-2"])];
+			await app(locale);
+			fireEvent.click(screen.getByRole("button", { name: "Remove post" }));
+			expect(screen.getByRole("alertdialog").textContent).toContain(
+				folders[0].name,
+			);
+			expect(state.remove).not.toHaveBeenCalled();
+			fireEvent.click(
+				screen.getByRole("button", {
+					name: locale === "en" ? "Cancel" : "Anuluj",
+				}),
+			);
+			await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+			expect(state.remove).not.toHaveBeenCalled();
+			fireEvent.click(screen.getByRole("button", { name: "Remove post" }));
+			fireEvent.click(
+				screen.getByRole("button", {
+					name: locale === "en" ? "Remove" : "Usuń",
+				}),
+			);
+			await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+			expect(state.remove).toHaveBeenCalledExactlyOnceWith({
+				postId: "a",
+				catalogId: "folder-1",
+			});
+			expect(state.delete).not.toHaveBeenCalled();
+		},
+	);
+	it("keeps a partial move retryable when a refetch empties the current folder", async () => {
+		state.posts = [artwork("a", "Fox portrait")];
+		const router = await app();
+		fireEvent.click(screen.getByRole("button", { name: "Move post" }));
+		fireEvent.keyDown(
+			screen.getByRole("combobox", { name: "Destination folder" }),
+			{ key: "ArrowDown" },
+		);
+		fireEvent.click(await screen.findByRole("option", { name: "Sketches" }));
+		state.remove.mockImplementationOnce(async () => {
+			state.posts = [];
+			await router.invalidate();
+			throw new Error("failed");
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Move to folder" }));
+		expect((await screen.findByRole("alert")).textContent).toContain(
+			"Retry to finish",
+		);
+		expect(screen.getByRole("dialog")).toBeDefined();
+		state.remove.mockResolvedValueOnce(undefined);
+		fireEvent.click(screen.getByRole("button", { name: "Move to folder" }));
+		await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+		expect(state.add).toHaveBeenCalledTimes(1);
+		expect(state.remove).toHaveBeenCalledTimes(2);
+	});
+	it.each([true, false])(
+		"passes post ownership into the folder feed: %s",
+		async (owner) => {
+			state.owner = owner;
+			state.posts = [artwork("a", "Fox portrait")];
+			await app();
+			expect(
+				screen
+					.getByRole("region", { name: "Folder posts" })
+					.getAttribute("data-owner"),
+			).toBe(String(owner));
+		},
+	);
 	it("explains an owner's empty folder and keeps its management actions accessible", async () => {
 		const router = await app();
 		expect(screen.getByText("0 posts")).toBeDefined();
