@@ -75,7 +75,7 @@ export function PostViewerLayout({
 		"--post-compact-height":
 			"min(50dvh, max(12rem, calc((100vw - 2rem - 2px) / var(--post-ratio))))",
 		"--post-height":
-			"min(42rem, max(16rem, calc((var(--post-limit) - var(--post-details) - 2px) / var(--post-ratio))), calc(100dvh - 7rem))",
+			"min(42rem, max(28rem, calc((var(--post-limit) - var(--post-details) - 2px) / var(--post-ratio))), calc(100dvh - 7rem))",
 		"--post-width":
 			"min(var(--post-limit), max(36rem, calc(var(--post-height) * var(--post-ratio) + var(--post-details) + 2px)))",
 	} as CSSProperties;
