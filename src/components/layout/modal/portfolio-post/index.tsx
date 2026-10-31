@@ -76,7 +76,7 @@ function usePortfolioPostController({
 	onDeleted?: () => void;
 }) {
 	const { t, i18n } = useTranslation();
-	const { user: currentUser } = useAuth();
+	const { user: currentUser, isPending: isAuthPending } = useAuth();
 	const queryClient = useQueryClient();
 	const requestedUsername = username || currentUser?.username || "";
 
@@ -84,14 +84,18 @@ function usePortfolioPostController({
 		data: post,
 		isPending: isPostPending,
 		isError: isPostError,
-	} = useArtistPortfolioPost(requestedUsername, postId);
+	} = useArtistPortfolioPost(requestedUsername, postId, {
+		viewer: currentUser,
+		enabled: !isAuthPending,
+	});
 	const { user: profileUser, isPending: isUserPending } = useUserByUsername(
 		post ? requestedUsername : "",
 	);
 
-	const isError = isPostError || !requestedUsername;
+	const isError = !isAuthPending && (isPostError || !requestedUsername);
 	const isPending =
-		!isError && (isPostPending || Boolean(post && isUserPending));
+		!isError &&
+		(isAuthPending || isPostPending || Boolean(post && isUserPending));
 
 	const deletePostMutation = useDeletePortfolioPost();
 

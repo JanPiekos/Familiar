@@ -142,12 +142,22 @@ export async function getPortfolioPost(postId: string) {
 	return fetchPortfolioPost(`portfolio/posts/${postId}`);
 }
 
-export async function getArtistPortfolioPost(username: string, postId: string) {
+export async function getArtistPortfolioPost(
+	username: string,
+	postId: string,
+	ownerUsername?: string,
+) {
 	// The detail response does not include an author and currently accepts unrelated
 	// usernames. Verify membership before attributing a post to the requested artist.
+	// The authenticated owner's list also includes posts omitted from the public list.
+	const isOwner = Boolean(
+		ownerUsername && ownerUsername.toLowerCase() === username.toLowerCase(),
+	);
 	let page = 0;
 	while (true) {
-		const posts = await getArtistPortfolioPosts(username, { page, size: 100 });
+		const posts = isOwner
+			? await getMyPortfolioPosts({ page, size: 100 })
+			: await getArtistPortfolioPosts(username, { page, size: 100 });
 		if (posts.content?.some((post) => post.id === postId)) break;
 		if (
 			!posts.content?.length ||

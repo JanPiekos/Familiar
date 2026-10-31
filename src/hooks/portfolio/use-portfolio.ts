@@ -84,19 +84,46 @@ export function useArtistPortfolioPosts(
 	return useQuery(artistPortfolioPostsQueryOptions(username, params));
 }
 
+type PortfolioPostViewer = { userId: string; username: string };
+
 export function artistPortfolioPostQueryOptions(
 	username: string,
 	postId: string,
+	viewer?: PortfolioPostViewer | null,
 ) {
+	const owner =
+		viewer?.userId && viewer.username.toLowerCase() === username.toLowerCase()
+			? viewer
+			: null;
 	return queryOptions({
-		queryKey: ["portfolio", "artist", username, "post", postId],
-		queryFn: () => getArtistPortfolioPost(username, postId),
+		// Never reuse an owner's private details in the public/SEO query or another account.
+		queryKey: [
+			"portfolio",
+			"artist",
+			username,
+			"post",
+			postId,
+			...(owner ? ["owner", owner.userId] : []),
+		],
+		queryFn: () => getArtistPortfolioPost(username, postId, owner?.username),
 		enabled: !!username && !!postId,
 	});
 }
 
-export function useArtistPortfolioPost(username: string, postId: string) {
-	return useQuery(artistPortfolioPostQueryOptions(username, postId));
+export function useArtistPortfolioPost(
+	username: string,
+	postId: string,
+	{ viewer, enabled = true }: {
+		viewer?: PortfolioPostViewer | null;
+		enabled?: boolean;
+	} = {},
+) {
+	const options = artistPortfolioPostQueryOptions(
+		username,
+		postId,
+		enabled ? viewer : undefined,
+	);
+	return useQuery({ ...options, enabled: enabled && options.enabled });
 }
 
 export function portfolioPostQueryOptions(postId: string) {
