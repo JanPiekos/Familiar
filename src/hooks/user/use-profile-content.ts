@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getPortfolioPostsByUserId } from "@/api/portfolio";
 import {
 	getArtistCatalogs,
 	getMyCatalogs,
@@ -114,18 +113,6 @@ export function useProfileContent(
 
 					throw error;
 				}
-			}
-
-			if (tab === "liked" || tab === "saved") {
-				const feedPosts = await getPortfolioPostsByUserId(userId);
-
-				return {
-					hasPortfolio: null,
-					portfolioPosts: [],
-					feedPosts,
-					folders: [],
-					characters: [],
-				};
 			}
 
 			return {

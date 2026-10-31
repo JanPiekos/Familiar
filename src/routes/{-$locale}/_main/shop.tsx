@@ -16,7 +16,6 @@ import {
 	TypeIcon,
 	VideoIcon,
 } from "lucide-react";
-import { MOCK_CATEGORIES } from "mock/shop";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EmptyPage } from "@/components/layout/empty-page";
@@ -47,12 +46,10 @@ function ShopPage() {
 	const { data: backendCategories } = useCommissionCategories();
 	const { data: items, isLoading: isLoadingItems } = useShopItems();
 
-	const categories = useMemo(() => {
-		if (backendCategories && backendCategories.length > 0) {
-			return backendCategories;
-		}
-		return MOCK_CATEGORIES as any[];
-	}, [backendCategories, t]);
+	const categories = useMemo(
+		() => backendCategories ?? [],
+		[backendCategories],
+	);
 
 	const categoryOptions = useMemo(() => {
 		if (!categories) return [];

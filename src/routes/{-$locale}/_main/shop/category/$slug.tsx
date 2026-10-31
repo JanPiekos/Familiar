@@ -1,7 +1,6 @@
 import { Typography } from "@heroui/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ListFilterIcon } from "lucide-react";
-import { MOCK_CATEGORIES } from "mock/shop";
 import { useMemo, useState } from "react";
 import { OutlineArrowLeft } from "@/components/icons/icons";
 import { EmptyPage } from "@/components/layout/empty-page";
@@ -35,12 +34,10 @@ function CategoryPage() {
 		Record<string, FilterValue | ManagedFilterValue | undefined>
 	>({});
 
-	const categories = useMemo(() => {
-		if (backendCategories && backendCategories.length > 0) {
-			return backendCategories;
-		}
-		return MOCK_CATEGORIES as any[];
-	}, [backendCategories, t]);
+	const categories = useMemo(
+		() => backendCategories ?? [],
+		[backendCategories],
+	);
 
 	const currentCategory = useMemo(() => {
 		return categories.find(
