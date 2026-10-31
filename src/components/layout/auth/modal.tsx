@@ -153,7 +153,7 @@ function AuthModal({ defaultTab = "login" }: AuthModalProps) {
 					</DialogTitle>
 				)}
 				{forgotOpen ? (
-					<div className="mx-auto w-full max-w-md p-6">
+					<div className="auth-form mx-auto w-full max-w-md p-6">
 						<DialogTitle className="mb-6 text-2xl">
 							{t("auth.forgot.title")}
 						</DialogTitle>
