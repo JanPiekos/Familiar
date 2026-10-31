@@ -12,8 +12,16 @@ import {
 	DrawerTitle,
 	DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsTablet } from "@/hooks/ui/use-mobile";
 import { localizePath, stripLocaleFromPathname } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
@@ -21,6 +29,10 @@ import { TRoles } from "@/types/user/roles";
 import { PortfolioCreationMenu } from "./profile/portfolio-creation";
 import User from "./profile/user";
 import { SiteNavigationLinks } from "./site-navigation";
+import {
+	AccountPreferenceControls,
+	AccountPreferenceMenuItems,
+} from "./account-preferences";
 
 export function AccountNavigation({ className }: { className?: string }) {
 	const { t, i18n } = useTranslation();
@@ -34,7 +46,7 @@ export function AccountNavigation({ className }: { className?: string }) {
 	return (
 		<div
 			className={cn(
-				"pointer-events-none fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-3 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:pointer-events-auto lg:static lg:shrink-0 lg:gap-1 lg:p-0",
+				"pointer-events-none fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-3 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:pointer-events-auto lg:static lg:shrink-0 lg:p-0",
 				className,
 			)}
 		>
@@ -69,7 +81,12 @@ export function AccountNavigation({ className }: { className?: string }) {
 				) : user ? (
 					<>
 						{user.roles?.includes(TRoles.Artist) && (
-							<Button size="xl" className="h-10 min-w-0 shrink" asChild>
+							<Button
+								variant={isDashboard ? "default" : "secondary"}
+								size="xl"
+								className="h-10 min-w-0 shrink"
+								asChild
+							>
 								<Link
 									to={localizePath("/dashboard", i18n.language)}
 									aria-current={isDashboard ? "page" : undefined}
@@ -126,21 +143,38 @@ export function AccountNavigation({ className }: { className?: string }) {
 function GuestNavigationMenu() {
 	const { t, i18n } = useTranslation();
 	const [open, setOpen] = useState(false);
+	const compact = useIsTablet();
+	const trigger = (
+		<Button
+			type="button"
+			variant="secondary"
+			size="icon-xl"
+			aria-label={t("header.navigation.account", "Account navigation")}
+		>
+			<CircleUserRound aria-hidden="true" className="size-6" />
+		</Button>
+	);
+	if (!compact)
+		return (
+			<DropdownMenu open={open} onOpenChange={setOpen}>
+				<DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+				<DropdownMenuContent
+					align="end"
+					sideOffset={12}
+					collisionPadding={16}
+					className="w-64"
+				>
+					<DropdownMenuLabel>{t("ui.settings", "Settings")}</DropdownMenuLabel>
+					<DropdownMenuSeparator />
+					<AccountPreferenceMenuItems onLanguageChange={() => setOpen(false)} />
+				</DropdownMenuContent>
+			</DropdownMenu>
+		);
 	return (
 		<Drawer open={open} onOpenChange={setOpen}>
-			<DrawerTrigger asChild>
-				<Button
-					type="button"
-					variant="secondary"
-					size="icon-xl"
-					className="lg:hidden"
-					aria-label={t("header.navigation.account", "Account navigation")}
-				>
-					<CircleUserRound aria-hidden="true" className="size-6" />
-				</Button>
-			</DrawerTrigger>
+			<DrawerTrigger asChild>{trigger}</DrawerTrigger>
 			<DrawerContent
-				className="max-h-[calc(100dvh-2rem)]! overflow-hidden"
+				className="max-h-[calc(100dvh-2rem)]! overflow-hidden bg-popover text-popover-foreground"
 				aria-describedby={undefined}
 			>
 				<DrawerHeader className="px-6 pt-4 pb-3 text-left!">
@@ -180,6 +214,8 @@ function GuestNavigationMenu() {
 							{t("auth.register.cta")}
 						</Link>
 					</Button>
+					<Separator className="my-2" />
+					<AccountPreferenceControls onLanguageChange={() => setOpen(false)} />
 				</nav>
 			</DrawerContent>
 		</Drawer>

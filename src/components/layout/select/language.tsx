@@ -27,10 +27,9 @@ import {
 } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-export default function LanguageSelect() {
-	const { t, i18n } = useTranslation();
+export function useLanguageSelection(onSelected?: () => void) {
+	const { i18n } = useTranslation();
 	const router = useRouter();
-	const [open, setOpen] = useState(false);
 
 	const selectedLanguage = languages.find((language) =>
 		i18n.language.startsWith(language.value),
@@ -38,7 +37,7 @@ export default function LanguageSelect() {
 
 	async function handleLanguageChange(languageValue: string) {
 		if (i18n.language.startsWith(languageValue)) {
-			setOpen(false);
+			onSelected?.();
 			return;
 		}
 
@@ -50,9 +49,18 @@ export default function LanguageSelect() {
 		);
 		const nextHref = `${nextPathname}${window.location.search}${window.location.hash}`;
 
-		setOpen(false);
+		onSelected?.();
 		router.history.push(nextHref);
 	}
+	return { selectedLanguage, handleLanguageChange };
+}
+
+export default function LanguageSelect() {
+	const { t } = useTranslation();
+	const [open, setOpen] = useState(false);
+	const { selectedLanguage, handleLanguageChange } = useLanguageSelection(() =>
+		setOpen(false),
+	);
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
@@ -117,7 +125,7 @@ export default function LanguageSelect() {
 									<OutlineCheck
 										className={cn(
 											"ml-auto",
-											i18n.language.startsWith(language.value)
+											selectedLanguage?.value === language.value
 												? "opacity-100"
 												: "opacity-0",
 										)}

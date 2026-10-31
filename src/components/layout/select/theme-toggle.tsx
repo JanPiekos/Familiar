@@ -24,12 +24,10 @@ import { Elevated } from "@/lib/elevated";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/providers/theme";
 
-export default function ThemeToggle() {
+export function useThemeOptions() {
 	const { t } = useTranslation();
-	const { userTheme, setTheme } = useTheme();
-	const [open, setOpen] = React.useState(false);
 
-	const themes = [
+	return [
 		{
 			value: "light",
 			label: t("components.theme_switcher.light", "Light"),
@@ -51,6 +49,13 @@ export default function ThemeToggle() {
 			icon: OutlineMonitor,
 		},
 	] as const;
+}
+
+export default function ThemeToggle() {
+	const { t } = useTranslation();
+	const { userTheme, setTheme } = useTheme();
+	const [open, setOpen] = React.useState(false);
+	const themes = useThemeOptions();
 
 	const selectedTheme = themes.find((theme) => theme.value === userTheme);
 
