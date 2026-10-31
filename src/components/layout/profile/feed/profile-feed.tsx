@@ -21,6 +21,7 @@ import { packAppend, type Tile, toPixels } from "@/lib/bento";
 import { cn } from "@/lib/utils";
 
 import { PortfolioFeedItem } from "../../feed/item";
+import { PortfolioGridSkeleton } from "./portfolio-sekeleton";
 
 interface ProfileFeedProps {
 	emptyActions?: ReactNode;
@@ -341,11 +342,10 @@ export function ProfileFeed({
 				className,
 			)}
 		>
+			{isMeasuring && <PortfolioGridSkeleton />}
 			{variant === "portfolio" ? (
 				<div className="lg:hidden">
-					{isMeasuring ? (
-						<div className="min-h-80 w-full animate-pulse bg-muted/20" />
-					) : (
+					{isMeasuring ? null : (
 						<div
 							className={cn(
 								"relative w-full transition-opacity duration-150 ease-out motion-reduce:transition-none",
@@ -379,9 +379,7 @@ export function ProfileFeed({
 
 			{variant === "portfolio" ? (
 				<div className="hidden lg:block xl:hidden">
-					{isMeasuring ? (
-						<div className="min-h-80 w-full animate-pulse bg-muted/20" />
-					) : (
+					{isMeasuring ? null : (
 						<div
 							className={cn(
 								"relative w-full transition-opacity duration-150 ease-out motion-reduce:transition-none",
@@ -414,9 +412,7 @@ export function ProfileFeed({
 			) : null}
 
 			<div className={cn(variant === "portfolio" && "hidden xl:block")}>
-				{isMeasuring ? (
-					<div className="min-h-80 w-full animate-pulse bg-muted/20" />
-				) : tiles.length === 0 ? (
+				{isMeasuring ? null : tiles.length === 0 ? (
 					emptyState
 				) : (
 					<div
