@@ -1,4 +1,4 @@
-import { ImageOff, Images } from "lucide-react";
+import { Flag, FolderInput, ImageOff, Images } from "lucide-react";
 import { type CSSProperties, memo, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -10,12 +10,14 @@ import {
 	SolidChat,
 	SolidHeart,
 } from "@/components/icons/icons";
+import type { PostManagementAction } from "@/components/layout/modal/portfolio-post/post-management-dialog";
 import { ContentWarningOverlay } from "@/components/layout/content-warning-overlay";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Tile } from "@/lib/bento";
@@ -28,6 +30,10 @@ interface PortfolioFeedItemProps {
 	style: CSSProperties;
 	isOwner: boolean;
 	onRemoveFromCatalog?: (postId: string) => void;
+	onManagePost?: (
+		post: PortfolioPostResponse,
+		action: PostManagementAction,
+	) => void;
 }
 
 interface NormalizedMedia {
@@ -48,6 +54,7 @@ export const PortfolioFeedItem = memo(function PortfolioFeedItem({
 	style,
 	isOwner,
 	onRemoveFromCatalog,
+	onManagePost,
 }: PortfolioFeedItemProps) {
 	const { t, i18n } = useTranslation();
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -138,7 +145,7 @@ export const PortfolioFeedItem = memo(function PortfolioFeedItem({
 			</div>
 
 			{hasMedia && hasMultipleImages && !hasContentWarnings ? (
-				<div className="pointer-events-none absolute right-2 top-2 z-20 flex size-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm">
+				<div className="pointer-events-none absolute left-2 top-2 z-20 flex size-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm">
 					<Images aria-hidden="true" className="size-3.5" />
 				</div>
 			) : null}
@@ -184,79 +191,92 @@ export const PortfolioFeedItem = memo(function PortfolioFeedItem({
 				/>
 			) : null}
 
-			{isOwner ? (
-				<div
-					className={cn(
-						"absolute left-2 top-4 z-40 transition-opacity duration-150",
-						isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100",
-					)}
+			<div
+				className="portfolio-post-options absolute right-2 top-2 z-40 flex transition-opacity duration-150"
+				data-open={isMenuOpen}
+			>
+				<DropdownMenu
+					modal={false}
+					open={isMenuOpen}
+					onOpenChange={setIsMenuOpen}
 				>
-					<DropdownMenu
-						modal={false}
-						open={isMenuOpen}
-						onOpenChange={setIsMenuOpen}
-					>
-						<DropdownMenuTrigger asChild>
-							<Button
-								type="button"
-								variant="secondary"
-								size="icon"
-								aria-label={t(
-									"components.profile.portfolio.manage.options",
-									"Post options",
-								)}
-								onClick={(event) => event.stopPropagation()}
-							>
-								<OutlineMore />
-							</Button>
-						</DropdownMenuTrigger>
-
-						<DropdownMenuContent
-							align="start"
+					<DropdownMenuTrigger asChild>
+						<Button
+							type="button"
+							variant="secondary"
+							size="icon-xl"
+							className="size-10 bg-background/90 text-foreground shadow-sm backdrop-blur-sm lg:size-9"
+							aria-label={t(
+								"components.profile.portfolio.manage.options",
+								"Post options",
+							)}
 							onClick={(event) => event.stopPropagation()}
 						>
-							<DropdownMenuItem
-								disabled
-								onSelect={(event) => {
-									event.stopPropagation();
-									// TODO: Implement editing.
-								}}
-							>
-								<OutlineEdit />
-								{t("components.profile.portfolio.manage.edit", "Edit post")}
-							</DropdownMenuItem>
-
-							<DropdownMenuItem
-								disabled
-								variant="destructive"
-								onSelect={(event) => {
-									event.stopPropagation();
-									// TODO: Implement deleting.
-								}}
-							>
-								<OutlineTrash />
-								{t("components.profile.portfolio.manage.delete", "Delete post")}
-							</DropdownMenuItem>
-
-							{onRemoveFromCatalog ? (
+							<OutlineMore />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent
+						align="end"
+						onClick={(event) => event.stopPropagation()}
+					>
+						{isOwner ? (
+							<>
 								<DropdownMenuItem
+									disabled={!onManagePost}
+									onSelect={(event) => {
+										event.stopPropagation();
+										onManagePost?.(post, "edit");
+									}}
+								>
+									<OutlineEdit />
+									{t("components.portfolio.post.manage.edit")}
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									disabled={!onManagePost}
+									onSelect={(event) => {
+										event.stopPropagation();
+										onManagePost?.(post, "move");
+									}}
+								>
+									<FolderInput />
+									{t("components.portfolio.post.manage.move")}
+								</DropdownMenuItem>
+								{onRemoveFromCatalog && (
+									<DropdownMenuItem
+										onSelect={(event) => {
+											event.stopPropagation();
+											onRemoveFromCatalog(p.id);
+										}}
+									>
+										<FolderInput />
+										{t("components.profile.portfolio.manage.remove")}
+									</DropdownMenuItem>
+								)}
+								<DropdownMenuSeparator />
+								<DropdownMenuItem
+									disabled={!onManagePost}
 									variant="destructive"
 									onSelect={(event) => {
 										event.stopPropagation();
-										onRemoveFromCatalog(p.id);
+										onManagePost?.(post, "delete");
 									}}
 								>
 									<OutlineTrash />
-									{t(
-										"components.profile.portfolio.manage.remove",
-										"Remove from folder",
-									)}
+									{t("components.portfolio.post.manage.delete")}
 								</DropdownMenuItem>
-							) : null}
-						</DropdownMenuContent>
-					</DropdownMenu>
-				</div>
-			) : null}
+							</>
+						) : (
+							<DropdownMenuItem
+								disabled
+								title={t("components.portfolio.post.report_coming_soon")}
+							>
+								<Flag />
+								{t("components.portfolio.post.manage.report")}
+							</DropdownMenuItem>
+						)}
+					</DropdownMenuContent>
+				</DropdownMenu>
+			</div>
 		</article>
 	);
 });
