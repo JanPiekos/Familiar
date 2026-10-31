@@ -130,7 +130,7 @@ function AuthModal({ defaultTab = "login" }: AuthModalProps) {
 					{t("auth.register.cta")}
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="auth-form gap-0 p-0 md:max-w-4xl" showCloseButton={false}>
+			<DialogContent className="gap-0 p-0 md:max-w-4xl" showCloseButton={false}>
 				<AuthContent
 					tab={tab}
 					setTab={setTab}
@@ -181,7 +181,7 @@ function AuthContent({
 				</div>
 			</aside>
 
-			<section className="max-h-[80vh] min-w-0 overflow-x-hidden overflow-y-auto p-4">
+			<section className="auth-form max-h-[80vh] min-w-0 overflow-x-hidden overflow-y-auto p-4">
 				<div className="mb-3 flex justify-end">
 					<DialogClose asChild>
 						<Button
