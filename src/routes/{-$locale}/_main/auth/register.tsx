@@ -1,4 +1,3 @@
-import { Typography } from "@heroui/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,22 +22,23 @@ function RegisterPage() {
 	useSetAuthArtwork(REGISTER_ARTWORK_BY_STAGE[stage]);
 
 	return (
-		<article className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
-			{stage !== "verify" ? (
-				<header className="flex flex-col py-3">
-					<Typography.Heading level={3}>
-						{t("auth.register.title", "Register")}
-					</Typography.Heading>
+		<article className="flex min-w-0 flex-1 flex-col [&_footer]:pt-3">
+			<header className={stage === "verify" ? "sr-only" : "flex flex-col py-1"}>
+				<h1
+					id="auth-page-title"
+					className="text-3xl font-semibold tracking-tight text-foreground"
+				>
+					{t("auth.register.title", "Register")}
+				</h1>
 
-					<Typography.Paragraph size="sm" className="text-muted-foreground">
-						{t("auth.register.description", "Register to Familiar")}
-					</Typography.Paragraph>
-				</header>
-			) : null}
+				<p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+					{t("auth.register.description", "Register to Familiar")}
+				</p>
+			</header>
 
 			<section
 				aria-labelledby="auth-page-title"
-				className="mt-4 min-h-0 min-w-0 flex-1"
+				className="mt-2 flex min-w-0 flex-1 flex-col"
 			>
 				<RegisterForm
 					onStageChange={setStage}

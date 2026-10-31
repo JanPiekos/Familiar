@@ -594,6 +594,11 @@ const pl = {
 		"artist-dashboard": "Panel artysty",
 	},
 	auth: {
+		navigation: "Dostęp do konta",
+		brand: {
+			title: "Zrób miejsce na swoją kreatywność.",
+			description: "Miejsce, w którym możesz dzielić się swoją twórczością i poczuć się jak u siebie.",
+		},
 		login: {
 			cta: "Zaloguj",
 			title: "Witaj ponownie",
@@ -749,9 +754,9 @@ const pl = {
 		account_type: {
 			label: "Typ Konta",
 			client_title: "Konto Klienta",
-			client_description: "Dla osób szukających połączeń z artystami.",
-			artist_title: "Konto Artysty",
-			artist_description: "Dla artystów szukających połączeń z klientami.",
+			client_description: "Dla osób chcących nawiązać kontakt z twórcami.",
+			artist_title: "Konto Twórcy",
+			artist_description: "Dla twórców chcących nawiązać kontakt z klientami.",
 			client_badge: "Domyślne",
 		},
 	},
