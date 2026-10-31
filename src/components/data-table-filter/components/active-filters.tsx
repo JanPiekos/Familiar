@@ -12,7 +12,7 @@ import type {
 	FiltersState,
 } from "../core/types";
 import { getColumn } from "../lib/helpers";
-import type { Locale } from "../lib/i18n";
+import { type Locale, t } from "../lib/i18n";
 import { FilterOperator } from "./filter-operator";
 import { FilterSubject } from "./filter-subject";
 import { FilterValue } from "./filter-value";
@@ -75,7 +75,7 @@ export function ActiveFilter<TData, TType extends ColumnDataType>({
 }: ActiveFilterProps<TData, TType>) {
 	return (
 		// TODO: try make h based on prop size (xs, sm, lg)
-		<div className="flex h-10 items-center rounded-full border border-border bg-background text-xs">
+		<div className="flex h-11 items-center rounded-full border border-border bg-background text-sm">
 			<FilterSubject column={column} />
 			<Separator orientation="vertical" />
 			<FilterOperator
@@ -95,8 +95,9 @@ export function ActiveFilter<TData, TType extends ColumnDataType>({
 			<Separator orientation="vertical" />
 			<Button
 				variant="ghost"
-				className="rounded-l-none! hover:text-foreground"
-				size={"icon-xl"}
+				className="h-full w-11 rounded-l-none! hover:text-foreground"
+				size="icon-2xl"
+				aria-label={`${column.displayName}: ${t("clear", locale)}`}
 				onClick={() => actions.removeFilter(filter.columnId)}
 			>
 				<OutlineClose className="size-4 -translate-x-0.5" />
