@@ -217,7 +217,7 @@ describe("portfolio creation navigation", () => {
 				await createPost("profile");
 			}
 			await act(async () => {
-				await router.navigate({ to: "/" });
+				router.history.push("/");
 			});
 			await screen.findByRole("heading", { name: "Home" });
 			expect(
