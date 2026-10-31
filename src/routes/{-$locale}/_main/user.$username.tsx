@@ -8,7 +8,7 @@ import {
 	useNavigate,
 } from "@tanstack/react-router";
 
-import { EmbeddedRouteNotFoundPage } from "@/components/layout/error-page";
+import { ProfileNotFoundPage } from "@/components/layout/profile/profile-not-found";
 import { ProfileCommissions } from "@/components/layout/profile/feed/commissions";
 import { ProfilePortfolio } from "@/components/layout/profile/feed/portfolio";
 import {
@@ -73,15 +73,19 @@ export const Route = createFileRoute("/{-$locale}/_main/user/$username")({
 		}
 	},
 	loader: async ({ params, context }) => {
+		const missingProfile = () =>
+			notFound({
+				data: { kind: "profile_not_found", username: params.username },
+			});
 		const user = await context.queryClient
 			.ensureQueryData(userByUsernameQueryOptions(params.username))
 			.catch((error: unknown) => {
-				if (getErrorStatus(error) === 404) throw notFound();
+				if (getErrorStatus(error) === 404) throw missingProfile();
 				throw error;
 			});
 
 		if (!user) {
-			throw notFound();
+			throw missingProfile();
 		}
 
 		const faviconUrl = getProfileFaviconUrl(user, params.username);
@@ -102,7 +106,7 @@ export const Route = createFileRoute("/{-$locale}/_main/user/$username")({
 	},
 
 	pendingComponent: UserProfileSkeleton,
-	notFoundComponent: EmbeddedRouteNotFoundPage,
+	notFoundComponent: ProfileNotFoundPage,
 	component: RouteComponent,
 });
 

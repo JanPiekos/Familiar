@@ -20,6 +20,11 @@ const pl = {
 		home: "Strona główna",
 		back: "Wróć",
 		sign_in: "Zaloguj się",
+		profile_not_found: {
+			title: "Nie znaleziono użytkownika",
+			description:
+				"Nie znaleźliśmy konta o tej nazwie. Nazwa mogła się zmienić lub konto nie jest już dostępne.",
+		},
 		not_found: {
 			title: "Nie udało się znaleźć tej strony",
 			description:
