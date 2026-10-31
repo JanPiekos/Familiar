@@ -1,11 +1,15 @@
 import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getUserAccentStylesFromHex } from "@/lib/colors";
+import { PROFILE_COVER_CLASS_NAME as PROFILE_COVER_ASPECT_CLASS_NAME } from "@/lib/image-crop";
+import { cn } from "@/lib/utils";
 import type { TUserResponse } from "@/types/user";
 import { useTranslation } from "react-i18next";
 
-const PROFILE_COVER_CLASS_NAME =
-	"relative h-48 w-full overflow-hidden rounded-none ring-1 ring-ring/30 md:h-72 lg:rounded-3xl";
+const PROFILE_COVER_CLASS_NAME = cn(
+	"relative w-full overflow-hidden rounded-none ring-1 ring-ring/30 lg:rounded-3xl",
+	PROFILE_COVER_ASPECT_CLASS_NAME,
+);
 
 const imageCache = new Map<string, Promise<void> | true>();
 
