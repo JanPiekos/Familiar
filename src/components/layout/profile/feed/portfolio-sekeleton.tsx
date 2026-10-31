@@ -1,40 +1,10 @@
-import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { MENU_SEARCH_HEIGHT_CLASS_NAME } from "@/components/ui/menu-styles";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
-import { useBento } from "@/hooks/ui/use-bento";
-import { type PlacedTile, packAppend, type Tile } from "@/lib/bento";
 import { cn, createStaticList } from "@/lib/utils";
 import { FolderCardArtwork } from "./folder-artwork";
 
 const FOLDERS = createStaticList("portfolio-folder-skeleton", 5);
-function tile(
-	id: string,
-	widthUnit: Tile["widthUnit"],
-	heightUnit: Tile["heightUnit"],
-): Tile {
-	return {
-		id,
-		widthUnit,
-		heightUnit,
-		cover: {
-			path: "",
-			width: widthUnit * 100,
-			height: heightUnit * 100,
-			alt: "",
-		},
-	};
-}
-const TILES: Tile[] = [
-	tile("portrait", 2, 3),
-	tile("square-1", 1, 1),
-	tile("square-2", 1, 1),
-	tile("wide-1", 2, 1),
-	tile("tall-1", 1, 2),
-	tile("square-3", 1, 1),
-	tile("square-4", 1, 1),
-	tile("wide-2", 2, 1),
-];
 export function PortfolioFolderCardSkeleton() {
 	return (
 		<article className="flex h-full w-40 min-w-0 shrink-0 flex-col gap-3">
@@ -58,33 +28,25 @@ export function PortfolioFolderCardSkeleton() {
 		</article>
 	);
 }
-function BentoSkeletonGrid({
+export function PortfolioGridSkeleton({
 	className,
-	cols,
-	placed,
 }: {
-	className: string;
-	cols: number;
-	placed: PlacedTile[];
-}) {
+	className?: string;
+} = {}) {
 	return (
 		<div
-			className={cn("w-full gap-px overflow-hidden", className)}
-			style={{
-				gridTemplateColumns: `repeat(${cols},minmax(0,1fr))`,
-				gridAutoRows: `calc((100cqw - ${cols - 1}px) / ${cols})`,
-			}}
+			aria-hidden="true"
+			data-slot="portfolio-grid-skeleton"
+			className={cn(
+				"w-auto min-w-0 max-w-full overflow-clip rounded-3xl",
+				className,
+			)}
 		>
-			{placed.map((item) => (
-				<Skeleton
-					key={item.tile.id}
-					className="min-w-0 rounded-none"
-					style={{
-						gridColumn: `${item.x + 1} / span ${item.widthUnit}`,
-						gridRow: `${item.y + 1} / span ${item.heightUnit}`,
-					}}
-				/>
-			))}
+			<div className="grid aspect-square grid-cols-2 grid-rows-2 gap-px md:aspect-3/1 md:grid-cols-3 md:grid-rows-1 xl:aspect-4/1 xl:grid-cols-4">
+				<Skeleton className="col-span-2 min-h-0 min-w-0 rounded-none" />
+				<Skeleton className="min-h-0 min-w-0 rounded-none" />
+				<Skeleton className="min-h-0 min-w-0 rounded-none md:hidden xl:block" />
+			</div>
 		</div>
 	);
 }
@@ -119,33 +81,6 @@ export function PortfolioContentSkeleton({
 	variant?: "portfolio" | "folder";
 	isOwner?: boolean;
 } = {}) {
-	const mobileTiles = useMemo(
-		() =>
-			TILES.map((item) =>
-				item.heightUnit > item.widthUnit
-					? { ...item, widthUnit: 2 as const, heightUnit: 3 as const }
-					: item,
-			),
-		[],
-	);
-	const tabletTiles = useMemo(
-		() =>
-			TILES.map((item) =>
-				item.heightUnit > item.widthUnit
-					? { ...item, widthUnit: 1 as const, heightUnit: 2 as const }
-					: item,
-			),
-		[],
-	);
-	const mobilePlaced = useMemo(
-		() => packAppend([], mobileTiles, 2, "balanced"),
-		[mobileTiles],
-	);
-	const tabletPlaced = useMemo(
-		() => packAppend([], tabletTiles, 3, "fit"),
-		[tabletTiles],
-	);
-	const { cols, placed } = useBento(TILES, "balanced");
 	return (
 		<div
 			aria-hidden="true"
@@ -179,28 +114,11 @@ export function PortfolioContentSkeleton({
 					</div>
 				</section>
 			)}
-			<div
+			<PortfolioGridSkeleton
 				className={cn(
-					"@container w-auto min-w-0 max-w-full",
 					variant === "folder" ? "mx-4 lg:mx-0 xl:mx-4" : "lg:mx-0 xl:mx-4",
 				)}
-			>
-				<BentoSkeletonGrid
-					className="grid md:hidden"
-					cols={2}
-					placed={mobilePlaced}
-				/>
-				<BentoSkeletonGrid
-					className="hidden md:grid xl:hidden"
-					cols={3}
-					placed={tabletPlaced}
-				/>
-				<BentoSkeletonGrid
-					className="hidden xl:grid"
-					cols={cols}
-					placed={placed}
-				/>
-			</div>
+			/>
 		</div>
 	);
 }

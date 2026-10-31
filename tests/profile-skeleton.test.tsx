@@ -6,7 +6,9 @@ describe("portfolio loading", () => {
 	it("includes artwork placeholders in the server output before browser measurements", () => {
 		const html = renderToString(<PortfolioContentSkeleton />);
 		const document = new DOMParser().parseFromString(html, "text/html");
-		const grids = document.querySelectorAll('[style*="grid-template-columns"]');
+		const grids = document.querySelectorAll(
+			'[data-slot="portfolio-grid-skeleton"]',
+		);
 		expect(grids.length).toBeGreaterThan(0);
 		for (const grid of grids)
 			expect(grid.querySelector('[data-slot="skeleton"]')).not.toBeNull();
