@@ -51,7 +51,6 @@ import {
 import {
 	useAddPortfolioPostToCatalog,
 	useDeleteCatalog,
-	useRemovePortfolioPostFromCatalog,
 	useUpdateCatalog,
 } from "@/hooks/portfolio/use-portfolio";
 import { useIsTablet } from "@/hooks/ui/use-mobile";
@@ -250,6 +249,7 @@ export function ProfilePortfolio({
 	const [management, setManagement] = useState<{
 		post: PortfolioPostResponse;
 		action: PostManagementAction;
+		folder?: CatalogResponse;
 	} | null>(null);
 	const managePost = useCallback(
 		(post: PortfolioPostResponse, action: PostManagementAction) => {
@@ -270,7 +270,6 @@ export function ProfilePortfolio({
 
 	const updateCatalogMutation = useUpdateCatalog();
 	const deleteCatalogMutation = useDeleteCatalog();
-	const removePostMutation = useRemovePortfolioPostFromCatalog();
 	const addPostMutation = useAddPortfolioPostToCatalog();
 
 	const canCreateCatalog = canManageCatalogs && Boolean(onCreateCatalog);
@@ -406,13 +405,10 @@ export function ProfilePortfolio({
 		});
 	};
 
-	const handleRemovePostFromCatalog = async (postId: string) => {
-		if (!currentFolder) return;
-
-		await removePostMutation.mutateAsync({
-			postId,
-			catalogId: currentFolder.id,
-		});
+	const handleRemovePostFromCatalog = (postId: string) => {
+		const post = posts.find((item) => item.id === postId);
+		if (!canManageCatalogs || !currentFolder || !post) return;
+		setManagement({ post, action: "remove", folder: currentFolder });
 	};
 
 	const availableTags = useMemo(

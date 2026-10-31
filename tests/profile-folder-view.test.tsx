@@ -59,11 +59,13 @@ vi.mock("@/components/layout/profile/feed/profile-feed", () => ({
 		onPostClick,
 		isOwner,
 		onManagePost,
+		onRemoveFromCatalog,
 	}: {
 		posts: PortfolioPostResponse[];
 		onPostClick: (post: PortfolioPostResponse) => void;
 		isOwner: boolean;
 		onManagePost: (post: PortfolioPostResponse, action: "move") => void;
+		onRemoveFromCatalog?: (postId: string) => void;
 	}) => (
 		<section aria-label="Folder posts" data-owner={isOwner}>
 			{posts.map((post) => (
@@ -72,6 +74,11 @@ vi.mock("@/components/layout/profile/feed/profile-feed", () => ({
 					{isOwner && (
 						<button onClick={() => onManagePost(post, "move")}>
 							Move post
+						</button>
+					)}
+					{onRemoveFromCatalog && post.id && (
+						<button onClick={() => onRemoveFromCatalog(post.id!)}>
+							Remove post
 						</button>
 					)}
 				</div>
@@ -183,6 +190,37 @@ const artwork = (
 ): PortfolioPostResponse => ({ id, title, catalogIds });
 
 describe("folder contents", () => {
+	it.each(["en", "pl"])(
+		"confirms folder removal and lets the user cancel in %s",
+		async (locale) => {
+			state.posts = [artwork("a", "Fox portrait", ["folder-1", "folder-2"])];
+			await app(locale);
+			fireEvent.click(screen.getByRole("button", { name: "Remove post" }));
+			expect(screen.getByRole("alertdialog").textContent).toContain(
+				folders[0].name,
+			);
+			expect(state.remove).not.toHaveBeenCalled();
+			fireEvent.click(
+				screen.getByRole("button", {
+					name: locale === "en" ? "Cancel" : "Anuluj",
+				}),
+			);
+			await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+			expect(state.remove).not.toHaveBeenCalled();
+			fireEvent.click(screen.getByRole("button", { name: "Remove post" }));
+			fireEvent.click(
+				screen.getByRole("button", {
+					name: locale === "en" ? "Remove" : "Usuń",
+				}),
+			);
+			await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+			expect(state.remove).toHaveBeenCalledExactlyOnceWith({
+				postId: "a",
+				catalogId: "folder-1",
+			});
+			expect(state.delete).not.toHaveBeenCalled();
+		},
+	);
 	it("keeps a partial move retryable when a refetch empties the current folder", async () => {
 		state.posts = [artwork("a", "Fox portrait")];
 		const router = await app();

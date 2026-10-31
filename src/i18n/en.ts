@@ -855,6 +855,14 @@ const en = {
 					deleting: "Deleting...",
 					confirm: "Delete",
 				},
+				remove_from_folder: {
+					title: "Remove from folder?",
+					description: "Remove this post from “{{folder}}”? It will stay in your portfolio and other folders.",
+					confirm: "Remove",
+					removing: "Removing...",
+					success: "Post removed from folder.",
+					error: "We couldn't remove this post from the folder. Please try again.",
+				},
 				edit_coming_soon: "Edit feature coming soon!",
 				manage: {
 					edit: "Edit post",

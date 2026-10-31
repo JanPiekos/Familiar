@@ -181,6 +181,34 @@ describe("owner post management", () => {
 		await waitFor(() => expect(close).toHaveBeenCalledTimes(1));
 		expect(mutations.remove).toHaveBeenLastCalledWith("post-1");
 	});
+	it("confirms removing just one folder membership and keeps failures retryable", async () => {
+		mutations.unfile.mockRejectedValueOnce(new Error("failed"));
+		mount(
+			<PostManagementDialog
+				post={post}
+				action="remove"
+				folders={folders}
+				folder={{ id: "old-1", name: "Sketches" }}
+				onClose={close}
+			/>,
+		);
+		expect(screen.getByRole("alertdialog").textContent).toContain("Sketches");
+		expect(
+			screen.getByText(/stay in your portfolio and other folders/),
+		).toBeDefined();
+		expect(mutations.unfile).not.toHaveBeenCalled();
+		fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+		await screen.findByRole("alert");
+		expect(close).not.toHaveBeenCalled();
+		fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+		await waitFor(() => expect(close).toHaveBeenCalledTimes(1));
+		expect(mutations.unfile.mock.calls).toEqual([
+			[{ postId: "post-1", catalogId: "old-1" }],
+			[{ postId: "post-1", catalogId: "old-1" }],
+		]);
+		expect(mutations.remove).not.toHaveBeenCalled();
+		expect(mutations.add).not.toHaveBeenCalled();
+	});
 	it("adds the destination before removing other folder memberships", async () => {
 		const requests: string[] = [];
 		mutations.add.mockImplementation(async () => {

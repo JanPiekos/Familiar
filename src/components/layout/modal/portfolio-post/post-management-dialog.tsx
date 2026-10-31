@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react";
+import { FolderMinus, Trash2 } from "lucide-react";
 import { useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -38,17 +38,19 @@ import {
 	useUpdatePortfolioPost,
 } from "@/hooks/portfolio/use-portfolio";
 
-export type PostManagementAction = "edit" | "move" | "delete";
+export type PostManagementAction = "edit" | "move" | "delete" | "remove";
 
 export function PostManagementDialog({
 	post,
 	action,
 	folders,
+	folder,
 	onClose,
 }: {
 	post: PortfolioPostResponse;
 	action: PostManagementAction;
 	folders: CatalogResponse[];
+	folder?: CatalogResponse;
 	onClose: () => void;
 }) {
 	const { t } = useTranslation();
@@ -68,6 +70,9 @@ export function PostManagementDialog({
 	const remove = useDeletePortfolioPost();
 	const addToFolder = useAddPortfolioPostToCatalog();
 	const removeFromFolder = useRemovePortfolioPostFromCatalog();
+	const isConfirmation = action === "delete" || action === "remove";
+	const confirmationPrefix = `components.portfolio.post.${action === "remove" ? "remove_from_folder" : "delete"}`;
+	const ConfirmationIcon = action === "remove" ? FolderMinus : Trash2;
 	const changed =
 		action === "edit"
 			? title.trim() !== (post.title ?? "").trim() ||
@@ -83,7 +88,8 @@ export function PostManagementDialog({
 		if (
 			lock.current ||
 			!post.id ||
-			(action !== "delete" && !changed) ||
+			(action === "remove" && !folder?.id) ||
+			(!isConfirmation && !changed) ||
 			(action === "edit" && !title.trim())
 		)
 			return;
@@ -92,7 +98,12 @@ export function PostManagementDialog({
 		setError("");
 		try {
 			if (action === "delete") await remove.mutateAsync(post.id);
-			else if (action === "edit") {
+			else if (action === "remove" && folder) {
+				await removeFromFolder.mutateAsync({
+					postId: post.id,
+					catalogId: folder.id,
+				});
+			} else if (action === "edit") {
 				const data: UpdatePortfolioPostRequest = {};
 				if (title.trim() !== (post.title ?? "").trim())
 					data.title = title.trim();
@@ -121,8 +132,8 @@ export function PostManagementDialog({
 			}
 			toast.success(
 				t(
-					action === "delete"
-						? "components.portfolio.post.delete.success"
+					isConfirmation
+						? `${confirmationPrefix}.success`
 						: `components.portfolio.post.manage.${action}_success`,
 				),
 			);
@@ -130,8 +141,8 @@ export function PostManagementDialog({
 		} catch {
 			setError(
 				t(
-					action === "delete"
-						? "components.portfolio.post.delete.error"
+					isConfirmation
+						? `${confirmationPrefix}.error`
 						: action === "move" && memberships.current.has(destination)
 							? "components.portfolio.post.manage.move_partial"
 							: "components.portfolio.post.manage.save_error",
@@ -147,7 +158,7 @@ export function PostManagementDialog({
 			{error}
 		</p>
 	) : null;
-	if (action === "delete")
+	if (isConfirmation)
 		return (
 			<AlertDialog
 				open
@@ -161,13 +172,13 @@ export function PostManagementDialog({
 							className="mb-4 flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive"
 							aria-hidden="true"
 						>
-							<Trash2 className="size-5" />
+							<ConfirmationIcon className="size-5" />
 						</div>
 						<AlertDialogTitle className="text-xl leading-snug text-foreground">
-							{t("components.portfolio.post.delete.title")}
+							{t(`${confirmationPrefix}.title`)}
 						</AlertDialogTitle>
 						<AlertDialogDescription className="mt-2 text-pretty leading-relaxed text-foreground/70">
-							{t("components.portfolio.post.delete.description")}
+							{t(`${confirmationPrefix}.description`, { folder: folder?.name })}
 						</AlertDialogDescription>
 						{post.title && (
 							<div className="mt-4 rounded-2xl bg-muted/50 px-4 py-3">
@@ -189,7 +200,9 @@ export function PostManagementDialog({
 						<AlertDialogAction
 							variant="destructive"
 							size="2xl"
-							disabled={busy || !post.id}
+							disabled={
+								busy || !post.id || (action === "remove" && !folder?.id)
+							}
 							className="flex-1 sm:flex-none"
 							onClick={(event) => {
 								event.preventDefault();
@@ -198,8 +211,8 @@ export function PostManagementDialog({
 						>
 							{t(
 								busy
-									? "components.portfolio.post.delete.deleting"
-									: "components.portfolio.post.delete.confirm",
+									? `${confirmationPrefix}.${action === "remove" ? "removing" : "deleting"}`
+									: `${confirmationPrefix}.confirm`,
 							)}
 						</AlertDialogAction>
 					</AlertDialogFooter>

@@ -865,6 +865,14 @@ const pl = {
 					deleting: "Usuwanie...",
 					confirm: "Usuń",
 				},
+				remove_from_folder: {
+					title: "Usunąć z folderu?",
+					description: "Usunąć ten post z folderu „{{folder}}”? Pozostanie on w Twoim portfolio i pozostałych folderach.",
+					confirm: "Usuń",
+					removing: "Usuwanie...",
+					success: "Post został usunięty z folderu.",
+					error: "Nie udało się usunąć posta z folderu. Spróbuj ponownie.",
+				},
 				edit_coming_soon: "Edycja postów będzie dostępna wkrótce!",
 				manage: {
 					edit: "Edytuj post",
