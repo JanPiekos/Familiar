@@ -10,6 +10,7 @@ import { createInstance } from "i18next";
 import { I18nextProvider } from "react-i18next";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AccessibilitySettings } from "@/components/layout/modal/profile/settings/accessibility-settings";
+import { ReadingGuide } from "@/components/layout/reading-guide";
 import en from "@/i18n/en";
 import pl from "@/i18n/pl";
 import {
@@ -18,7 +19,6 @@ import {
 	initializeAccessibility,
 	parseAccessibility,
 	saveAccessibility,
-	useAccessibility,
 } from "@/lib/accessibility";
 import { MotionProvider } from "@/providers/motion";
 const motion = vi.hoisted(() => ({ system: false, value: "" }));
@@ -58,6 +58,7 @@ async function show() {
 	});
 	return render(
 		<I18nextProvider i18n={i18n}>
+			<ReadingGuide />
 			<AccessibilitySettings />
 			<button form="accessibility-settings-form" type="submit">
 				Save changes
@@ -66,6 +67,73 @@ async function show() {
 	);
 }
 describe("accessibility preferences", () => {
+	it("moves the reading strip with pointer and keyboard focus, then exits with Escape", async () => {
+		await show();
+		act(() => {
+			saveAccessibility({
+				...DEFAULT_ACCESSIBILITY,
+				readingGuide: true,
+				guideHeight: 120,
+				font: "system",
+			});
+		});
+		await screen.findByRole("button", { name: "Exit reading guide" });
+		fireEvent(window, new MouseEvent("pointermove", { clientY: 250 }));
+		await waitFor(() =>
+			expect(
+				document.querySelector<HTMLElement>('[data-guide-shade="top"]')?.style
+					.height,
+			).toBe("190px"),
+		);
+		expect(
+			document.querySelector<HTMLElement>('[data-guide-shade="bottom"]')?.style
+				.top,
+		).toBe("310px");
+		const save = screen.getByText("Save changes");
+		vi.spyOn(save, "getBoundingClientRect").mockReturnValue({
+			top: 400,
+			height: 40,
+		} as DOMRect);
+		fireEvent.focusIn(save);
+		await waitFor(() =>
+			expect(
+				document.querySelector<HTMLElement>('[data-guide-shade="top"]')?.style
+					.height,
+			).toBe("360px"),
+		);
+		fireEvent.keyDown(document, { key: "Escape" });
+		expect(
+			screen.queryByRole("button", { name: "Exit reading guide" }),
+		).toBeNull();
+		expect(JSON.parse(localStorage.getItem(ACCESSIBILITY_KEY)!)).toMatchObject({
+			readingGuide: false,
+			font: "system",
+		});
+	});
+	it("keeps the strip inside the viewport and lets its exit button turn it off", async () => {
+		await show();
+		act(() => {
+			saveAccessibility({
+				...DEFAULT_ACCESSIBILITY,
+				readingGuide: true,
+				guideHeight: 180,
+			});
+		});
+		fireEvent(window, new MouseEvent("pointerdown", { clientY: 0 }));
+		await waitFor(() =>
+			expect(
+				document.querySelector<HTMLElement>('[data-guide-shade="top"]')?.style
+					.height,
+			).toBe("0px"),
+		);
+		expect(
+			document.querySelector<HTMLElement>('[data-guide-shade="bottom"]')?.style
+				.top,
+		).toBe("180px");
+		fireEvent.click(screen.getByRole("button", { name: "Exit reading guide" }));
+		expect(document.querySelector("[data-reading-guide]")).toBeNull();
+		expect(parseAccessibility({ guideHeight: -100 }).guideHeight).toBe(120);
+	});
 	it("accepts supported values and rejects malformed stored preferences", () => {
 		expect(
 			parseAccessibility({

@@ -4,6 +4,7 @@ export const ACCESSIBILITY_KEY = "familiar-accessibility-v1";
 export const FONT_OPTIONS = ["default", "dyslexic", "system"] as const;
 export const COLOR_OPTIONS = ["default", "red-green", "blue-yellow"] as const;
 export const TEXT_SIZES = [100, 112, 125, 150] as const;
+export const GUIDE_HEIGHTS = [80, 120, 180, 240] as const;
 export const DEFAULT_ACCESSIBILITY = {
 	font: "default",
 	colorVision: "default",
@@ -12,6 +13,8 @@ export const DEFAULT_ACCESSIBILITY = {
 	highContrast: false,
 	underlineLinks: false,
 	spaciousText: false,
+	readingGuide: false,
+	guideHeight: 120,
 } as const;
 export type AccessibilityPreferences = {
 	font: (typeof FONT_OPTIONS)[number];
@@ -21,6 +24,8 @@ export type AccessibilityPreferences = {
 	highContrast: boolean;
 	underlineLinks: boolean;
 	spaciousText: boolean;
+	readingGuide: boolean;
+	guideHeight: (typeof GUIDE_HEIGHTS)[number];
 };
 export function parseAccessibility(value: unknown): AccessibilityPreferences {
 	const input =
@@ -33,6 +38,7 @@ export function parseAccessibility(value: unknown): AccessibilityPreferences {
 		"highContrast",
 		"underlineLinks",
 		"spaciousText",
+		"readingGuide",
 	] as const)
 		prefs[key] = input[key] === true;
 	if (FONT_OPTIONS.includes(input.font as AccessibilityPreferences["font"]))
@@ -48,6 +54,13 @@ export function parseAccessibility(value: unknown): AccessibilityPreferences {
 		TEXT_SIZES.includes(input.textSize as AccessibilityPreferences["textSize"])
 	)
 		prefs.textSize = input.textSize as AccessibilityPreferences["textSize"];
+	if (
+		GUIDE_HEIGHTS.includes(
+			input.guideHeight as AccessibilityPreferences["guideHeight"],
+		)
+	)
+		prefs.guideHeight =
+			input.guideHeight as AccessibilityPreferences["guideHeight"];
 	return prefs;
 }
 let current: AccessibilityPreferences = DEFAULT_ACCESSIBILITY;

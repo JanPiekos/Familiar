@@ -325,6 +325,12 @@ const pl = {
 		},
 	},
 	accessibility: {
+		guide_title: "Pasek skupienia podczas czytania",
+		guide_help:
+			"Przyciemnij stronę nad i pod wyraźnym paskiem tekstu. Pasek podąża za kursorem, dotykiem lub fokusem klawiatury. Naciśnij Esc lub przycisk wyjścia, aby go wyłączyć.",
+		guide_height: "Wysokość paska czytania",
+		guide_pixels: "{{height}} px",
+		guide_exit: "Wyłącz pasek czytania",
 		reading: "Czytanie",
 		save_hint:
 			"Zmiany zostaną zastosowane po zapisaniu i zapamiętane w tej przeglądarce.",
