@@ -1,4 +1,4 @@
-import { ChevronRight, Languages, SunMoon } from "lucide-react";
+import { Check, ChevronRight, Languages, SunMoon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -58,7 +58,11 @@ type PreferenceOption = { label: string; flag?: string };
 function OptionLabel({ option }: { option?: PreferenceOption }) {
 	return (
 		<span className="inline-flex items-center gap-2">
-			{option?.flag && <span aria-hidden="true">{option.flag}</span>}
+			{option?.flag && (
+				<span className="shrink-0 text-lg leading-none" aria-hidden="true">
+					{option.flag}
+				</span>
+			)}
 			{option?.label}
 		</span>
 	);
@@ -162,11 +166,18 @@ function PreferenceMenu({ preference }: { preference: Preference }) {
 						value={preference.value}
 						onValueChange={preference.onChange}
 						aria-label={preference.label}
-						className="max-h-64 overflow-y-auto overscroll-contain"
+						className={cn(
+							"max-h-64 overflow-y-auto overscroll-contain",
+							searchable && "mt-1",
+						)}
 					>
 						{(searchable ? search.options : preference.options).map(
 							(option) => (
-								<DropdownMenuRadioItem key={option.value} value={option.value}>
+								<DropdownMenuRadioItem
+									key={option.value}
+									value={option.value}
+									indicator="check"
+								>
 									<OptionLabel option={option} />
 								</DropdownMenuRadioItem>
 							),
@@ -256,11 +267,21 @@ export function AccountPreferenceControls({
 								key={option.value}
 								className={cn(
 									MENU_ITEM_LAYOUT_CLASS_NAME,
-									"flex cursor-pointer items-center rounded-xl hover:bg-muted",
+									"relative flex cursor-pointer items-center rounded-xl hover:bg-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring",
 								)}
 							>
-								<RadioGroupItem value={option.value} />
+								<RadioGroupItem
+									value={option.value}
+									className="absolute size-px opacity-0"
+								/>
 								<OptionLabel option={option} />
+								<Check
+									aria-hidden="true"
+									className={cn(
+										"ml-auto size-4",
+										preference.value !== option.value && "invisible",
+									)}
+								/>
 							</label>
 						))}
 					</RadioGroup>
