@@ -22,7 +22,6 @@ import type {
 	OptionFilterOperator,
 	TextFilterOperator,
 } from "@/components/data-table-filter/core/types";
-import { MENU_SEARCH_HEIGHT_CLASS_NAME } from "@/components/ui/menu-styles";
 import { useIsMobile } from "@/hooks/ui/use-mobile";
 import appI18n from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -458,6 +457,10 @@ export function FilterBar<TData>({
 	className,
 }: FilterBarProps<TData>) {
 	const { i18n } = useTranslation();
+	const locale =
+		(i18n.resolvedLanguage ?? i18n.language).split("-")[0] === "pl"
+			? "pl"
+			: "en";
 	const isMobile = useIsMobile();
 	const dtf = useMemo(() => createColumnConfigHelper<TData>(), []);
 
@@ -577,12 +580,12 @@ export function FilterBar<TData>({
 		<div className={cn("flex min-w-0 flex-col gap-3", className)}>
 			<div className="flex flex-wrap items-center gap-2 sm:gap-3">
 				<div className="min-w-32 flex-1">
-					<InputGroup className={cn("w-full", MENU_SEARCH_HEIGHT_CLASS_NAME)}>
+					<InputGroup className="h-11 w-full lg:h-10">
 						<InputGroupAddon>
-							<Search className="mt-0! size-4" />
+							<Search className="mt-0! size-5" />
 						</InputGroupAddon>
 						<InputGroupInput
-							className="h-full"
+							className="h-full text-base md:text-base"
 							aria-label={searchPlaceholder}
 							value={searchQuery}
 							onChange={(event) => onSearchChange?.(event.target.value)}
@@ -599,6 +602,7 @@ export function FilterBar<TData>({
 						strategy={strategy}
 						backButtonMode="floating"
 						compact={isMobile}
+						locale={locale}
 					/>
 					{endAction}
 				</div>
@@ -616,11 +620,13 @@ export function FilterBar<TData>({
 							filters={filters}
 							actions={wrappedActions}
 							strategy={strategy}
+							locale={locale}
 						/>
 					</div>
 					<FilterActions
 						hasFilters={filters.length > 0}
 						actions={wrappedActions}
+						locale={locale}
 					/>
 				</ScrollShadow>
 			)}

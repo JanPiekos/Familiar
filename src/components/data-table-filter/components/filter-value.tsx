@@ -79,8 +79,8 @@ function __FilterValue<TData, TType extends ColumnDataType>({
 			<PopoverTrigger asChild>
 				<Button
 					variant="ghost"
-					size="xl"
-					className="whitespace-nowrap rounded-none text-xs hover:text-foreground"
+					size="2xl"
+					className="h-full whitespace-nowrap rounded-none text-sm hover:text-foreground"
 				>
 					<FilterValueDisplay
 						filter={filter}

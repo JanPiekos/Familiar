@@ -30,7 +30,6 @@ import {
 } from "src/components/ui/popover";
 import { cn } from "src/lib/utils";
 import { OutlineFilter } from "@/components/icons/icons";
-import { MENU_SEARCH_HEIGHT_CLASS_NAME } from "@/components/ui/menu-styles";
 import type {
 	Column,
 	ColumnDataType,
@@ -192,12 +191,15 @@ function FilterSelectorInner<TData>({
 		>
 			<PopoverTrigger asChild>
 				<Button
-					size={compact ? "icon-xl" : "xl"}
-					className={MENU_SEARCH_HEIGHT_CLASS_NAME}
+					size="2xl"
+					className={cn("lg:h-10", compact && "size-11 p-0 lg:size-10")}
 					variant="outline"
 					aria-label={t("filter", locale)}
 				>
-					<OutlineFilter data-icon="inline-start" />
+					<OutlineFilter
+						className="size-5"
+						data-icon={compact ? undefined : "inline-start"}
+					/>
 					{!compact && t("filter", locale)}
 				</Button>
 			</PopoverTrigger>

@@ -14,9 +14,9 @@ export function FilterSubject<TData, TType extends ColumnDataType>({
 		<Button
 			aria-haspopup="true"
 			variant={"ghost"}
-			size="xl"
+			size="2xl"
 			className={cn(
-				"rounded-r-none hover:text-foreground text-xs hover:bg-transparent",
+				"h-full rounded-r-none hover:text-foreground text-sm hover:bg-transparent",
 			)}
 		>
 			{hasIcon && <column.icon className="size-4" />}

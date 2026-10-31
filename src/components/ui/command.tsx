@@ -11,8 +11,6 @@ import {
 } from "src/components/ui/dialog";
 import { cn } from "src/lib/utils";
 import appI18n from "@/lib/i18n";
-import { surfaceClasses } from "@/lib/surface-classes";
-import { useSurface } from "@/lib/surface-context";
 import {
 	MENU_ITEM_LAYOUT_CLASS_NAME,
 	MENU_SEARCH_HEIGHT_CLASS_NAME,
@@ -23,16 +21,12 @@ function Command({
 	style,
 	...props
 }: React.ComponentProps<typeof CommandPrimitive>) {
-	const substrate = useSurface();
-	const level = Math.min(substrate + 2, 0);
-
 	return (
 		<CommandPrimitive
 			data-slot="command"
 			className={cn(
-				"text-elevated-foreground flex h-full w-full flex-col overflow-hidden rounded-(--command-content-radius) group/command",
+				"bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-(--command-content-radius) group/command",
 				className,
-				surfaceClasses(level, 0),
 			)}
 			style={
 				{
