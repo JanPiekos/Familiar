@@ -336,7 +336,10 @@ export function ProfileFeed({
 	return (
 		<div
 			ref={containerRef}
-			className={cn("w-auto min-w-0 max-w-full", className)}
+			className={cn(
+				"w-auto min-w-0 max-w-full overflow-clip rounded-3xl",
+				className,
+			)}
 		>
 			{variant === "portfolio" ? (
 				<div className="lg:hidden">

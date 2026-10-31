@@ -181,7 +181,7 @@ export function PortfolioContentSkeleton({
 			)}
 			<div
 				className={cn(
-					"@container w-auto min-w-0 max-w-full",
+					"@container w-auto min-w-0 max-w-full overflow-clip rounded-3xl",
 					variant === "folder" ? "mx-4 lg:mx-0 xl:mx-4" : "lg:mx-0 xl:mx-4",
 				)}
 			>
