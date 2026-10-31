@@ -18,6 +18,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ImageZoom } from "@/components/ui/image-zoom";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { usePostConversationDirect } from "@/hooks/chat/use-chat";
 import { useAvailableFeeds } from "@/hooks/feed/use-available-feeds";
@@ -479,7 +480,16 @@ export function UserProfileSidebar({
 		<>
 			<aside className="-mt-12 h-fit flex flex-col gap-3 max-lg:px-4 lg:sticky lg:top-20 lg:-mt-16 lg:pb-10 lg:pl-4">
 				<div className="relative z-10 flex flex-row items-start justify-between gap-4 lg:flex-col lg:justify-start">
-					<UserAvatar user={user} isHuge hasOutline />
+					<ImageZoom
+						src={user.avatarPath}
+						alt={t("ui.image_zoom.avatar", {
+							name: user.displayName || user.username,
+						})}
+						circle
+						className="self-start"
+					>
+						<UserAvatar user={user} isHuge hasOutline />
+					</ImageZoom>
 
 					{/* Mobile actions */}
 					{/* <div className="flex w-fit max-w-full shrink-0 gap-2 self-end sm:hidden">

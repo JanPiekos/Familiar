@@ -1,0 +1,42 @@
+.image-zoom-content {
+	left: var(--zoom-x);
+	top: var(--zoom-y);
+	width: var(--zoom-width);
+	height: var(--zoom-height);
+	border-radius: var(--zoom-radius);
+}
+.image-zoom-content[data-state="open"] {
+	animation: image-zoom-enter 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.image-zoom-content[data-state="closed"] {
+	animation: image-zoom-leave 220ms ease-in-out;
+}
+.image-zoom-close {
+	transition: opacity 150ms;
+}
+.image-zoom-content[data-state="closed"] .image-zoom-close {
+	opacity: 0;
+}
+@keyframes image-zoom-enter {
+	from {
+		left: var(--zoom-from-x);
+		top: var(--zoom-from-y);
+		width: var(--zoom-from-width);
+		height: var(--zoom-from-height);
+		border-radius: var(--zoom-from-radius);
+	}
+}
+@keyframes image-zoom-leave {
+	to {
+		left: var(--zoom-from-x);
+		top: var(--zoom-from-y);
+		width: var(--zoom-from-width);
+		height: var(--zoom-from-height);
+		border-radius: var(--zoom-from-radius);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.image-zoom-content {
+		animation-duration: 0.01ms !important;
+	}
+}

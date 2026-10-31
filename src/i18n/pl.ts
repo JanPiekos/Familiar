@@ -1848,6 +1848,12 @@ const pl = {
 		},
 	},
 	ui: {
+		image_zoom: {
+			open: "Powiększ {{image}}",
+			close_image: "Zamknij powiększony obraz",
+			avatar: "Zdjęcie profilowe użytkownika {{name}}",
+			unavailable: "Nie udało się wczytać tego obrazu.",
+		},
 		add_to_portfolio: "Dodaj do portfolio",
 		empty_portfolio_owner_description:
 			"Udostępnij pierwszą pracę lub uporządkuj portfolio za pomocą folderu.",
