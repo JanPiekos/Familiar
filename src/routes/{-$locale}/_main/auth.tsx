@@ -39,30 +39,32 @@ function AuthPageLayout() {
 				<SolidLogo size={28} aria-hidden="true" />
 				<span className="text-sm font-bold tracking-wider">FAMILIAR</span>
 			</div>
-			<div className="grid min-w-0 lg:h-[min(52rem,calc(100dvh-8rem))] lg:grid-cols-2 lg:overflow-hidden lg:rounded-4xl lg:border lg:bg-card lg:shadow-sm">
+			<div className="grid min-w-0 lg:min-h-[clamp(44rem,calc(100dvh-8rem),52rem)] lg:grid-cols-2 lg:overflow-hidden lg:rounded-4xl lg:border lg:bg-card lg:shadow-sm">
 				<section
 					aria-labelledby="auth-page-title"
-					className="flex min-h-0 min-w-0 flex-col lg:p-10 xl:p-12"
+					className="flex min-h-0 min-w-0 flex-col lg:p-6"
 				>
 					<div className="flex min-h-0 flex-1 flex-col lg:items-center lg:justify-center">
 						<div className="flex min-h-0 min-w-0 w-full flex-1 flex-col lg:max-w-md">
 							{(isLogin || isRegister) && (
 								<nav
 									aria-label={t("auth.navigation")}
-									className="mb-6 grid shrink-0 grid-cols-2 gap-1 rounded-full bg-secondary/60 p-1"
+									className="mb-4 grid shrink-0 grid-cols-2 gap-1 rounded-full bg-secondary/60 p-1"
 								>
-								{([
-										{
-											to: "/{-$locale}/auth/login",
-											label: t("auth.login.cta"),
-											active: isLogin,
-										},
-										{
-											to: "/{-$locale}/auth/register",
-											label: t("auth.create_account.cta"),
-											active: isRegister,
-										},
-									] as const).map((item) => (
+									{(
+										[
+											{
+												to: "/{-$locale}/auth/login",
+												label: t("auth.login.cta"),
+												active: isLogin,
+											},
+											{
+												to: "/{-$locale}/auth/register",
+												label: t("auth.create_account.cta"),
+												active: isRegister,
+											},
+										] as const
+									).map((item) => (
 										<Link
 											key={item.to}
 											to={item.to}
@@ -80,7 +82,9 @@ function AuthPageLayout() {
 									))}
 								</nav>
 							)}
-							<div className="min-h-0 flex-1 lg:overflow-y-auto lg:overscroll-contain lg:px-1 lg:pb-1"><Outlet /></div>
+							<div className="min-w-0 flex-1 px-1 py-1">
+								<Outlet />
+							</div>
 						</div>
 					</div>
 				</section>
@@ -94,10 +98,7 @@ function AuthPageLayout() {
 					<p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
 						Familiar
 					</p>
-					<AuthArtworkImage
-						artwork={artwork}
-						className="my-6 min-h-0 flex-1"
-					/>
+					<AuthArtworkImage artwork={artwork} className="my-6 min-h-0 flex-1" />
 					<div className="relative">
 						<p className="max-w-sm text-3xl font-semibold leading-tight tracking-tight text-foreground xl:text-4xl">
 							{t("auth.brand.title")}

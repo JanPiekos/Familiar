@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { SolidCheck } from "@/components/icons/icons";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { AccountTypeSelectorProps } from "@/types/auth/form/account-type-selector";
 import type { AccountType } from "@/types/auth/schema/accounts";
@@ -36,7 +35,7 @@ export function AccountTypeSelector({
 			<div
 				role="radiogroup"
 				aria-label={t("ui.account_type", "Account Type")}
-				className={"flex flex-col gap-3"}
+				className={"grid grid-cols-2 gap-2"}
 			>
 				{OPTIONS.map((opt) => {
 					const selected = value === opt.key;
@@ -44,7 +43,7 @@ export function AccountTypeSelector({
 						<label
 							key={opt.key}
 							className={cn(
-								"group relative w-full cursor-pointer rounded-2xl border p-2 text-left outline-none transition-all sm:p-3",
+								"group relative w-full cursor-pointer rounded-2xl border p-2 text-left outline-none transition-all",
 
 								// Shared keyboard focus state
 								"has-focus-visible:ring-2 has-focus-visible:ring-offset-2 has-focus-visible:ring-offset-background",
@@ -87,7 +86,7 @@ export function AccountTypeSelector({
 								aria-hidden
 							/>
 
-							<div className={"flex items-start gap-3"}>
+							<div className={"flex items-start gap-2"}>
 								{/* custom radio mark */}
 								<span
 									className={cn(
@@ -108,7 +107,7 @@ export function AccountTypeSelector({
 									)}
 								</span>
 
-								<div className={"flex-1"}>
+								<div className={"min-w-0 flex-1"}>
 									<div className={"flex items-center justify-between gap-2"}>
 										<span
 											className={cn(
@@ -116,21 +115,11 @@ export function AccountTypeSelector({
 												selected
 													? "text-blue-950 dark:text-blue-50"
 													: "text-primary group-hover:text-blue-950 group-hover:dark:text-blue-50",
-												"text-sm sm:text-[0.95rem]",
+												"text-sm",
 											)}
 										>
 											{opt.title}
 										</span>
-										{opt.key === "client" && (
-											<Badge
-												size={"sm"}
-												className={
-													"bg-blue-100 text-blue-700 dark:bg-blue-800/30 dark:text-blue-300"
-												}
-											>
-												{t("auth.account_type.client_badge")}
-											</Badge>
-										)}
 									</div>
 
 									<p
