@@ -1,4 +1,3 @@
-import { Typography } from "@heroui/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,17 +23,18 @@ function RegisterPage() {
 
 	return (
 		<article className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
-			{stage !== "verify" ? (
-				<header className="flex flex-col py-3">
-					<Typography.Heading level={3}>
+				<header className={stage === "verify" ? "sr-only" : "flex flex-col py-3"}>
+					<h1
+						id="auth-page-title"
+						className="text-3xl font-semibold tracking-tight text-foreground"
+					>
 						{t("auth.register.title", "Register")}
-					</Typography.Heading>
+					</h1>
 
-					<Typography.Paragraph size="sm" className="text-muted-foreground">
+					<p className="mt-2 text-sm leading-relaxed text-muted-foreground">
 						{t("auth.register.description", "Register to Familiar")}
-					</Typography.Paragraph>
+					</p>
 				</header>
-			) : null}
 
 			<section
 				aria-labelledby="auth-page-title"

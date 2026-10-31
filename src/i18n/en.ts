@@ -587,6 +587,11 @@ const en = {
 		"artist-dashboard": "Dashboard",
 	},
 	auth: {
+		navigation: "Account access",
+		brand: {
+			title: "Make room for your creativity.",
+			description: "A place to share your work and make yourself at home.",
+		},
 		login: {
 			cta: "Login",
 			title: "Welcome back",

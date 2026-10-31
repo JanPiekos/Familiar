@@ -9,6 +9,8 @@ import {
 	useState,
 } from "react";
 import type { RegisterStage } from "@/types/auth/form/register";
+import { SolidLogo } from "@/components/icons/assets/logo/logo";
+import { cn } from "@/lib/utils";
 
 export interface AuthArtwork {
 	src: string;
@@ -16,8 +18,8 @@ export interface AuthArtwork {
 	objectPosition?: CSSProperties["objectPosition"];
 }
 
-const AUTH_PLACEHOLDER_IMAGE =
-	"https://images.pexels.com/photos/1570264/pexels-photo-1570264.jpeg";
+// Leave empty to display the brand mark until mascot artwork is available.
+const AUTH_PLACEHOLDER_IMAGE = "";
 
 export const DEFAULT_AUTH_ARTWORK: AuthArtwork = {
 	src: AUTH_PLACEHOLDER_IMAGE,
@@ -111,12 +113,21 @@ export function AuthArtworkImage({
 	className?: string;
 }) {
 	return (
-		<img
-			key={artwork.src}
-			src={artwork.src}
-			alt={artwork.alt ?? ""}
-			className={className}
-			style={{ objectPosition: artwork.objectPosition }}
-		/>
+		<div className={cn("relative flex items-center justify-center", className)}>
+			{artwork.src ? (
+				<img
+					key={artwork.src}
+					src={artwork.src}
+					alt={artwork.alt ?? ""}
+					className="absolute inset-0 size-full object-cover"
+					style={{ objectPosition: artwork.objectPosition }}
+				/>
+			) : (
+				<SolidLogo
+					className="h-auto w-2/5 max-w-48 text-foreground"
+					aria-hidden="true"
+				/>
+			)}
+		</div>
 	);
 }

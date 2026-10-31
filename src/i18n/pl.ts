@@ -594,6 +594,11 @@ const pl = {
 		"artist-dashboard": "Panel artysty",
 	},
 	auth: {
+		navigation: "Dostęp do konta",
+		brand: {
+			title: "Zrób miejsce na swoją kreatywność.",
+			description: "Miejsce, w którym możesz dzielić się swoją twórczością i poczuć się jak u siebie.",
+		},
 		login: {
 			cta: "Zaloguj",
 			title: "Witaj ponownie",

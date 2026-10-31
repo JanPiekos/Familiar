@@ -51,7 +51,9 @@ function LoginForm({ onSuccess, onForgot }: LoginFormProps) {
 		}
 	};
 
-	const passwordToggleLabel = showPassword ? "Hide password" : "Show password";
+	const passwordToggleLabel = t(
+		showPassword ? "auth.password.hide" : "auth.password.show",
+	);
 
 	return (
 		<Form {...form}>
@@ -84,7 +86,8 @@ function LoginForm({ onSuccess, onForgot }: LoginFormProps) {
 
 											<InputGroupInput
 												placeholder={t("auth.email.placeholder")}
-												type="text"
+												type="email"
+												inputMode="email"
 												autoComplete="email"
 												{...field}
 												aria-invalid={fieldState.invalid}
