@@ -1,4 +1,4 @@
-import { Flag, FolderInput, ImageOff, Images } from "lucide-react";
+import { Flag, FolderInput, FolderMinus, ImageOff, Images } from "lucide-react";
 import { type CSSProperties, memo, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -243,12 +243,13 @@ export const PortfolioFeedItem = memo(function PortfolioFeedItem({
 								</DropdownMenuItem>
 								{onRemoveFromCatalog && (
 									<DropdownMenuItem
+										variant="destructive"
 										onSelect={(event) => {
 											event.stopPropagation();
 											onRemoveFromCatalog(p.id);
 										}}
 									>
-										<FolderInput />
+										<FolderMinus />
 										{t("components.profile.portfolio.manage.remove")}
 									</DropdownMenuItem>
 								)}
