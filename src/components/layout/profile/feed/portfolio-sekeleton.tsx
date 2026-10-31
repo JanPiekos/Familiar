@@ -38,7 +38,7 @@ export function PortfolioGridSkeleton({
 			aria-hidden="true"
 			data-slot="portfolio-grid-skeleton"
 			className={cn(
-				"w-auto min-w-0 max-w-full overflow-clip rounded-3xl",
+				"w-auto min-w-0 max-w-full overflow-clip rounded-none lg:rounded-3xl",
 				className,
 			)}
 		>
