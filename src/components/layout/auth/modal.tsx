@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { SolidLogo } from "@/components/icons/assets/logo/logo";
 import { OutlineClose, SolidUser } from "@/components/icons/icons";
 import {
 	AuthArtworkImage,
@@ -167,7 +168,10 @@ function AuthContent({
 				<div className="absolute inset-0 rounded-r-lg bg-black/50" />
 				<div className="z-10 flex flex-col gap-2 text-white">
 					<div className="space-y-1">
-						<h3 className="font-semibold text-sm">Familiar</h3>
+						<h3 className="flex items-center gap-2 font-semibold text-sm">
+							<SolidLogo size={28} aria-hidden="true" />
+							Familiar
+						</h3>
 						<p className="text-xs opacity-80">
 							{t(
 								"ui.sign_in_to_share_your_work_and_follow_creators",

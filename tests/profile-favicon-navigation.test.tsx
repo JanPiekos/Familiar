@@ -11,7 +11,7 @@ import {
 	RouterProvider,
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { APP_FAVICON } from "@/lib/favicon";
+import { APP_FAVICONS } from "@/lib/favicon";
 import { RouteFavicon } from "@/components/layout/route-favicon";
 
 // Keep the real app head configuration and favicon owner; omit unrelated providers.
@@ -155,13 +155,27 @@ async function loadAvatar(index = 0, href = "data:image/png;base64,PROFILE") {
 	await waitFor(() => expectOnlyIcon(href));
 }
 
+function expectAppIcons() {
+	const icons = Array.from(
+		document.head.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]'),
+	);
+	expect(icons.map((icon) => icon.getAttribute("href"))).toEqual(
+		APP_FAVICONS.map((icon) => icon.href),
+	);
+	expect(icons.map((icon) => icon.getAttribute("media"))).toEqual([
+		"(prefers-color-scheme: light)",
+		"(prefers-color-scheme: dark)",
+		null,
+	]);
+}
+
 // These are client navigations on one mounted router: no reload between pages.
 describe("route favicon lifecycle", () => {
 	it.each(["/chat", "/pl/chat"])(
 		"declares the app icon on a direct visit to %s",
 		async (path) => {
 			await app(path);
-			expectOnlyIcon(APP_FAVICON.href);
+			expectAppIcons();
 		},
 	);
 
@@ -188,12 +202,12 @@ describe("route favicon lifecycle", () => {
 				await router.navigate({ to: "/pl/chat" as never });
 			});
 			await screen.findByRole("heading", { name: "Chat" });
-			await waitFor(() => expectOnlyIcon(APP_FAVICON.href));
+			await waitFor(() => expectAppIcons());
 			await act(async () => {
 				await router.navigate({ to: "/pl/shop" as never });
 			});
 			await screen.findByRole("heading", { name: "Shop" });
-			expectOnlyIcon(APP_FAVICON.href);
+			expectAppIcons();
 		},
 	);
 
@@ -298,7 +312,7 @@ describe("route favicon lifecycle", () => {
 			staleLoad?.();
 		});
 		expect(drawImage).not.toHaveBeenCalled();
-		expectOnlyIcon(APP_FAVICON.href);
+		expectAppIcons();
 	});
 
 	it("keeps the profile SVG when the optional PNG conversion fails", async () => {
@@ -314,6 +328,6 @@ describe("route favicon lifecycle", () => {
 			await router.navigate({ to: "/user/missing" as never });
 		});
 		await screen.findByRole("heading", { name: "Not found" });
-		expectOnlyIcon(APP_FAVICON.href);
+		expectAppIcons();
 	});
 });
