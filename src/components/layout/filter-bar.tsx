@@ -580,7 +580,7 @@ export function FilterBar<TData>({
 		<div className={cn("flex min-w-0 flex-col gap-3", className)}>
 			<div className="flex flex-wrap items-center gap-2 sm:gap-3">
 				<div className="min-w-32 flex-1">
-					<InputGroup className="h-11 w-full">
+					<InputGroup className="h-11 w-full lg:h-10">
 						<InputGroupAddon>
 							<Search className="mt-0! size-5" />
 						</InputGroupAddon>

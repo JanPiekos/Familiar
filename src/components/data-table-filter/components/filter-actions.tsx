@@ -21,7 +21,7 @@ function __FilterActions({
 		<Button
 			size="2xl"
 			aria-label={t("clear", locale)}
-			className={cn(!hasFilters && "hidden")}
+			className={cn("lg:h-10", !hasFilters && "hidden")}
 			variant="destructive"
 			onClick={actions?.removeAllFilters}
 		>

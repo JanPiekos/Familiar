@@ -192,7 +192,7 @@ function FilterSelectorInner<TData>({
 			<PopoverTrigger asChild>
 				<Button
 					size="2xl"
-					className={cn(compact && "size-11 p-0")}
+					className={cn("lg:h-10", compact && "size-11 p-0 lg:size-10")}
 					variant="outline"
 					aria-label={t("filter", locale)}
 				>

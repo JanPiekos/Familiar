@@ -75,7 +75,7 @@ export function ActiveFilter<TData, TType extends ColumnDataType>({
 }: ActiveFilterProps<TData, TType>) {
 	return (
 		// TODO: try make h based on prop size (xs, sm, lg)
-		<div className="flex h-11 items-center rounded-full border border-border bg-background text-sm">
+		<div className="flex h-11 items-center rounded-full border border-border bg-background text-sm lg:h-10">
 			<FilterSubject column={column} />
 			<Separator orientation="vertical" />
 			<FilterOperator
@@ -95,7 +95,7 @@ export function ActiveFilter<TData, TType extends ColumnDataType>({
 			<Separator orientation="vertical" />
 			<Button
 				variant="ghost"
-				className="h-full w-11 rounded-l-none! hover:text-foreground"
+				className="h-full w-11 rounded-l-none! hover:text-foreground lg:w-10"
 				size="icon-2xl"
 				aria-label={`${column.displayName}: ${t("clear", locale)}`}
 				onClick={() => actions.removeFilter(filter.columnId)}
