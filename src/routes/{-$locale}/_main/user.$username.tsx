@@ -102,7 +102,7 @@ export const Route = createFileRoute("/{-$locale}/_main/user/$username")({
 	},
 
 	pendingComponent: UserProfileSkeleton,
-	notFoundComponent: RouteNotFoundPage,
+	notFoundComponent: () => <RouteNotFoundPage embedded />,
 	component: RouteComponent,
 });
 

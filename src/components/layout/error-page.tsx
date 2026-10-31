@@ -1,5 +1,6 @@
 import {
 	type ErrorComponentProps,
+	type NotFoundRouteProps,
 	useLocation,
 	useRouter,
 } from "@tanstack/react-router";
@@ -44,12 +45,15 @@ export function ErrorPage({
 	onRetry,
 	onBack,
 	compact = false,
+	embedded = false,
 	className,
 }: {
 	error: unknown;
 	onRetry?: () => unknown;
 	onBack?: () => void;
 	compact?: boolean;
+	/** Fit inside the app layout, which already supplies the site header. */
+	embedded?: boolean;
 	className?: string;
 }) {
 	const { i18n } = useTranslation();
@@ -84,11 +88,13 @@ export function ErrorPage({
 				"mx-auto w-full max-w-5xl flex-1 px-5 py-8 text-foreground sm:px-8 sm:py-12",
 				compact
 					? "flex min-h-80 flex-col"
-					: "grid min-h-dvh grid-cols-1 grid-rows-[minmax(4rem,1fr)_auto_minmax(4rem,1fr)]",
+					: embedded
+						? "flex min-h-0 flex-col"
+						: "grid min-h-dvh grid-cols-1 grid-rows-[minmax(4rem,1fr)_auto_minmax(4rem,1fr)]",
 				className,
 			)}
 		>
-			{!compact && (
+			{!compact && !embedded && (
 				<a
 					href={home}
 					aria-label="Familiar"
@@ -101,7 +107,7 @@ export function ErrorPage({
 			<div
 				className={cn(
 					"mx-auto flex w-full max-w-lg flex-col items-center justify-center text-center",
-					compact ? "flex-1" : "col-start-1 row-start-2",
+					compact || embedded ? "flex-1" : "col-start-1 row-start-2",
 				)}
 			>
 				<div className="mb-5 flex size-20 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
@@ -218,11 +224,16 @@ export function RouteErrorPage({ error, reset }: ErrorComponentProps) {
 	);
 }
 
-export function RouteNotFoundPage() {
+export function RouteNotFoundPage({
+	embedded = false,
+}: Partial<NotFoundRouteProps> & {
+	embedded?: boolean;
+} = {}) {
 	const router = useRouter();
 	return (
 		<ErrorPage
 			error={{ status: 404 }}
+			embedded={embedded}
 			onBack={
 				router.history.canGoBack() ? () => router.history.back() : undefined
 			}
