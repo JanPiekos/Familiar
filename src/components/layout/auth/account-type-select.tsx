@@ -35,7 +35,7 @@ export function AccountTypeSelector({
 			<div
 				role="radiogroup"
 				aria-label={t("ui.account_type", "Account Type")}
-				className={"grid grid-cols-2 gap-2"}
+				className={"grid grid-cols-1 gap-2 sm:grid-cols-2"}
 			>
 				{OPTIONS.map((opt) => {
 					const selected = value === opt.key;
@@ -43,7 +43,7 @@ export function AccountTypeSelector({
 						<label
 							key={opt.key}
 							className={cn(
-								"group relative w-full cursor-pointer rounded-2xl border p-2 text-left outline-none transition-all",
+								"group relative w-full cursor-pointer rounded-2xl border p-3 text-left outline-none transition-all sm:p-2",
 
 								// Shared keyboard focus state
 								"has-focus-visible:ring-2 has-focus-visible:ring-offset-2 has-focus-visible:ring-offset-background",

@@ -408,8 +408,11 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 
 			const target = event.target as HTMLElement;
 
-			// Let Enter create a new line inside bio.
-			if (target.tagName === "TEXTAREA") {
+			// Preserve native activation for controls and new lines inside bio.
+			if (
+				target.tagName === "TEXTAREA" ||
+				target.closest("button, a, [role='combobox']")
+			) {
 				return;
 			}
 

@@ -558,7 +558,7 @@ code {
 
 /* Auth controls share a comfortable size across pages and dialogs. */
 .auth-form [data-slot="input-group"]:has(> input),
-.auth-form input[data-slot="input-group-control"],
+.auth-form [data-slot="form-control"]:has(> input[data-slot="input-group-control"]),
 .auth-form [data-slot="select-trigger"],
 .auth-form [data-slot="button"][data-size="xl"],
 .auth-form [data-slot="button"][data-size="2xl"] {
@@ -566,10 +566,21 @@ code {
 }
 
 .auth-form input[data-slot="input-group-control"] {
+  min-height: calc(3rem - 2px);
   font-size: 1rem;
 }
 
 .auth-form [data-slot="button"][data-size="icon-xs"] {
   width: 2.5rem;
   height: 2.5rem;
+}
+
+.auth-form [data-slot="input-group-addon"]:has(> button) {
+  flex-shrink: 0;
+  padding-block: 0;
+}
+
+.auth-form [data-slot="input-group-addon"][data-align="inline-end"]:has(> button) {
+  margin-inline-end: 0;
+  padding-inline-end: 0.25rem;
 }
