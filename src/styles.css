@@ -567,6 +567,11 @@ code {
 
 .auth-form input[data-slot="input-group-control"] {
   min-height: calc(3rem - 2px);
+}
+
+.auth-form input[data-slot="input-group-control"],
+.auth-form [data-slot="input-group-addon"],
+.auth-form [data-slot="input-group-text"] {
   font-size: 1rem;
 }
 
