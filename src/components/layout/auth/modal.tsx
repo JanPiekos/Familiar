@@ -14,6 +14,7 @@ import {
 	Dialog,
 	DialogClose,
 	DialogContent,
+	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import {
@@ -72,6 +73,13 @@ function AuthModal({ defaultTab = "login" }: AuthModalProps) {
 					</DrawerTrigger>
 					<DrawerContent className="max-h-[85vh]">
 						<DrawerHeader className="text-center">
+							<DrawerTitle className="sr-only">
+								{t(
+									tab === "register"
+										? "auth.register.title"
+										: "auth.login.title",
+								)}
+							</DrawerTitle>
 							<DrawerClose asChild className="absolute top-2 right-2">
 								<Button
 									variant="ghost"
@@ -87,7 +95,10 @@ function AuthModal({ defaultTab = "login" }: AuthModalProps) {
 								tab={tab}
 								setTab={setTab}
 								setOpen={setOpen}
-								setForgotOpen={setForgotOpen}
+								setForgotOpen={(value) => {
+									setForgotOpen(value);
+									if (value) setOpen(false);
+								}}
 								registerStage={registerStage}
 								setRegisterStage={setRegisterStage}
 							/>
@@ -109,11 +120,6 @@ function AuthModal({ defaultTab = "login" }: AuthModalProps) {
 									setTab("login");
 									setOpen(true);
 								}}
-								onSuccess={() => {
-									setForgotOpen(false);
-									setTab("login");
-									setOpen(true);
-								}}
 							/>
 						</div>
 					</DrawerContent>
@@ -123,22 +129,51 @@ function AuthModal({ defaultTab = "login" }: AuthModalProps) {
 	}
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<Dialog
+			open={open}
+			onOpenChange={(value) => {
+				setOpen(value);
+				if (!value) setForgotOpen(false);
+			}}
+		>
 			<DialogTrigger asChild>
-				<Button>
-					<SolidUser />
+				<Button aria-label={t("auth.register.cta")}>
+					<SolidUser aria-hidden="true" />
 					{t("auth.register.cta")}
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="gap-0 p-0 md:max-w-4xl" showCloseButton={false}>
-				<AuthContent
-					tab={tab}
-					setTab={setTab}
-					setOpen={setOpen}
-					setForgotOpen={setForgotOpen}
-					registerStage={registerStage}
-					setRegisterStage={setRegisterStage}
-				/>
+			<DialogContent
+				className="gap-0 p-0 md:max-w-4xl"
+				showCloseButton={forgotOpen}
+				aria-describedby={undefined}
+			>
+				{!forgotOpen && (
+					<DialogTitle className="sr-only">
+						{t(tab === "register" ? "auth.register.title" : "auth.login.title")}
+					</DialogTitle>
+				)}
+				{forgotOpen ? (
+					<div className="mx-auto w-full max-w-md p-6">
+						<DialogTitle className="mb-6 text-2xl">
+							{t("auth.forgot.title")}
+						</DialogTitle>
+						<ForgotForm
+							onModeChange={() => {
+								setForgotOpen(false);
+								setTab("login");
+							}}
+						/>
+					</div>
+				) : (
+					<AuthContent
+						tab={tab}
+						setTab={setTab}
+						setOpen={setOpen}
+						setForgotOpen={setForgotOpen}
+						registerStage={registerStage}
+						setRegisterStage={setRegisterStage}
+					/>
+				)}
 			</DialogContent>
 		</Dialog>
 	);

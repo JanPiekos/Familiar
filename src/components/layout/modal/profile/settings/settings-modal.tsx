@@ -1,6 +1,7 @@
 "use client";
 
 import { AccessibilitySettings } from "./accessibility-settings";
+import { PasswordUpdateForm } from "@/components/layout/auth/form/password";
 
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "@tanstack/react-router";
@@ -11,11 +12,8 @@ import {
 	Globe,
 	KeyRound,
 	Link2,
-	LogOut,
-	Mail,
 	Palette,
 	Shield,
-	Trash2,
 	UserRound,
 	X,
 } from "lucide-react";
@@ -23,7 +21,6 @@ import {
 	type ComponentType,
 	type CSSProperties,
 	type ReactNode,
-	useEffect,
 	useMemo,
 	useState,
 } from "react";
@@ -65,7 +62,6 @@ import {
 import {
 	InputGroup,
 	InputGroupAddon,
-	InputGroupButton,
 	InputGroupInput,
 } from "@/components/ui/input-group";
 import { Kbd } from "@/components/ui/kbd";
@@ -94,7 +90,6 @@ import {
 	SidebarProvider,
 } from "@/components/ui/sidebar";
 import { Switch } from "@/components/ui/switch";
-import { deriveShadeFromHex, getSwatchStyles } from "@/lib/colors";
 import {
 	languages,
 	localizePath,
@@ -119,6 +114,7 @@ type SettingsSection =
 // Only these sections currently apply or persist their changes.
 const SUPPORTED_SETTINGS_SECTIONS = new Set<SettingsSection>([
 	"profile",
+	"account",
 	"appearance",
 	"language",
 ]);
@@ -214,32 +210,6 @@ function getSettingsNavigation(t: TFunction): SettingsNavigationItem[] {
 		},
 	];
 }
-
-// Danger 500: oklch(63.7% 0.237 25.331)
-const DANGER_500_HEX = "#fb2c36";
-const DANGER_PALETTE_OPTIONS = { baseShade: 500 } as const;
-const DANGER_ZONE_SWATCH = getSwatchStyles(
-	DANGER_500_HEX,
-	100,
-	DANGER_PALETTE_OPTIONS,
-);
-const DANGER_ACTION_SWATCH = getSwatchStyles(
-	DANGER_500_HEX,
-	500,
-	DANGER_PALETTE_OPTIONS,
-);
-const DANGER_MUTED_FOREGROUND = deriveShadeFromHex(
-	DANGER_500_HEX,
-	"700",
-	DANGER_PALETTE_OPTIONS,
-);
-const DANGER_ZONE_STYLE = {
-	...DANGER_ZONE_SWATCH,
-	"--foreground": DANGER_ZONE_SWATCH.color,
-	"--muted-foreground": DANGER_MUTED_FOREGROUND,
-	"--destructive": DANGER_ACTION_SWATCH.backgroundColor,
-	"--destructive-foreground": DANGER_ACTION_SWATCH.color,
-} as CSSProperties;
 
 const EMPTY_PROFILE_VALUES: ProfileEditorValues = {
 	avatar_url: "",
@@ -524,18 +494,20 @@ export function UserSettingsPanel({
 						</Button>
 					)}
 
-					<Button
-						size="responsive-xl"
-						type="submit"
-						form={`${activeSection}-settings-form`}
-						disabled={updateProfile.isPending || activeSection !== "profile"}
-						aria-busy={updateProfile.isPending}
-						className="min-w-0 flex-1 sm:flex-none"
-					>
-						{updateProfile.isPending
-							? t("settings.profile.saving", "Saving profile…")
-							: t("common.save_changes", "Save changes")}
-					</Button>
+					{activeSection !== "account" && (
+						<Button
+							size="responsive-xl"
+							type="submit"
+							form={`${activeSection}-settings-form`}
+							disabled={updateProfile.isPending || activeSection !== "profile"}
+							aria-busy={updateProfile.isPending}
+							className="min-w-0 flex-1 sm:flex-none"
+						>
+							{updateProfile.isPending
+								? t("settings.profile.saving", "Saving profile…")
+								: t("common.save_changes", "Save changes")}
+						</Button>
+					)}
 				</footer>
 			</main>
 		</SidebarProvider>
@@ -565,7 +537,7 @@ function SettingsSectionContent({
 			);
 
 		case "account":
-			return <AccountSettings email={accountEmail} onSubmit={onSave} />;
+			return <AccountSettings email={accountEmail} />;
 
 		case "appearance":
 			return <AppearanceSettings onSubmit={onSave} />;
@@ -615,149 +587,23 @@ export function ProfileSettings({
 	);
 }
 
-function AccountSettings({
-	email,
-	onSubmit,
-}: {
-	email: string;
-	onSubmit?: () => void | Promise<void>;
-}) {
+function AccountSettings({ email }: { email: string }) {
 	const { t } = useTranslation();
-	const form = useForm({
-		defaultValues: { email },
-		onSubmit: async () => {
-			await onSubmit?.();
-		},
-	});
-
-	useEffect(() => {
-		form.reset({ email });
-	}, [email, form]);
-
 	return (
-		<form
-			id="account-settings-form"
-			onSubmit={(event) => {
-				event.preventDefault();
-				void form.handleSubmit();
-			}}
-		>
-			<div className="flex flex-col gap-6">
-				<SettingsCard
-					title={t("settings.account.email.title", "Email address")}
-					description={t(
-						"settings.account.email.description",
-						"Used for signing in and account notifications.",
-					)}
-				>
-					<FieldGroup>
-						<form.Field
-							name="email"
-							children={(field) => (
-								<Field>
-									<FieldLabel htmlFor={field.name} className="sr-only">
-										{t("settings.account.email.label", "Email address")}
-									</FieldLabel>
-									<InputGroup>
-										<InputGroupAddon>
-											<Mail />
-										</InputGroupAddon>
-										<InputGroupInput
-											id={field.name}
-											name={field.name}
-											type="email"
-											value={field.state.value}
-											placeholder={t(
-												"settings.account.email.placeholder",
-												"Email address",
-											)}
-											readOnly
-										/>
-										<InputGroupAddon align="inline-end">
-											<InputGroupButton type="button" variant="secondary">
-												{t("settings.account.email.change", "Change")}
-											</InputGroupButton>
-										</InputGroupAddon>
-									</InputGroup>
-								</Field>
-							)}
-						/>
-					</FieldGroup>
-				</SettingsCard>
-
-				<SettingsCard
-					title={t("settings.account.password.title", "Password")}
-					description={t(
-						"settings.account.password.description",
-						"Choose a strong and unique password.",
-					)}
-				>
-					<FieldGroup>
-						<Field>
-							<Button type="button" variant="secondary" size="responsive-xl">
-								<KeyRound data-icon="inline-start" />
-								{t("settings.account.password.change", "Change password")}
-							</Button>
-						</Field>
-					</FieldGroup>
-				</SettingsCard>
-
-				<SettingsCard
-					title={t("settings.account.sessions.title", "Account sessions")}
-					description={t(
-						"settings.account.sessions.description",
-						"Sign out from other browsers and devices.",
-					)}
-				>
-					<FieldGroup>
-						<Field>
-							<Button type="button" variant="secondary" size="responsive-xl">
-								<LogOut data-icon="inline-start" />
-								{t(
-									"settings.account.sessions.sign_out_others",
-									"Sign out other sessions",
-								)}
-							</Button>
-						</Field>
-					</FieldGroup>
-				</SettingsCard>
-
-				<SettingsCard
-					title={t("settings.account.danger.title", "Danger zone")}
-					description={t(
-						"settings.account.danger.description",
-						"These actions cannot easily be undone.",
-					)}
-					style={DANGER_ZONE_STYLE}
-				>
-					<FieldGroup>
-						<Field orientation="horizontal">
-							<FieldContent>
-								<FieldLabel>
-									{t("settings.account.delete.title", "Delete account")}
-								</FieldLabel>
-								<FieldDescription>
-									{t(
-										"settings.account.delete.description",
-										"Permanently delete your account and content.",
-									)}
-								</FieldDescription>
-							</FieldContent>
-							<Button
-								type="button"
-								variant="destructive"
-								size="responsive-xl"
-								style={DANGER_ACTION_SWATCH}
-								className="hover:opacity-90"
-							>
-								<Trash2 data-icon="inline-start" />
-								{t("settings.account.delete.action", "Delete account")}
-							</Button>
-						</Field>
-					</FieldGroup>
-				</SettingsCard>
-			</div>
-		</form>
+		<div className="flex flex-col gap-6">
+			<SettingsCard
+				title={t("settings.account.email.title")}
+				description={t("settings.account.email.description")}
+			>
+				<p className="break-all text-sm font-medium">{email}</p>
+			</SettingsCard>
+			<SettingsCard
+				title={t("settings.account.password.title")}
+				description={t("settings.account.password.description")}
+			>
+				<PasswordUpdateForm requireCurrentPassword />
+			</SettingsCard>
+		</div>
 	);
 }
 
