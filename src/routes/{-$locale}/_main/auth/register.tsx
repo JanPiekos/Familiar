@@ -22,7 +22,7 @@ function RegisterPage() {
 	useSetAuthArtwork(REGISTER_ARTWORK_BY_STAGE[stage]);
 
 	return (
-		<article className="flex min-w-0 flex-col [&_footer]:pt-3">
+		<article className="flex min-w-0 flex-1 flex-col [&_footer]:pt-3">
 			<header className={stage === "verify" ? "sr-only" : "flex flex-col py-1"}>
 				<h1
 					id="auth-page-title"
@@ -36,7 +36,10 @@ function RegisterPage() {
 				</p>
 			</header>
 
-			<section aria-labelledby="auth-page-title" className="mt-2 min-w-0">
+			<section
+				aria-labelledby="auth-page-title"
+				className="mt-2 flex min-w-0 flex-1 flex-col"
+			>
 				<RegisterForm
 					onStageChange={setStage}
 					onSuccess={() => navigate({ to: "/{-$locale}", params: { locale } })}

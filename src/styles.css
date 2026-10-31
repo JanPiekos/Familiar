@@ -555,3 +555,21 @@ code {
 		}
 	}
 }
+
+/* Auth controls share a comfortable size across pages and dialogs. */
+.auth-form [data-slot="input-group"]:has(> input),
+.auth-form input[data-slot="input-group-control"],
+.auth-form [data-slot="select-trigger"],
+.auth-form [data-slot="button"][data-size="xl"],
+.auth-form [data-slot="button"][data-size="2xl"] {
+  min-height: 3rem;
+}
+
+.auth-form input[data-slot="input-group-control"] {
+  font-size: 1rem;
+}
+
+.auth-form [data-slot="button"][data-size="icon-xs"] {
+  width: 2.5rem;
+  height: 2.5rem;
+}

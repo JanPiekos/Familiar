@@ -444,7 +444,7 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 
 	if (isAwaitingVerification) {
 		return (
-			<div className="flex min-w-0 flex-col gap-4 px-1 py-1">
+			<div className="flex min-w-0 flex-1 flex-col gap-4 px-1 py-1">
 				<RegisterStepVerifyEmail
 					email={registeredEmail}
 					isChecking={isAuthPending}
@@ -471,7 +471,7 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 			<form
 				onSubmit={blockNativeSubmit}
 				onKeyDown={handleKeyDown}
-				className="flex min-w-0 flex-col gap-4"
+				className="flex min-w-0 flex-1 flex-col gap-4"
 				noValidate
 			>
 				<Stepper
@@ -523,7 +523,7 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 					</StepperNav>
 				</Stepper>
 
-				<div className="min-w-0 px-1 py-1">
+				<div className="min-w-0 flex-1 px-1 py-1">
 					{step === 0 && (
 						<RegisterStepAccount
 							control={control}

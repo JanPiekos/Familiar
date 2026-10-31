@@ -754,9 +754,9 @@ const pl = {
 		account_type: {
 			label: "Typ Konta",
 			client_title: "Konto Klienta",
-			client_description: "Dla osób szukających połączeń z artystami.",
-			artist_title: "Konto Artysty",
-			artist_description: "Dla artystów szukających połączeń z klientami.",
+			client_description: "Dla osób chcących nawiązać kontakt z twórcami.",
+			artist_title: "Konto Twórcy",
+			artist_description: "Dla twórców chcących nawiązać kontakt z klientami.",
 			client_badge: "Domyślne",
 		},
 	},

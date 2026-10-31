@@ -42,10 +42,10 @@ function AuthPageLayout() {
 			<div className="grid min-w-0 lg:min-h-[clamp(44rem,calc(100dvh-8rem),52rem)] lg:grid-cols-2 lg:overflow-hidden lg:rounded-4xl lg:border lg:bg-card lg:shadow-sm">
 				<section
 					aria-labelledby="auth-page-title"
-					className="flex min-h-0 min-w-0 flex-col lg:p-6"
+					className="auth-form flex min-h-0 min-w-0 flex-col lg:p-6"
 				>
 					<div className="flex min-h-0 flex-1 flex-col lg:items-center lg:justify-center">
-						<div className="flex min-h-0 min-w-0 w-full flex-1 flex-col lg:max-w-md">
+						<div className="flex min-h-0 min-w-0 w-full flex-1 flex-col">
 							{(isLogin || isRegister) && (
 								<nav
 									aria-label={t("auth.navigation")}
@@ -82,7 +82,7 @@ function AuthPageLayout() {
 									))}
 								</nav>
 							)}
-							<div className="min-w-0 flex-1 px-1 py-1">
+							<div className="flex min-w-0 flex-1 flex-col px-1 py-1">
 								<Outlet />
 							</div>
 						</div>
