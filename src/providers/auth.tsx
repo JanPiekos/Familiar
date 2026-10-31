@@ -490,6 +490,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		} = supabase.auth.onAuthStateChange((event, nextSession) => {
 			if (
 				event === "INITIAL_SESSION" ||
+				event === "PASSWORD_RECOVERY" ||
 				event === "SIGNED_IN" ||
 				event === "TOKEN_REFRESHED" ||
 				event === "USER_UPDATED"
