@@ -52,12 +52,14 @@ import {
 	DataGridTableViewport,
 } from "src/components/reui/data-grid/data-grid-table";
 import { Button } from "src/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 function DataGridTableDndHeader<TData>({
 	header,
 }: {
 	header: Header<TData, unknown>;
 }) {
+	const { t } = useTranslation();
 	const { props } = useDataGrid();
 	const { column } = header;
 
@@ -104,7 +106,7 @@ function DataGridTableDndHeader<TData>({
 						className={`-ms-2 size-6 ${isDragging ? "cursor-grabbing" : "cursor-grab active:cursor-grabbing"}`}
 						{...attributes}
 						{...listeners}
-						aria-label="Drag to reorder"
+						aria-label={t("ui.drag_to_reorder", "Drag to reorder")}
 					>
 						<GripVerticalIcon
 							className="opacity-60 hover:opacity-100"

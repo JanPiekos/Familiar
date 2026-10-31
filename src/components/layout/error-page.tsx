@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { SolidLogo } from "@/components/icons/assets/logo/logo";
 import { Button } from "@/components/ui/button";
 import { detectLocaleFromPathOrParams, localizePath } from "@/lib/i18n";
 import { getPageError, type PageErrorKind } from "@/lib/page-error";
@@ -93,7 +94,7 @@ export function ErrorPage({
 					aria-label="Familiar"
 					className="col-start-1 row-start-1 inline-flex w-fit items-center self-start gap-2.5 rounded-full text-sm font-bold tracking-wider focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
 				>
-					<img src="/favicon.svg" alt="" width={28} height={28} />
+					<SolidLogo size={28} className="text-primary" aria-hidden="true" />
 					FAMILIAR
 				</a>
 			)}

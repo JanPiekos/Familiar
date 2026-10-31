@@ -17,6 +17,7 @@ import {
 	VideoIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { EmptyPage } from "@/components/layout/empty-page";
 import {
 	FilterBar,
@@ -28,26 +29,15 @@ import { CategoryCard } from "@/components/layout/shop/category-card";
 import { ShopItemCard } from "@/components/layout/shop/shop-item-card";
 import { useCommissionCategories } from "@/hooks/commissions/use-commissions";
 import { useShopItems } from "@/hooks/shop";
-import i18n, { stripLocaleFromPathname } from "@/lib/i18n";
-import { getSeoLinks, seo } from "@/lib/seo";
+import { stripLocaleFromPathname } from "@/lib/i18n";
 import type { MockShopItem } from "@/types/shop";
 
 export const Route = createFileRoute("/{-$locale}/_main/shop")({
-	head: ({ params }) => ({
-		meta: seo({
-			title: i18n.t("seo.shop.title"),
-			description: i18n.t("seo.shop.description"),
-			image: `https://og-image.vercel.app/${encodeURIComponent(i18n.t(`seo.shop.title`))}.png`,
-			keywords: i18n.t("seo.shop.keywords"),
-			pathname: "/shop",
-			locale: params.locale,
-		}),
-		links: getSeoLinks("/shop", params.locale),
-	}),
 	component: ShopPage,
 });
 
 function ShopPage() {
+	const { t } = useTranslation();
 	const { locale } = Route.useParams();
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -74,20 +64,20 @@ function ShopPage() {
 			}
 		}
 		return options;
-	}, [categories]);
+	}, [categories, t]);
 
 	const filterGroups: FilterGroup<MockShopItem>[] = useMemo(
 		() => [
 			{
 				id: "categoryId",
-				label: "Category",
+				label: t("ui.category", "Category"),
 				type: "select",
 				icon: ListFilterIcon,
 				getItemValue: (item) => item.categoryId,
 				options: categoryOptions,
 			},
 		],
-		[categoryOptions],
+		[categoryOptions, t],
 	);
 
 	const [searchQuery, setSearchQuery] = useState("");
@@ -138,7 +128,7 @@ function ShopPage() {
 		}
 
 		return result;
-	}, [items, searchQuery, filterValues]);
+	}, [items, searchQuery, filterValues, t]);
 
 	const categoriesWithItems = useMemo(() => {
 		if (!categories || !filteredItems.length) return [];
@@ -180,14 +170,16 @@ function ShopPage() {
 				};
 			})
 			.filter((group) => group.items.length > 0);
-	}, [categories, filteredItems]);
+	}, [categories, filteredItems, t]);
 
 	return (
 		<div className="flex h-full flex-1 flex-col gap-6 pb-5">
 			{isRootShop && (
 				<>
 					<div className="flex items-center justify-between px-4 lg:px-0">
-						<Typography.Heading level={2}>Shop</Typography.Heading>
+						<Typography.Heading level={2}>
+							{t("ui.shop", "Shop")}
+						</Typography.Heading>
 					</div>
 
 					<FilterBar
@@ -210,7 +202,7 @@ function ShopPage() {
 					{isLoadingItems ? (
 						<div className="flex items-center justify-center p-12">
 							<Typography className="text-muted-foreground">
-								Loading shop items...
+								{t("ui.loading_shop_items", "Loading shop items...")}
 							</Typography>
 						</div>
 					) : (
@@ -259,8 +251,11 @@ function ShopPage() {
 							})}
 							{categoriesWithItems.length === 0 && (
 								<EmptyPage
-									title="No items found"
-									description="Try adjusting your filters or search query."
+									title={t("ui.no_items_found", "No items found")}
+									description={t(
+										"ui.try_adjusting_your_filters_or_search_query",
+										"Try adjusting your filters or search query.",
+									)}
 								/>
 							)}
 						</div>

@@ -15,12 +15,14 @@ import { Button } from "@/components/ui/button";
 import { useShopItems } from "@/hooks/shop";
 import { useCommissionCategories } from "@/hooks/commissions/use-commissions";
 import type { MockShopItem } from "@/types/shop";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/{-$locale}/_main/shop/category/$slug")({
 	component: CategoryPage,
 });
 
 function CategoryPage() {
+	const { t } = useTranslation();
 	const { slug, locale } = Route.useParams();
 	const navigate = useNavigate();
 
@@ -45,7 +47,7 @@ function CategoryPage() {
 					.replace(/[^a-z0-9]+/g, "-")
 					.replace(/(^-|-$)/g, "") === slug,
 		);
-	}, [categories, slug]);
+	}, [categories, slug, t]);
 
 	const categoryItems = useMemo(() => {
 		if (!items || !currentCategory) return [];
@@ -99,7 +101,7 @@ function CategoryPage() {
 		}
 
 		return result;
-	}, [items, currentCategory, searchQuery, filterValues]);
+	}, [items, currentCategory, searchQuery, filterValues, t]);
 
 	const subcategoryOptions = useMemo(() => {
 		if (!currentCategory?.subcategories) return [];
@@ -107,21 +109,21 @@ function CategoryPage() {
 			id: sub.id,
 			label: sub.name,
 		}));
-	}, [currentCategory]);
+	}, [currentCategory, t]);
 
 	const filterGroups: FilterGroup<MockShopItem>[] = useMemo(() => {
 		if (subcategoryOptions.length === 0) return [];
 		return [
 			{
 				id: "categoryId",
-				label: "Subcategory",
+				label: t("ui.subcategory", "Subcategory"),
 				type: "select",
 				icon: ListFilterIcon,
 				getItemValue: (item) => item.categoryId,
 				options: subcategoryOptions,
 			},
 		];
-	}, [subcategoryOptions]);
+	}, [subcategoryOptions, t]);
 
 	if (!currentCategory && !isLoading) {
 		return (
@@ -137,9 +139,9 @@ function CategoryPage() {
 					}
 				>
 					<OutlineArrowLeft />
-					Back to shop
+					{t("ui.back_to_shop", "Back to shop")}
 				</Button>
-				<EmptyPage title="Category not found" />
+				<EmptyPage title={t("ui.category_not_found", "Category not found")} />
 			</div>
 		);
 	}
@@ -160,7 +162,7 @@ function CategoryPage() {
 					<OutlineArrowLeft />
 				</Button>
 				<Typography.Heading level={2}>
-					{currentCategory?.name || "Category"}
+					{currentCategory?.name || t("ui.category", "Category")}
 				</Typography.Heading>
 			</div>
 
@@ -183,7 +185,7 @@ function CategoryPage() {
 			{isLoading ? (
 				<div className="flex items-center justify-center p-12">
 					<Typography className="text-muted-foreground">
-						Loading items...
+						{t("ui.loading_items", "Loading items...")}
 					</Typography>
 				</div>
 			) : categoryItems.length > 0 ? (
@@ -193,7 +195,9 @@ function CategoryPage() {
 					))}
 				</div>
 			) : (
-				<EmptyPage title="No items in this category" />
+				<EmptyPage
+					title={t("ui.no_items_in_this_category", "No items in this category")}
+				/>
 			)}
 		</div>
 	);

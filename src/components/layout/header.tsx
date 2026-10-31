@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { SolidLogo } from "@/components/icons/assets/logo/logo";
 import { localizePath } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { AccountNavigation } from "./account-navigation";
@@ -16,6 +17,7 @@ export default function Header() {
 						to={localizePath("/", i18n.language)}
 						className="mr-2 ml-3 flex items-center gap-x-2"
 					>
+						<SolidLogo size={28} className="text-primary" aria-hidden="true" />
 						<span className="text-sm font-bold tracking-wider text-primary uppercase">
 							{t("header.title")}
 						</span>

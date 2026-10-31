@@ -59,7 +59,9 @@ describe("error document", () => {
 			expect(html).toContain(
 				"<title>This page couldn&#x27;t be found | Familiar</title>",
 			);
-			expect(html.match(/<title>/g)).toHaveLength(1);
+			// SVG labels in the page body are not document metadata.
+			const head = html.match(/<head>([\s\S]*?)<\/head>/)?.[1];
+			expect(head?.match(/<title>/g)).toHaveLength(1);
 		},
 	);
 

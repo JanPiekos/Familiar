@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { SolidLogo } from "@/components/icons/assets/logo/logo";
 import { OutlineClose, SolidUser } from "@/components/icons/icons";
 import {
 	AuthArtworkImage,
@@ -72,7 +73,11 @@ function AuthModal({ defaultTab = "login" }: AuthModalProps) {
 					<DrawerContent className="max-h-[85vh]">
 						<DrawerHeader className="text-center">
 							<DrawerClose asChild className="absolute top-2 right-2">
-								<Button variant="ghost" size="icon" aria-label="Close">
+								<Button
+									variant="ghost"
+									size="icon"
+									aria-label={t("ui.close", "Close")}
+								>
 									<OutlineClose />
 								</Button>
 							</DrawerClose>
@@ -93,7 +98,9 @@ function AuthModal({ defaultTab = "login" }: AuthModalProps) {
 				<Drawer open={forgotOpen} onOpenChange={setForgotOpen}>
 					<DrawerContent className="max-h-[85vh]">
 						<DrawerHeader className="text-center">
-							<DrawerTitle>Reset your password</DrawerTitle>
+							<DrawerTitle>
+								{t("ui.reset_your_password", "Reset your password")}
+							</DrawerTitle>
 						</DrawerHeader>
 						<div className="px-4 pb-4">
 							<ForgotForm
@@ -145,6 +152,7 @@ function AuthContent({
 	registerStage,
 	setRegisterStage,
 }: AuthContentProps) {
+	const { t } = useTranslation();
 	const artwork =
 		tab === "register"
 			? REGISTER_ARTWORK_BY_STAGE[registerStage]
@@ -160,9 +168,15 @@ function AuthContent({
 				<div className="absolute inset-0 rounded-r-lg bg-black/50" />
 				<div className="z-10 flex flex-col gap-2 text-white">
 					<div className="space-y-1">
-						<h3 className="font-semibold text-sm">Familiar</h3>
+						<h3 className="flex items-center gap-2 font-semibold text-sm">
+							<SolidLogo size={28} aria-hidden="true" />
+							Familiar
+						</h3>
 						<p className="text-xs opacity-80">
-							Sign in to share your work and follow creators.
+							{t(
+								"ui.sign_in_to_share_your_work_and_follow_creators",
+								"Sign in to share your work and follow creators.",
+							)}
 						</p>
 					</div>
 				</div>
@@ -171,7 +185,11 @@ function AuthContent({
 			<section className="max-h-[80vh] min-w-0 overflow-x-hidden overflow-y-auto p-4">
 				<div className="mb-3 flex justify-end">
 					<DialogClose asChild>
-						<Button variant="ghost" size="icon" aria-label="Close">
+						<Button
+							variant="ghost"
+							size="icon"
+							aria-label={t("ui.close", "Close")}
+						>
 							<OutlineClose />
 						</Button>
 					</DialogClose>
@@ -204,6 +222,7 @@ function TabContent({
 	setForgotOpen: (forgotOpen: boolean) => void;
 	setRegisterStage: (stage: RegisterStage) => void;
 }) {
+	const { t } = useTranslation();
 	return (
 		<AnimateChangeInHeight>
 			<Tabs
@@ -217,8 +236,10 @@ function TabContent({
 						"[&>button]:rounded-md [&>button]:py-2 [&>button]:text-muted-foreground [&>button]:text-sm [&>button]:transition-all [&>button]:data-[state=active]:bg-background [&>button]:data-[state=active]:text-foreground [&>button]:data-[state=active]:shadow-sm",
 					)}
 				>
-					<TabsTrigger value="login">Sign In</TabsTrigger>
-					<TabsTrigger value="register">Sign Up</TabsTrigger>
+					<TabsTrigger value="login">{t("ui.sign_in", "Sign In")}</TabsTrigger>
+					<TabsTrigger value="register">
+						{t("ui.sign_up", "Sign Up")}
+					</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="login">

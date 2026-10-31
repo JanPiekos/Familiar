@@ -19,12 +19,14 @@ import {
 import { useMyRequestFilterGroups } from "@/components/layout/requests/my/page-filters";
 import { RequestList } from "@/components/layout/requests/my/list";
 import { useMyCommissionRequests } from "@/hooks/commissions/use-commissions";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/{-$locale}/_main/my-requests")({
 	component: RouteComponent,
 });
 
 function RouteComponent() {
+	const { t } = useTranslation();
 	const [state, dispatch] = useReducer(
 		myRequestsPageReducer,
 		INITIAL_PAGE_STATE,
@@ -42,7 +44,7 @@ function RouteComponent() {
 
 	const requests = useMemo<RequestItem[]>(
 		() => pageData?.content ?? [],
-		[pageData],
+		[pageData, t],
 	);
 
 	const showSkeleton = !pageData && !isError;
@@ -55,7 +57,7 @@ function RouteComponent() {
 			timeline: filterState.timeline,
 			submittedDate: filterState.submittedDate,
 		}),
-		[filterState],
+		[filterState, t],
 	);
 
 	const filteredRequests = useFilteredMyRequests({
@@ -113,7 +115,7 @@ function RouteComponent() {
 		return (
 			<div className="border-b pb-4">
 				<p className="text-sm font-medium text-destructive">
-					Could not load your requests
+					{t("ui.could_not_load_your_requests", "Could not load your requests")}
 				</p>
 				<p className="mt-1 text-xs text-muted-foreground">{error?.message}</p>
 			</div>

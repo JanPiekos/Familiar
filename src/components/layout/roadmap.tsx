@@ -15,7 +15,7 @@ export function Roadmap() {
 
 	const roadmap = useMemo(
 		() => createRoadmapLifeline(i18n.language),
-		[i18n.language],
+		[i18n.language, t],
 	);
 
 	// useLifelineMediaDebug(roadmap.markers);

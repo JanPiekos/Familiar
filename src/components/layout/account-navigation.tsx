@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { CircleUserRound, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { SolidLogo } from "@/components/icons/assets/logo/logo";
 import { OutlineChat, SolidChat } from "@/components/icons/icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -143,7 +144,10 @@ function GuestNavigationMenu() {
 				aria-describedby={undefined}
 			>
 				<DrawerHeader className="px-6 pt-4 pb-3 text-left!">
-					<DrawerTitle>{t("header.title")}</DrawerTitle>
+					<DrawerTitle className="flex items-center gap-2.5">
+						<SolidLogo size={32} className="text-primary" aria-hidden="true" />
+						{t("header.title")}
+					</DrawerTitle>
 				</DrawerHeader>
 				<nav
 					aria-label={t("header.navigation.account", "Account navigation")}

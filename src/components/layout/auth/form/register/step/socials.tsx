@@ -30,6 +30,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import type { RegisterData } from "@/types/auth/schema/register";
+import appI18n from "@/lib/i18n";
 
 interface RegisterStepSocialsProps {
 	control: Control<RegisterData>;
@@ -45,25 +46,35 @@ const SOCIAL_PLATFORMS = {
 	twitter: {
 		label: "Twitter / X",
 		prefix: "x.com/",
-		placeholder: "username",
+		get placeholder() {
+			return appI18n.t("ui.username", "username");
+		},
 	},
 	instagram: {
 		label: "Instagram",
 		prefix: "instagram.com/",
-		placeholder: "username",
+		get placeholder() {
+			return appI18n.t("ui.username", "username");
+		},
 	},
 	facebook: {
 		label: "Facebook",
 		prefix: "facebook.com/",
-		placeholder: "username",
+		get placeholder() {
+			return appI18n.t("ui.username", "username");
+		},
 	},
 	website_1: {
-		label: "Website",
+		get label() {
+			return appI18n.t("ui.website", "Website");
+		},
 		prefix: "https://",
 		placeholder: "example.com",
 	},
 	website_2: {
-		label: "Website",
+		get label() {
+			return appI18n.t("ui.website", "Website");
+		},
 		prefix: "https://",
 		placeholder: "example.com",
 	},
@@ -124,7 +135,7 @@ export function RegisterStepSocials({ control }: RegisterStepSocialsProps) {
 
 				return !Object.hasOwn(socials, platform);
 			}),
-		[socials],
+		[socials, t],
 	);
 
 	const addSocial = () => {
@@ -135,8 +146,8 @@ export function RegisterStepSocials({ control }: RegisterStepSocialsProps) {
 		const platform =
 			selectedPlatform === "website"
 				? WEBSITE_PLATFORMS.find(
-					(websitePlatform) => !Object.hasOwn(socials, websitePlatform),
-				)
+						(websitePlatform) => !Object.hasOwn(socials, websitePlatform),
+					)
 				: selectedPlatform;
 
 		if (!platform || Object.hasOwn(socials, platform)) {
