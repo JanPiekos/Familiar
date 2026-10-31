@@ -301,7 +301,7 @@ describe("mobile account dock", () => {
 	});
 
 	it.each([false, true])(
-		"switches guest language and preserves the URL on mobile=%s",
+		"searches flagged languages and preserves the URL on mobile=%s",
 		async (compact) => {
 			state.compact = compact;
 			state.user = null;
@@ -316,16 +316,54 @@ describe("mobile account dock", () => {
 				fireEvent.click(trigger);
 				const drawer = await screen.findByRole("dialog");
 				fireEvent.click(within(drawer).getByText("Language"));
-				fireEvent.click(within(drawer).getByRole("radio", { name: "Polski" }));
 			} else {
 				fireEvent.keyDown(trigger, { key: "ArrowDown" });
 				fireEvent.keyDown(
 					await screen.findByRole("menuitem", { name: /^Language/ }),
 					{ key: "ArrowRight" },
 				);
-				fireEvent.click(
-					await screen.findByRole("menuitemradio", { name: "Polski" }),
+			}
+			const role = compact ? "radio" : "menuitemradio";
+			const english = await screen.findByRole(role, { name: "English" });
+			expect(english.getAttribute("aria-checked")).toBe("true");
+			expect(
+				within(english.closest("label") ?? english).getByText("\u{1f1fa}\u{1f1f8}"),
+			).toBeDefined();
+			let search = await screen.findByRole("textbox", {
+				name: "Search languages",
+			});
+			if (!compact) {
+				await waitFor(() => expect(document.activeElement).toBe(search));
+				fireEvent.keyDown(search, { key: "Escape" });
+				await waitFor(() =>
+					expect(
+						screen.queryByRole("textbox", { name: "Search languages" }),
+					).toBeNull(),
 				);
+				fireEvent.keyDown(trigger, { key: "ArrowDown" });
+				fireEvent.keyDown(
+					await screen.findByRole("menuitem", { name: /^Language/ }),
+					{ key: "ArrowRight" },
+				);
+				search = await screen.findByRole("textbox", {
+					name: "Search languages",
+				});
+			}
+			fireEvent.change(search, { target: { value: "unavailable language" } });
+			expect(screen.getByRole("status").textContent).toBe("No language found");
+			expect(screen.queryByRole(role, { name: "English" })).toBeNull();
+			fireEvent.change(search, { target: { value: "pl" } });
+			expect(screen.getByRole(role, { name: "Polski" })).toBeDefined();
+			fireEvent.change(search, { target: { value: "Polish" } });
+			const polish = screen.getByRole(role, { name: "Polski" });
+			expect(
+				within(polish.closest("label") ?? polish).getByText("\u{1f1f5}\u{1f1f1}"),
+			).toBeDefined();
+			if (compact) fireEvent.click(polish);
+			else {
+				fireEvent.keyDown(search, { key: "ArrowDown" });
+				expect(document.activeElement).toBe(polish);
+				fireEvent.keyDown(polish, { key: "Enter" });
 			}
 			await waitFor(() =>
 				expect(router.state.location.pathname).toBe("/pl/user/hasira"),
