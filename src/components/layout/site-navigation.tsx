@@ -2,12 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { FileText, ListChecks, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import {
-	OutlineHome,
-	OutlineReceipt,
-	SolidHome,
-	SolidReceipt,
-} from "@/components/icons/icons";
+import { OutlineHome, SolidHome } from "@/components/icons/icons";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { localizePath, stripLocaleFromPathname } from "@/lib/i18n";
@@ -39,15 +34,6 @@ export function SiteNavigationLinks({
 				<SolidHome aria-hidden="true" />
 			) : (
 				<OutlineHome aria-hidden="true" />
-			),
-		},
-		{
-			path: "/shop",
-			label: t("header.navigation.shop", "Shop"),
-			icon: isActive("/shop") ? (
-				<SolidReceipt aria-hidden="true" />
-			) : (
-				<OutlineReceipt aria-hidden="true" />
 			),
 		},
 	];
