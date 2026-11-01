@@ -25,6 +25,7 @@ import {
 	type ReactNode,
 	useEffect,
 	useMemo,
+	useRef,
 	useState,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -68,7 +69,6 @@ import {
 	InputGroupButton,
 	InputGroupInput,
 } from "@/components/ui/input-group";
-import { Kbd } from "@/components/ui/kbd";
 import {
 	Popover,
 	PopoverContent,
@@ -105,6 +105,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import { useTheme } from "@/providers/theme";
 import type { TUserResponse } from "@/types/user";
+import "./settings-modal.css";
 
 type SettingsSection =
 	| "profile"
@@ -135,8 +136,6 @@ interface UserSettingsModalProps {
 	onOpenChange: (open: boolean) => void;
 	onSave?: () => void;
 }
-
-// TODO: do not open modal on isMobile, instead redirect to fullpage settings page
 
 function getSettingsNavigation(t: TFunction): SettingsNavigationItem[] {
 	return [
@@ -273,34 +272,60 @@ export function UserSettingsModal({
 	onSave,
 }: UserSettingsModalProps) {
 	const { t } = useTranslation();
+	const [closing, setClosing] = useState(false);
+	const content = useRef<HTMLDivElement>(null);
+	const returnFocus = useRef<HTMLElement | null>(null);
+	const afterClose = useRef<(() => void) | null>(null);
+	const mounted = useRef(true);
+	useEffect(() => {
+		mounted.current = true;
+		return () => {
+			mounted.current = false;
+		};
+	}, []);
+	useEffect(() => {
+		if (open) {
+			afterClose.current = null;
+			setClosing(false);
+		}
+	}, [open]);
+	const close = (done = () => onOpenChange(false)) => {
+		if (afterClose.current) return;
+		afterClose.current = done;
+		setClosing(true);
+	};
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
+		<Dialog
+			open={open && !closing}
+			onOpenChange={(next) => {
+				if (next) onOpenChange(true);
+				else close();
+			}}
+		>
 			<DialogContent
+				ref={content}
+				tabIndex={-1}
 				showCloseButton={false}
-				className={cn(
-					"inset-0! size-auto! max-h-none! max-w-none! translate-x-0! translate-y-0! overflow-visible rounded-none border-0 p-0 shadow-none!",
-					"sm:inset-auto! sm:left-1/2! sm:top-1/2! sm:h-[calc(100dvh-2rem)]! sm:w-[calc(100vw-2rem)]! sm:-translate-x-1/2! sm:-translate-y-1/2! sm:rounded-2xl sm:border sm:ring-1 sm:ring-border",
-					"xl:max-h-190! xl:max-w-5xl!",
-				)}
+				onOpenAutoFocus={(event) => {
+					event.preventDefault();
+					returnFocus.current =
+						document.activeElement instanceof HTMLElement
+							? document.activeElement
+							: null;
+					content.current?.focus({ preventScroll: true });
+				}}
+				onCloseAutoFocus={(event) => {
+					if (!mounted.current || !afterClose.current) return;
+					event.preventDefault();
+					if (returnFocus.current?.isConnected)
+						returnFocus.current.focus({ preventScroll: true });
+					const done = afterClose.current;
+					afterClose.current = null;
+					done();
+				}}
+				className="settings-dialog flex h-[min(48rem,calc(100dvh-2rem))] w-[calc(100vw-2rem)] max-w-5xl! gap-0 overflow-hidden rounded-3xl border bg-background p-0 shadow-lg"
 			>
-				<div className="absolute right-4 top-2 z-20 flex flex-col items-center gap-1.5 xl:-right-14 xl:top-0">
-					<DialogClose asChild>
-						<Button
-							type="button"
-							variant="secondary"
-							size="icon-xl"
-							className="rounded-full bg-background ring-1 ring-border"
-							aria-label={t("settings.dialog.close", "Close settings dialog")}
-						>
-							<X aria-hidden="true" />
-						</Button>
-					</DialogClose>
-					<Kbd className="hidden bg-background/90 xl:inline-flex">
-						{t("settings.dialog.escape_key", "ESC")}
-					</Kbd>
-				</div>
-
 				<div className="flex size-full min-h-0 overflow-hidden rounded-[inherit]">
 					<DialogTitle className="sr-only">
 						{t("settings.title", "User settings")}
@@ -315,8 +340,23 @@ export function UserSettingsModal({
 
 					<UserSettingsPanel
 						className="min-h-0"
-						onCancel={() => onOpenChange(false)}
-						onSave={onSave}
+						headerAction={
+							<DialogClose asChild>
+								<Button
+									type="button"
+									variant="ghost"
+									size="icon-xl"
+									aria-label={t(
+										"settings.dialog.close",
+										"Close settings dialog",
+									)}
+								>
+									<X aria-hidden="true" />
+								</Button>
+							</DialogClose>
+						}
+						onCancel={() => close()}
+						onSave={() => close(onSave)}
 					/>
 				</div>
 			</DialogContent>
@@ -327,6 +367,7 @@ export function UserSettingsModal({
 interface UserSettingsPanelProps {
 	layout?: "dialog" | "page";
 	className?: string;
+	headerAction?: ReactNode;
 	onCancel?: () => void;
 	onSave?: () => void;
 }
@@ -334,6 +375,7 @@ interface UserSettingsPanelProps {
 export function UserSettingsPanel({
 	layout = "dialog",
 	className,
+	headerAction,
 	onCancel,
 	onSave,
 }: UserSettingsPanelProps) {
@@ -364,16 +406,16 @@ export function UserSettingsPanel({
 
 	return (
 		<SidebarProvider
-			className={cn("min-h-0 items-stretch", className)}
+			className={cn("settings-panel min-h-0 items-stretch", className)}
 			style={
 				{
-					"--sidebar-width": "16rem",
+					"--sidebar-width": "14rem",
 				} as CSSProperties
 			}
 		>
 			<Sidebar collapsible="none" className="hidden h-full border-r xl:flex">
 				<SidebarContent>
-					<div className="flex h-16 shrink-0 items-center px-4">
+					<div className="flex min-h-18 shrink-0 items-center px-5">
 						<div>
 							<p className="font-semibold">
 								{t("settings.sidebar.title", "Settings")}
@@ -408,7 +450,7 @@ export function UserSettingsPanel({
 												}
 												isActive={isActive}
 												tooltip={item.name}
-												className="h-auto items-center py-2.5"
+												className="h-10 items-center px-3"
 												onClick={() => setActiveSection(item.id)}
 											>
 												<item.icon className="size-4" />
@@ -434,20 +476,36 @@ export function UserSettingsPanel({
 					layout === "dialog" && "overflow-hidden",
 				)}
 			>
-				<header className="flex h-16 shrink-0 items-center px-4 pr-20 sm:px-6 xl:h-20 xl:px-8 xl:pr-6">
+				<header className="flex min-h-18 shrink-0 items-center justify-between gap-4 border-b px-4 py-3 sm:px-6">
 					<div className="min-w-0">
-						<p className="truncate font-semibold xl:hidden">
+						<p
+							className={cn(
+								"truncate font-semibold xl:hidden",
+								layout === "dialog" && "hidden",
+							)}
+						>
 							{t("settings.title", "User settings")}
 						</p>
 
-						<p className="hidden truncate font-semibold xl:block">
+						<p
+							className={cn(
+								"truncate font-semibold text-foreground",
+								layout === "page" && "hidden xl:block",
+							)}
+						>
 							{activeItem.name}
 						</p>
 
-						<p className="hidden truncate text-sm text-muted-foreground xl:block">
+						<p
+							className={cn(
+								"text-sm text-muted-foreground",
+								layout === "page" && "hidden xl:block",
+							)}
+						>
 							{activeItem.description}
 						</p>
 					</div>
+					{headerAction}
 				</header>
 
 				<div className="shrink-0 border-b px-4 pb-4 pt-2 sm:px-6 xl:hidden">
@@ -493,7 +551,7 @@ export function UserSettingsPanel({
 						layout === "dialog" && "overflow-y-auto overscroll-contain",
 					)}
 				>
-					<div className="mx-auto w-full max-w-3xl p-4 sm:p-6 xl:p-8">
+					<div className="mx-auto w-full max-w-3xl p-4 sm:p-6">
 						<SettingsSectionContent
 							section={activeSection}
 							profileInitialValues={profileInitialValues}
