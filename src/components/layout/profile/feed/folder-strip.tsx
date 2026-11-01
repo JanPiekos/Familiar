@@ -74,8 +74,10 @@ export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
 	}
 
 	return (
+		// biome-ignore lint/a11y/useSemanticElements: This groups folder links rather than form fields.
 		<div
 			ref={rowRef}
+			role="group"
 			data-slot="portfolio-folder-strip"
 			className="relative w-full min-w-0 snap-x snap-proximity overflow-x-auto overscroll-x-contain scroll-px-3 scrollbar-none select-none data-[dragging=true]:snap-none [@media(hover:hover)]:data-[overflow=true]:cursor-grab lg:scroll-px-0 xl:scroll-px-3"
 			onPointerDown={(event) => {
