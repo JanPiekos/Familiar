@@ -192,9 +192,7 @@ describe("mobile account dock", () => {
 			within(navigation).getByRole("link", { name: "Panel artysty" }),
 		);
 		await waitFor(() =>
-			expect(router.state.location.pathname).toBe(
-				"/pl/dashboard/commissions_requests",
-			),
+			expect(router.state.location.pathname).toBe("/pl/dashboard"),
 		);
 		expect(
 			within(navigation)

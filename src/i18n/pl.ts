@@ -427,9 +427,9 @@ const pl = {
 				"Czytaj prywatne rozmowy i wiadomości dotyczące zleceń oraz zarządzaj nimi w Familiar.",
 		},
 		dashboard: {
-			title: "Panel artysty",
+			title: "Panel",
 			description:
-				"Zarządzaj kontem artysty, zleceniami, usługami i formularzami zapytań w Familiar.",
+				"Zarządzaj profilem, portfolio i swoją przestrzenią twórcy w Familiar.",
 		},
 		dashboard_requests: {
 			title: "Zapytania o zlecenia",
@@ -1741,6 +1741,28 @@ const pl = {
 	},
 	commissions: {
 		"create-new": "Utwórz ofertę",
+	},
+	dashboard_workspace: {
+		title: "Panel",
+		workspace: "Twoja przestrzeń",
+		overview: "Przegląd",
+		navigation: "Sekcje panelu",
+		account: "Twoje konto",
+		settings: "Ustawienia konta",
+		loading: "Ładowanie Twojego panelu…",
+		sign_in_title: "Twoja przestrzeń czeka",
+		sign_in_description: "Zaloguj się, aby zarządzać profilem, portfolio i narzędziami twórcy.",
+		creator_only: "Narzędzia twórcy",
+		creator_only_description: "Zarządzanie zleceniami jest dostępne dla kont twórców. Nadal możesz zarządzać swoim profilem z poziomu przeglądu.",
+		welcome: "Witaj ponownie, {{name}}",
+		description: "Zarządzaj profilem, dziel się swoją twórczością i miej swoje projekty pod kontrolą.",
+		open_portfolio: "Otwórz portfolio",
+		edit_profile: "Edytuj profil",
+		manage_work: "Zarządzaj twórczością",
+		requests_description: "Przeglądaj przychodzące zapytania o zlecenia i śledź ich postępy.",
+		services_description: "Twórz i aktualizuj oferty dla swoich klientów.",
+		forms_description: "Twórz szablony formularzy, aby zbierać informacje potrzebne do zleceń.",
+		settings_description: "Zaktualizuj profil, preferencje i dane konta.",
 	},
 	commission_request_from: "Od",
 	common: {
