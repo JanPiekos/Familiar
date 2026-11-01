@@ -336,9 +336,7 @@ it("uses the shared numeric steppers and preset quantities", async () => {
 	await screen.findByText(key.code);
 	fireEvent.click(screen.getByRole("button", { name: "Generate keys" }));
 	const dialog = screen.getByRole("dialog");
-	fireEvent.click(
-		within(dialog).getByRole("button", { name: "25", exact: true }),
-	);
+	fireEvent.click(within(dialog).getByRole("button", { name: "25" }));
 	fireEvent.click(
 		within(dialog).getByRole("button", { name: "Increase value" }),
 	);

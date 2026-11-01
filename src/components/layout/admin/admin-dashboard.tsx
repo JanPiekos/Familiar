@@ -371,12 +371,11 @@ export function AdminInvitationKeys({ userId }: { userId: string }) {
 						</footer>
 					)}
 			</Surface>
-			{generateOpen && !accessDenied && (
-				<GenerateInvitationKeysDialog
-					onGenerate={(count) => generate.mutateAsync(count)}
-					onClose={() => setGenerateOpen(false)}
-				/>
-			)}
+			<GenerateInvitationKeysDialog
+				open={generateOpen && !accessDenied}
+				onGenerate={(count) => generate.mutateAsync(count)}
+				onClose={() => setGenerateOpen(false)}
+			/>
 		</section>
 	);
 }

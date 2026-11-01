@@ -1,6 +1,6 @@
 import { Surface } from "@heroui/react";
 import { Copy, KeyRound, Plus } from "lucide-react";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	type InvitationKey,
@@ -13,9 +13,11 @@ import { ApiFetchError } from "@/lib/fetch";
 import { copyInvitationKeys } from "./invitation-key-list";
 
 export function GenerateInvitationKeysDialog({
+	open,
 	onGenerate,
 	onClose,
 }: {
+	open: boolean;
 	onGenerate: (count: number) => Promise<InvitationKey[]>;
 	onClose: () => void;
 }) {
@@ -26,6 +28,13 @@ export function GenerateInvitationKeysDialog({
 	const [error, setError] = useState("");
 	const [generated, setGenerated] = useState<InvitationKey[] | null>(null);
 	const lock = useRef(false);
+	useEffect(() => {
+		if (open) {
+			setCount(10);
+			setError("");
+			setGenerated(null);
+		}
+	}, [open]);
 	const valid = count !== undefined && isInvitationKeyCount(count);
 	const generate = async () => {
 		if (lock.current || !valid || generated) return;
@@ -49,7 +58,7 @@ export function GenerateInvitationKeysDialog({
 	};
 	return (
 		<CreationDialogLayout
-			open
+			open={open}
 			onOpenChange={(open) => {
 				if (!open && !lock.current) onClose();
 			}}
