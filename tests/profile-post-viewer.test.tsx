@@ -12,6 +12,7 @@ import { I18nextProvider } from "react-i18next";
 import en from "@/i18n/en";
 import pl from "@/i18n/pl";
 const data = vi.hoisted(() => ({
+	remove: vi.fn(),
 	post: {
 		id: "first",
 		title: "Wide artwork",
@@ -31,7 +32,10 @@ vi.mock("@/hooks/portfolio/use-portfolio", () => ({
 		isPending: false,
 		isError: false,
 	}),
-	useDeletePortfolioPost: () => ({ mutateAsync: vi.fn(), isPending: false }),
+	useDeletePortfolioPost: () => ({
+		mutateAsync: data.remove,
+		isPending: false,
+	}),
 	useUpdatePortfolioPost: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 vi.mock("@/hooks/user/use-user", () => ({
@@ -55,13 +59,62 @@ import { PortfolioPostModal } from "@/components/layout/modal/portfolio-post";
 import { PostViewerLayout } from "@/components/layout/modal/portfolio-post/post-viewer-layout";
 const clients: QueryClient[] = [];
 beforeEach(() => {
+	data.remove.mockReset().mockResolvedValue(undefined);
 	data.post.id = "first";
 	data.post.contentWarnings = [];
 });
 afterEach(() => {
 	cleanup();
+	vi.restoreAllMocks();
+	vi.unstubAllGlobals();
 	clients.forEach((client) => client.clear());
 	clients.length = 0;
+});
+
+it("finishes the delete confirmation exit before dismissing the post viewer", async () => {
+	const getStyle = globalThis.getComputedStyle;
+	vi.stubGlobal("CSS", { escape: (value: string) => value });
+	vi.spyOn(globalThis, "getComputedStyle").mockImplementation(
+		(element, pseudo) => {
+			const style = getStyle(element, pseudo);
+			if (element.getAttribute("data-slot") !== "alert-dialog-content")
+				return style;
+			return new Proxy(style, {
+				get(target, property) {
+					return property === "animationName"
+						? element.getAttribute("data-state") === "closed"
+							? "exit"
+							: "enter"
+						: Reflect.get(target, property, target);
+				},
+			});
+		},
+	);
+	const close = vi.fn();
+	await mount(
+		<PortfolioPostModal
+			postId="first"
+			username="artist"
+			open
+			onOpenChange={close}
+		/>,
+	);
+	fireEvent.keyDown(screen.getByRole("button", { name: "More options" }), {
+		key: "ArrowDown",
+	});
+	fireEvent.click(await screen.findByRole("menuitem", { name: "Delete post" }));
+	const confirmation = screen.getByRole("alertdialog");
+	const remove = screen.getByRole("button", { name: "Delete" });
+	fireEvent.click(remove);
+	await waitFor(() => expect(confirmation.dataset.state).toBe("closed"));
+	expect(confirmation.isConnected).toBe(true);
+	expect(close).not.toHaveBeenCalled();
+	fireEvent.click(remove);
+	expect(data.remove).toHaveBeenCalledExactlyOnceWith("first");
+	const finish = new Event("animationend", { bubbles: true });
+	Object.defineProperty(finish, "animationName", { value: "exit" });
+	fireEvent(confirmation, finish);
+	await waitFor(() => expect(close).toHaveBeenCalledExactlyOnceWith(false));
 });
 async function mount(children: React.ReactNode, locale = "en") {
 	const i18n = createInstance();
