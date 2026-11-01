@@ -1,3 +1,4 @@
+import { Surface } from "@heroui/react";
 import { FolderMinus, Trash2 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -197,7 +198,7 @@ export function PostManagementDialog({
 						onClose();
 					}}
 				>
-					<div className="min-h-0 overflow-y-auto p-5 text-left sm:p-6">
+					<Surface className="min-h-0 overflow-y-auto p-5 text-left sm:p-6">
 						<div
 							className="mb-4 flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive"
 							aria-hidden="true"
@@ -211,44 +212,52 @@ export function PostManagementDialog({
 							{t(`${confirmationPrefix}.description`, { folder: folder?.name })}
 						</AlertDialogDescription>
 						{post.title && (
-							<div className="mt-4 rounded-2xl bg-muted/50 px-4 py-3">
+							<Surface
+								variant="secondary"
+								className="mt-4 rounded-2xl border border-border px-4 py-3"
+							>
 								<p className="line-clamp-2 break-words text-sm font-medium text-foreground">
 									{post.title}
 								</p>
-							</div>
+							</Surface>
 						)}
 						{error && <div className="mt-4">{errorMessage}</div>}
-					</div>
-					<AlertDialogFooter className="shrink-0 flex-row border-t bg-muted/20 p-4 sm:px-6">
-						<AlertDialogCancel
-							size="2xl"
-							className="flex-1 sm:flex-none"
-							disabled={busy || !open}
-						>
-							{t("ui.cancel")}
-						</AlertDialogCancel>
-						<AlertDialogAction
-							variant="destructive"
-							size="2xl"
-							disabled={
-								busy ||
-								!open ||
-								!post.id ||
-								(action === "remove" && !folder?.id)
-							}
-							className="flex-1 sm:flex-none"
-							onClick={(event) => {
-								event.preventDefault();
-								void save();
-							}}
-						>
-							{t(
-								busy
-									? `${confirmationPrefix}.${action === "remove" ? "removing" : "deleting"}`
-									: `${confirmationPrefix}.confirm`,
-							)}
-						</AlertDialogAction>
-					</AlertDialogFooter>
+					</Surface>
+					<Surface
+						variant="secondary"
+						className="shrink-0 border-t border-border"
+					>
+						<AlertDialogFooter className="flex-row p-4 sm:px-6">
+							<AlertDialogCancel
+								size="2xl"
+								className="flex-1 sm:flex-none"
+								disabled={busy || !open}
+							>
+								{t("ui.cancel")}
+							</AlertDialogCancel>
+							<AlertDialogAction
+								variant="destructive"
+								size="2xl"
+								disabled={
+									busy ||
+									!open ||
+									!post.id ||
+									(action === "remove" && !folder?.id)
+								}
+								className="flex-1 sm:flex-none"
+								onClick={(event) => {
+									event.preventDefault();
+									void save();
+								}}
+							>
+								{t(
+									busy
+										? `${confirmationPrefix}.${action === "remove" ? "removing" : "deleting"}`
+										: `${confirmationPrefix}.confirm`,
+								)}
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</Surface>
 				</AlertDialogContent>
 			</AlertDialog>
 		);
