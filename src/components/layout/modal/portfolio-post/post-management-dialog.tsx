@@ -223,10 +223,7 @@ export function PostManagementDialog({
 						)}
 						{error && <div className="mt-4">{errorMessage}</div>}
 					</Surface>
-					<Surface
-						variant="secondary"
-						className="shrink-0 border-t border-border"
-					>
+					<Surface className="shrink-0">
 						<AlertDialogFooter className="flex-row p-4 sm:px-6">
 							<AlertDialogCancel
 								size="2xl"
