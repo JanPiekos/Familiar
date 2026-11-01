@@ -40,12 +40,8 @@ export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
 			const end = fade(max - position);
 			const left = rtl ? end : start;
 			const right = rtl ? start : end;
-			const mask =
-				left || right
-					? `linear-gradient(to right, transparent, #000 ${left}px, #000 calc(100% - ${right}px), transparent)`
-					: "none";
-			viewport.style.maskImage = mask;
-			viewport.style.webkitMaskImage = mask;
+			viewport.style.setProperty("--folder-fade-left", `${left}px`);
+			viewport.style.setProperty("--folder-fade-right", `${right}px`);
 		};
 		const schedule = () => {
 			frame ??= requestAnimationFrame(update);
@@ -76,7 +72,11 @@ export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
 	}
 
 	return (
-		<div ref={viewportRef} className="relative isolate w-full min-w-0">
+		<div
+			ref={viewportRef}
+			className="relative isolate w-full min-w-0"
+			style={{ maskImage: "none", WebkitMaskImage: "none" }}
+		>
 			{/* biome-ignore lint/a11y/useSemanticElements: This groups folder links rather than form fields. */}
 			<div
 				ref={rowRef}
@@ -139,6 +139,18 @@ export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
 					{children}
 				</div>
 			</div>
+			<div
+				aria-hidden="true"
+				data-slot="folder-edge-fade"
+				data-edge="left"
+				className="pointer-events-none absolute inset-y-0 left-0 z-30 w-[var(--folder-fade-left,0px)] bg-linear-to-r from-background to-transparent"
+			/>
+			<div
+				aria-hidden="true"
+				data-slot="folder-edge-fade"
+				data-edge="right"
+				className="pointer-events-none absolute inset-y-0 right-0 z-30 w-[var(--folder-fade-right,0px)] bg-linear-to-l from-background to-transparent"
+			/>
 		</div>
 	);
 }

@@ -62,11 +62,6 @@ function setup() {
 		clientWidth: { get: () => metrics.width },
 		scrollWidth: { get: () => metrics.contentWidth },
 	});
-	// jsdom rejects mask gradients with calc(); real browser checks cover CSS parsing.
-	Object.defineProperties(viewport.style, {
-		maskImage: { value: "none", writable: true },
-		webkitMaskImage: { value: "none", writable: true },
-	});
 	row.setPointerCapture = vi.fn();
 	row.releasePointerCapture = vi.fn();
 	row.hasPointerCapture = () => true;
@@ -75,8 +70,10 @@ function setup() {
 		row.scrollLeft = left;
 		fireEvent.scroll(row);
 	};
-	const fades = () =>
-		(viewport.style.maskImage.match(/[\d.]+px/g) ?? []).map(parseFloat);
+	const fades = () => [
+		parseFloat(viewport.style.getPropertyValue("--folder-fade-left")),
+		parseFloat(viewport.style.getPropertyValue("--folder-fade-right")),
+	];
 	return {
 		row,
 		viewport,
@@ -107,16 +104,19 @@ it("grows each fade only as far as the hidden content and clears it at the reach
 	await waitFor(() => expect(fades()).toEqual([0, 32]));
 	scroll(-20);
 	await waitFor(() => expect(fades()).toEqual([0, 32]));
-	expect(viewport.style.webkitMaskImage).toBe(viewport.style.maskImage);
+	expect(viewport.style.maskImage).toBe("none");
 	expect(row.style.maskImage).toBe("");
+	expect(
+		viewport.querySelectorAll('[data-slot="folder-edge-fade"]'),
+	).toHaveLength(2);
 });
 
 it("refreshes fades when the viewport or folder content resizes", async () => {
-	const { row, viewport, metrics, scroll, fades, rerender } = setup();
+	const { row, metrics, scroll, fades, rerender } = setup();
 	await waitFor(() => expect(fades()).toEqual([0, 32]));
 	metrics.width = 1208;
 	act(() => resize([], {} as ResizeObserver));
-	await waitFor(() => expect(viewport.style.maskImage).toBe("none"));
+	await waitFor(() => expect(fades()).toEqual([0, 0]));
 	metrics.width = 390;
 	act(() => resize([], {} as ResizeObserver));
 	await waitFor(() => expect(fades()).toEqual([0, 32]));
@@ -129,7 +129,7 @@ it("refreshes fades when the viewport or folder content resizes", async () => {
 		</PortfolioFolderStrip>,
 	);
 	act(() => resize([], {} as ResizeObserver));
-	await waitFor(() => expect(viewport.style.maskImage).toBe("none"));
+	await waitFor(() => expect(fades()).toEqual([0, 0]));
 	expect(row.dataset.overflow).toBe("false");
 });
 
