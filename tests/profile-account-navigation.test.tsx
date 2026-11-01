@@ -148,8 +148,6 @@ describe("mobile account dock", () => {
 	});
 
 	it.each([
-		["Strona główna", "/pl"],
-		["Sklep", "/pl/shop"],
 		["Zapytania", "/pl/my-requests"],
 		["Oferty", "/pl/dashboard/services"],
 		["Formularze", "/pl/dashboard/forms_templates"],
@@ -161,6 +159,10 @@ describe("mobile account dock", () => {
 				within(navigation).getByRole("button", { name: "Hasira" }),
 			);
 			const drawer = await screen.findByRole("dialog");
+			expect(
+				within(drawer).queryByRole("link", { name: "Strona główna" }),
+			).toBeNull();
+			expect(within(drawer).queryByRole("link", { name: "Sklep" })).toBeNull();
 			fireEvent.click(within(drawer).getByRole("link", { name: label }));
 			await waitFor(() => expect(router.state.location.pathname).toBe(path));
 			await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
@@ -168,7 +170,7 @@ describe("mobile account dock", () => {
 		},
 	);
 
-	it("keeps site navigation available in the guest dock menu", async () => {
+	it("keeps authentication available without placeholder links in the guest dock menu", async () => {
 		state.user = null;
 		const { router, navigation } = await renderNavigation();
 		fireEvent.click(
@@ -179,9 +181,13 @@ describe("mobile account dock", () => {
 		expect(
 			within(drawer).getByRole("link", { name: "Zarejestruj" }),
 		).toBeDefined();
-		fireEvent.click(within(drawer).getByRole("link", { name: "Sklep" }));
+		expect(
+			within(drawer).queryByRole("link", { name: "Strona główna" }),
+		).toBeNull();
+		expect(within(drawer).queryByRole("link", { name: "Sklep" })).toBeNull();
+		fireEvent.click(within(drawer).getByRole("link", { name: "Zaloguj" }));
 		await waitFor(() =>
-			expect(router.state.location.pathname).toBe("/pl/shop"),
+			expect(router.state.location.pathname).toBe("/pl/auth/login"),
 		);
 		await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 	});
