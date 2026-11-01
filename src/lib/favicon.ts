@@ -1,7 +1,7 @@
 /** Stable app icon restored when a profile-specific icon is removed. */
 export const APP_FAVICON = {
 	rel: "icon",
-	href: "/favicon.svg?brand=a",
+	href: "/favicon.svg?brand=a-color",
 	type: "image/svg+xml",
 	sizes: "any",
 } as const;
@@ -10,14 +10,14 @@ export const APP_FAVICON = {
 export const APP_FAVICONS = [
 	{
 		rel: "icon",
-		href: "/favicon.ico?brand=a",
+		href: "/favicon.ico?brand=a-color",
 		type: "image/x-icon",
 		sizes: "16x16 32x32 48x48 64x64",
 		media: "(prefers-color-scheme: light)",
 	},
 	{
 		rel: "icon",
-		href: "/favicon-dark.ico?brand=a",
+		href: "/favicon-dark.ico?brand=a-color",
 		type: "image/x-icon",
 		sizes: "16x16 32x32 48x48 64x64",
 		media: "(prefers-color-scheme: dark)",
