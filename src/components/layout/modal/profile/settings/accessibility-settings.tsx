@@ -169,7 +169,7 @@ export function AccessibilitySettings({
 			<Button
 				type="button"
 				variant="outline"
-				className="h-10 lg:h-9"
+				size="responsive-xl"
 				onClick={() => setDraft({ ...DEFAULT_ACCESSIBILITY })}
 			>
 				{t("accessibility.reset")}
@@ -193,20 +193,15 @@ function PreferenceSelect({
 	options: { value: string; label: string }[];
 }) {
 	return (
-		<div className="space-y-2">
+		<div className="flex flex-col gap-2">
 			<label htmlFor={id} className="text-sm font-medium">
 				{label}
 			</label>
-			{description && (
-				<p id={`${id}-help`} className="text-sm text-muted-foreground">
-					{description}
-				</p>
-			)}
 			<Select value={value} onValueChange={onChange}>
 				<SelectTrigger
 					id={id}
 					aria-describedby={description ? `${id}-help` : undefined}
-					className="h-10! w-full min-w-0 lg:h-9!"
+					className="w-full min-w-0"
 				>
 					<SelectValue />
 				</SelectTrigger>
@@ -222,6 +217,11 @@ function PreferenceSelect({
 					))}
 				</SelectContent>
 			</Select>
+			{description && (
+				<p id={`${id}-help`} className="text-sm text-muted-foreground">
+					{description}
+				</p>
+			)}
 		</div>
 	);
 }
