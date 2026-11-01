@@ -16,7 +16,7 @@ import type {
 	RegistrationSocials,
 } from "@/api/auth/auth-types";
 import { useRegisterAccount } from "@/hooks/auth/use-register";
-import { useUserById } from "@/hooks/user/use-user";
+import { useSessionProfile } from "@/hooks/user/use-user";
 import { ApiFetchError } from "@/lib/fetch";
 import i18n from "@/lib/i18n";
 import { getStoredSupabaseUser, supabase } from "@/lib/supabase";
@@ -275,7 +275,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		user: fetchedUser,
 		isPending: userQueryPending,
 		error: userQueryError,
-	} = useUserById(
+	} = useSessionProfile(
 		sessionUserId ?? "",
 		!!sessionUserId && session !== undefined,
 	);

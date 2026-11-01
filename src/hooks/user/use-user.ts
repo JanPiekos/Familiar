@@ -122,6 +122,25 @@ export function useUserById(userId: string, enabled = true) {
 	};
 }
 
+// Own roles must come from the authenticated profile, never a public profile cache.
+export function useSessionProfile(userId: string, enabled = true) {
+	const query = useQuery({
+		queryKey: ["users", "session", userId],
+		queryFn: async ({ signal }) => {
+			const user = await apiFetch<TUserResponse>("/users/me", {
+				apiVersion: "v1",
+				signal,
+			});
+			if (user.userId !== userId) throw new Error("Profile identity mismatch");
+			return toUserProfile(user);
+		},
+		enabled: enabled && !!userId && typeof window !== "undefined",
+		staleTime: 30_000,
+		gcTime: 0,
+	});
+	return { ...query, user: query.data ?? null };
+}
+
 export function useMyProfile(enabled = true) {
 	const query = useQuery({
 		...myProfileQueryOptions(),

@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
+import { ShieldCheck } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -28,6 +29,7 @@ import { getLocaleParam, localizePath } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import type { UserIdentity } from "@/types/user";
+import { TRoles } from "@/types/user/roles";
 import UserAvatar from "./avatar";
 
 type UserButtonContentProps = {
@@ -163,7 +165,7 @@ export default function User({
 		displayName: "Unknown",
 		username: "unknown",
 	};
-	const { logout } = useAuth();
+	const { logout, user: currentUser } = useAuth();
 	const navigate = useNavigate();
 	const isMobile = useIsMobile();
 	const isTablet = useIsTablet();
@@ -228,6 +230,13 @@ export default function User({
 			to: localizePath(`/user/${resolvedUser.username || ""}`, locale),
 		},
 	];
+	if (currentUser?.roles?.includes(TRoles.Admin)) {
+		menuItems.push({
+			label: t("admin_keys.title"),
+			icon: <ShieldCheck aria-hidden="true" />,
+			to: localizePath("/admin", locale),
+		});
+	}
 
 	const menuItemsContent = (
 		<nav
