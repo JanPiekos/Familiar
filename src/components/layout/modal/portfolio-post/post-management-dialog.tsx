@@ -1,4 +1,3 @@
-import { Surface } from "@heroui/react";
 import { FolderMinus, Trash2 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,15 +9,7 @@ import type {
 	UpdatePortfolioPostRequest,
 } from "@/api/portfolio/posts/post-types";
 import { CreationDialogLayout } from "@/components/layout/creation-dialog-layout";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
 	InputGroup,
@@ -38,6 +29,7 @@ import {
 	useRemovePortfolioPostFromCatalog,
 	useUpdatePortfolioPost,
 } from "@/hooks/portfolio/use-portfolio";
+import { PostConfirmationContent } from "./post-confirmation-content";
 
 export type PostManagementAction = "edit" | "move" | "delete" | "remove";
 
@@ -181,8 +173,24 @@ export function PostManagementDialog({
 					if (!open) close();
 				}}
 			>
-				<AlertDialogContent
-					className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-3xl bg-background p-0 outline-none data-[size=default]:sm:max-w-md"
+				<PostConfirmationContent
+					title={t(`${confirmationPrefix}.title`)}
+					description={t(`${confirmationPrefix}.description`, {
+						folder: folder?.name,
+					})}
+					postTitle={post.title}
+					icon={<ConfirmationIcon className="size-5" />}
+					error={errorMessage}
+					disabled={busy || !open}
+					confirmDisabled={!post.id || (action === "remove" && !folder?.id)}
+					confirmText={t(
+						busy
+							? `${confirmationPrefix}.${action === "remove" ? "removing" : "deleting"}`
+							: `${confirmationPrefix}.confirm`,
+					)}
+					onConfirm={() => {
+						void save();
+					}}
 					onOpenAutoFocus={() => {
 						returnFocus.current =
 							document.activeElement instanceof HTMLElement
@@ -197,65 +205,7 @@ export function PostManagementDialog({
 						// Radix removes the content only after its exit animation ends.
 						onClose();
 					}}
-				>
-					<Surface className="min-h-0 overflow-y-auto p-5 text-left sm:p-6">
-						<div
-							className="mb-4 flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive"
-							aria-hidden="true"
-						>
-							<ConfirmationIcon className="size-5" />
-						</div>
-						<AlertDialogTitle className="text-xl leading-snug text-foreground">
-							{t(`${confirmationPrefix}.title`)}
-						</AlertDialogTitle>
-						<AlertDialogDescription className="mt-2 text-pretty leading-relaxed text-foreground/70">
-							{t(`${confirmationPrefix}.description`, { folder: folder?.name })}
-						</AlertDialogDescription>
-						{post.title && (
-							<Surface
-								variant="secondary"
-								className="mt-4 rounded-2xl border border-border px-4 py-3"
-							>
-								<p className="line-clamp-2 break-words text-sm font-medium text-foreground">
-									{post.title}
-								</p>
-							</Surface>
-						)}
-						{error && <div className="mt-4">{errorMessage}</div>}
-					</Surface>
-					<Surface className="shrink-0">
-						<AlertDialogFooter className="flex-row p-4 sm:px-6">
-							<AlertDialogCancel
-								size="2xl"
-								className="flex-1 sm:flex-none"
-								disabled={busy || !open}
-							>
-								{t("ui.cancel")}
-							</AlertDialogCancel>
-							<AlertDialogAction
-								variant="destructive"
-								size="2xl"
-								disabled={
-									busy ||
-									!open ||
-									!post.id ||
-									(action === "remove" && !folder?.id)
-								}
-								className="flex-1 sm:flex-none"
-								onClick={(event) => {
-									event.preventDefault();
-									void save();
-								}}
-							>
-								{t(
-									busy
-										? `${confirmationPrefix}.${action === "remove" ? "removing" : "deleting"}`
-										: `${confirmationPrefix}.confirm`,
-								)}
-							</AlertDialogAction>
-						</AlertDialogFooter>
-					</Surface>
-				</AlertDialogContent>
+				/>
 			</AlertDialog>
 		);
 	return (
