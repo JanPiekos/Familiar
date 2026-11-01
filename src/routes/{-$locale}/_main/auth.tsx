@@ -73,7 +73,7 @@ function AuthPageLayout() {
 											className={cn(
 												"flex min-h-10 items-center justify-center rounded-full px-4 py-2 text-center text-sm font-medium transition-colors lg:min-h-9",
 												item.active
-													? "bg-background text-foreground shadow-sm"
+													? "bg-primary text-primary-foreground shadow-sm"
 													: "text-muted-foreground hover:text-foreground",
 											)}
 										>
