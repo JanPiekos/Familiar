@@ -37,6 +37,9 @@ import { ProfileSocials } from "./socials";
 
 const CHARACTER_SKELETON_ITEMS = createStaticList("character-skeleton", 10);
 const COMMISSION_SKELETON_ITEMS = createStaticList("commission-skeleton", 2);
+const PROFILE_COLUMNS_CLASS_NAME = "flex flex-1 flex-col gap-4 lg:flex-row";
+const PROFILE_SIDEBAR_COLUMN_CLASS_NAME =
+	"min-w-0 shrink-0 lg:w-72 xl:w-80";
 
 // Temporary stubs for missing components
 const FollowButton = ({
@@ -244,8 +247,8 @@ export function UserProfileSkeleton({ user }: { user?: TUserProfile } = {}) {
 				)}
 			</div>
 			<div className="flex min-h-0 flex-1 flex-col">
-				<div className="flex flex-1 flex-col gap-4 lg:flex-row lg:gap-8">
-					<div className="shrink-0 lg:w-72">
+				<div className={PROFILE_COLUMNS_CLASS_NAME}>
+					<div className={PROFILE_SIDEBAR_COLUMN_CLASS_NAME}>
 						<UserInfoSkeleton
 							isMe={isMe}
 							hasQueue={hasQueue}
@@ -354,8 +357,8 @@ export default function UserProfile({
 				{!isMe && <UserProfileMoreMenu user={user} />}
 			</div>
 			<div className="flex min-h-0 flex-1 flex-col">
-				<div className="flex flex-1 flex-col gap-4 lg:flex-row lg:gap-8">
-					<div className="shrink-0 lg:w-72">
+				<div className={PROFILE_COLUMNS_CLASS_NAME}>
+					<div className={PROFILE_SIDEBAR_COLUMN_CLASS_NAME}>
 						<UserProfileSidebar user={user} isMe={isMe} isSuspended={false} />
 					</div>
 
