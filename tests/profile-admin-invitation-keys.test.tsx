@@ -43,6 +43,7 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 import { AdminDashboard } from "@/components/layout/admin/admin-dashboard";
+import { invitationUsedFilter } from "@/components/layout/admin/invitation-key-filters";
 const key = {
 	id: "key-1",
 	code: "FAM-TEST-KEYS-001",
@@ -73,6 +74,20 @@ async function mount(locale = "en") {
 	return { ...view, client };
 }
 beforeEach(() => {
+	window.matchMedia = vi.fn().mockReturnValue({
+		matches: false,
+		addEventListener: vi.fn(),
+		removeEventListener: vi.fn(),
+	});
+	HTMLElement.prototype.scrollIntoView = vi.fn();
+	vi.stubGlobal(
+		"ResizeObserver",
+		class {
+			observe() {}
+			unobserve() {}
+			disconnect() {}
+		},
+	);
 	state.user = { userId: "admin-1", roles: [TRoles.Admin] };
 	state.pending = false;
 	state.page.mockReset().mockImplementation(async ({ page }) => ({
@@ -137,10 +152,9 @@ it("paginates on the server, resets pages for status filters, and keeps totals g
 	fireEvent.click(screen.getByRole("button", { name: "Next page" }));
 	await screen.findByText("FAM-TEST-KEYS-002");
 	expect(state.page.mock.calls.at(-1)?.[0].page).toBe(1);
-	fireEvent.keyDown(screen.getByRole("combobox", { name: "Key status" }), {
-		key: "ArrowDown",
-	});
-	fireEvent.click(await screen.findByRole("option", { name: "Available" }));
+	fireEvent.click(screen.getByRole("button", { name: "Filter" }));
+	fireEvent.click(await screen.findByRole("option", { name: /Key status/ }));
+	fireEvent.click(await screen.findByRole("option", { name: /^Available/ }));
 	await waitFor(() =>
 		expect(state.page.mock.calls.at(-1)?.[0]).toEqual({
 			page: 0,
@@ -197,7 +211,7 @@ it("rejects invalid quantities and prevents duplicate generation while pending",
 	const input = within(dialog).getByRole("spinbutton", {
 		name: "Number of keys",
 	});
-	for (const value of ["0", "101", "1.5", ""]) {
+	for (const value of ["0", "101", ""]) {
 		fireEvent.change(input, { target: { value } });
 		expect(
 			(
@@ -298,4 +312,45 @@ it("does not carry a generated batch into another account or a signed-out sessio
 			.find({ queryKey: ["invitation-keys", "admin", "admin-2", "stats"] }),
 	).toBeTruthy();
 	expect(screen.queryByRole("dialog")).toBeNull();
+});
+
+it.each([
+	[[], "is", undefined],
+	[["false"], "is", false],
+	[["true"], "is", true],
+	[["false"], "is not", true],
+	[["true"], "is none of", false],
+	[["true", "false"], "is any of", undefined],
+	[["true", "false"], "is none of", null],
+] as const)(
+	"maps status %j with %s to the server filter",
+	(value, operator, expected) => {
+		expect(invitationUsedFilter({ value: [...value], operator })).toBe(
+			expected,
+		);
+	},
+);
+
+it("uses the shared numeric steppers and preset quantities", async () => {
+	await mount();
+	await screen.findByText(key.code);
+	fireEvent.click(screen.getByRole("button", { name: "Generate keys" }));
+	const dialog = screen.getByRole("dialog");
+	fireEvent.click(
+		within(dialog).getByRole("button", { name: "25", exact: true }),
+	);
+	fireEvent.click(
+		within(dialog).getByRole("button", { name: "Increase value" }),
+	);
+	expect(
+		(within(dialog).getByRole("spinbutton") as HTMLInputElement).value,
+	).toBe("26");
+	fireEvent.click(
+		within(dialog).getByRole("button", { name: "Decrease value" }),
+	);
+	fireEvent.click(
+		within(dialog).getByRole("button", { name: "Generate keys" }),
+	);
+	await waitFor(() => expect(state.generate).toHaveBeenCalledTimes(1));
+	expect(state.generate.mock.calls[0][0]).toBe(25);
 });

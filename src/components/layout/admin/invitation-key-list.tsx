@@ -1,4 +1,4 @@
-import { CheckCircle2, Copy, KeyRound } from "lucide-react";
+import { Copy } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import type { InvitationKey } from "@/api/admin/invitation-keys";
@@ -31,70 +31,89 @@ export async function copyInvitationKeys(
 export function InvitationKeyList({ keys }: { keys: InvitationKey[] }) {
 	const { t, i18n } = useTranslation();
 	return (
-		<ul className="divide-y divide-border">
-			{keys.map((key) => (
-				<li key={key.id} className="flex items-start gap-3 p-4 sm:px-6 sm:py-5">
-					<div
-						className="mt-1 flex size-10 shrink-0 items-center justify-center rounded-2xl bg-muted text-muted-foreground"
-						aria-hidden="true"
+		<div>
+			<div
+				aria-hidden="true"
+				className="hidden grid-cols-[1.2fr_1fr_1fr_1fr_2.5rem] gap-5 border-b bg-muted/30 px-6 py-3 text-xs font-medium text-muted-foreground md:grid"
+			>
+				<span>{t("admin_keys.key_column")}</span>
+				<span>{t("admin_keys.owner")}</span>
+				<span>{t("admin_keys.created")}</span>
+				<span>{t("admin_keys.redeemed")}</span>
+				<span />
+			</div>
+			<ul className="divide-y divide-border">
+				{keys.map((key) => (
+					<li
+						key={key.id}
+						className="grid grid-cols-[1fr_2.5rem] items-center gap-x-4 gap-y-4 p-4 transition-colors hover:bg-muted/20 md:grid-cols-[1.2fr_1fr_1fr_1fr_2.5rem] md:gap-x-5 md:px-6"
 					>
-						{key.isUsed ? (
-							<CheckCircle2 className="size-5" />
-						) : (
-							<KeyRound className="size-5" />
-						)}
-					</div>
-					<div className="min-w-0 flex-1">
-						<div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-							<code className="break-all text-sm font-semibold tracking-wide text-foreground sm:text-base">
+						<div className="min-w-0 space-y-2">
+							<code className="block break-all text-sm font-semibold tracking-wide text-foreground">
 								{key.code}
 							</code>
-							<span className="rounded-full bg-muted px-2 py-0.5 text-xs text-foreground/70">
+							<span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+								<span
+									aria-hidden="true"
+									className={
+										key.isUsed
+											? "size-1.5 rounded-full bg-muted-foreground/60"
+											: "size-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400"
+									}
+								/>
 								{t(key.isUsed ? "admin_keys.used" : "admin_keys.available")}
 							</span>
 						</div>
-						<dl className="mt-3 grid min-w-0 gap-x-5 gap-y-2 text-xs text-muted-foreground md:grid-cols-3">
+						<dl className="col-span-2 row-start-2 grid min-w-0 grid-cols-2 gap-x-4 gap-y-3 text-xs text-muted-foreground md:contents">
 							<div className="min-w-0">
-								<dt className="mb-0.5">{t("admin_keys.owner")}</dt>
-								<dd className="break-all text-foreground/80">
+								<dt className="mb-1 md:sr-only">{t("admin_keys.owner")}</dt>
+								<dd
+									className="truncate text-foreground/85"
+									title={key.ownerUserId || t("admin_keys.pool")}
+								>
 									{key.ownerUserId || t("admin_keys.pool")}
 								</dd>
 							</div>
 							<div>
-								<dt className="mb-0.5">{t("admin_keys.created")}</dt>
+								<dt className="mb-1 md:sr-only">{t("admin_keys.created")}</dt>
 								<dd className="text-foreground/80">
 									{invitationDate(key.createdAt, i18n.language)}
 								</dd>
 							</div>
 							<div className="min-w-0">
-								<dt className="mb-0.5">{t("admin_keys.redeemed")}</dt>
+								<dt className="mb-1 md:sr-only">{t("admin_keys.redeemed")}</dt>
 								<dd className="break-all text-foreground/80">
 									{key.isUsed ? invitationDate(key.usedAt, i18n.language) : "—"}
 									{key.usedByUserId && (
-										<span className="mt-0.5 block">{key.usedByUserId}</span>
+										<span
+											className="mt-1 block truncate text-muted-foreground"
+											title={key.usedByUserId}
+										>
+											{key.usedByUserId}
+										</span>
 									)}
 								</dd>
 							</div>
 						</dl>
-					</div>
-					<Button
-						type="button"
-						variant="outline"
-						size="icon-xl"
-						className="shrink-0"
-						aria-label={t("admin_keys.copy_key", { code: key.code })}
-						onClick={() =>
-							void copyInvitationKeys(
-								[key.code],
-								t("admin_keys.copied"),
-								t("admin_keys.copy_failed"),
-							)
-						}
-					>
-						<Copy aria-hidden="true" />
-					</Button>
-				</li>
-			))}
-		</ul>
+						<Button
+							type="button"
+							variant="outline"
+							size="icon-xl"
+							className="col-start-2 row-start-1 shrink-0 md:col-start-5"
+							aria-label={t("admin_keys.copy_key", { code: key.code })}
+							onClick={() =>
+								void copyInvitationKeys(
+									[key.code],
+									t("admin_keys.copied"),
+									t("admin_keys.copy_failed"),
+								)
+							}
+						>
+							<Copy aria-hidden="true" />
+						</Button>
+					</li>
+				))}
+			</ul>
+		</div>
 	);
 }

@@ -5,11 +5,9 @@ import {
 	CheckCircle2,
 	ChevronLeft,
 	ChevronRight,
-	Filter,
 	KeyRound,
 	Plus,
 	RefreshCw,
-	Search,
 	ShieldCheck,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -19,33 +17,20 @@ import {
 	getAdminInvitationKeyStats,
 	getAdminInvitationKeys,
 } from "@/api/admin/invitation-keys";
+import type { ManagedFilterValue } from "@/components/layout/filter-bar";
 import { Button } from "@/components/ui/button";
-import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupInput,
-} from "@/components/ui/input-group";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ApiFetchError } from "@/lib/fetch";
 import { localizePath } from "@/lib/i18n";
 import { useAuth } from "@/providers/auth";
 import { TRoles } from "@/types/user/roles";
 import { GenerateInvitationKeysDialog } from "./generate-invitation-keys-dialog";
+import {
+	InvitationKeyFilters,
+	invitationUsedFilter,
+} from "./invitation-key-filters";
 import { InvitationKeyList } from "./invitation-key-list";
 
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const retry = (attempt: number, error: Error) =>
 	!(error instanceof ApiFetchError && [401, 403].includes(error.status)) &&
 	attempt < 1;
@@ -54,12 +39,17 @@ function KeyRowsSkeleton() {
 	return (
 		<div aria-hidden="true" className="divide-y divide-border">
 			{[0, 1, 2].map((index) => (
-				<div key={index} className="flex gap-3 p-5 sm:px-6">
-					<Skeleton className="size-10 rounded-2xl" />
-					<div className="flex-1 space-y-3">
-						<Skeleton className="h-5 w-52 max-w-full" />
-						<Skeleton className="h-9 w-3/4" />
+				<div
+					key={index}
+					className="grid grid-cols-[1fr_2.5rem] items-center gap-5 p-4 md:grid-cols-[1.2fr_1fr_1fr_1fr_2.5rem] md:px-6"
+				>
+					<div className="space-y-2">
+						<Skeleton className="h-4 w-40 max-w-full" />
+						<Skeleton className="h-3 w-20" />
 					</div>
+					{[0, 1, 2].map((item) => (
+						<Skeleton key={item} className="hidden h-4 w-4/5 md:block" />
+					))}
 					<Skeleton className="size-10 rounded-full" />
 				</div>
 			))}
@@ -77,9 +67,12 @@ export function AdminDashboard() {
 					{t("admin_keys.loading")}
 				</span>
 				<Skeleton className="h-10 w-64" />
-				<div className="grid gap-4 sm:grid-cols-3">
+				<div className="grid grid-cols-3 gap-2 sm:gap-3">
 					{[0, 1, 2].map((index) => (
-						<Skeleton key={index} className="h-32 rounded-3xl" />
+						<Skeleton
+							key={index}
+							className="h-24 rounded-2xl sm:h-32 sm:rounded-3xl"
+						/>
 					))}
 				</div>
 				<KeyRowsSkeleton />
@@ -112,17 +105,15 @@ export function AdminInvitationKeys({ userId }: { userId: string }) {
 	const { t, i18n } = useTranslation();
 	const client = useQueryClient();
 	const [page, setPage] = useState(0);
-	const [status, setStatus] = useState("all");
+	const [status, setStatus] = useState<ManagedFilterValue>();
 	const [search, setSearch] = useState("");
 	const [owner, setOwner] = useState<string>();
-	const [ownerDraft, setOwnerDraft] = useState("");
-	const [ownerError, setOwnerError] = useState("");
-	const [ownerOpen, setOwnerOpen] = useState(false);
 	const [generateOpen, setGenerateOpen] = useState(false);
 	const scope = ["invitation-keys", "admin", userId];
+	const used = invitationUsedFilter(status);
 	const filters = {
 		page,
-		used: status === "all" ? undefined : status === "used",
+		used: used ?? undefined,
 		ownerUserId: owner,
 	};
 	const keys = useQuery({
@@ -158,7 +149,7 @@ export function AdminInvitationKeys({ userId }: { userId: string }) {
 		if (keys.isSuccess && page > 0 && keys.data.totalPages <= page)
 			setPage(Math.max(0, keys.data.totalPages - 1));
 	}, [keys.isSuccess, keys.data?.totalPages, page]);
-	const rows = (keys.data?.content ?? []).filter((key) =>
+	const rows = (used === null ? [] : (keys.data?.content ?? [])).filter((key) =>
 		key.code.toLowerCase().includes(search.trim().toLowerCase()),
 	);
 	const refreshing = keys.isFetching || stats.isFetching;
@@ -259,7 +250,7 @@ export function AdminInvitationKeys({ userId }: { userId: string }) {
 								{t("admin_keys.single_use")}
 								{keys.data &&
 									!accessDenied &&
-									` · ${t("admin_keys.matching_total", { count: keys.data.totalElements })}`}
+									` · ${t("admin_keys.matching_total", { count: used === null ? 0 : keys.data.totalElements })}`}
 							</p>
 						</div>
 						<Button
@@ -280,120 +271,21 @@ export function AdminInvitationKeys({ userId }: { userId: string }) {
 							/>
 						</Button>
 					</div>
-					<div className="flex flex-wrap gap-2">
-						<InputGroup className="h-11 min-w-0 flex-1 basis-48 xl:h-10">
-							<InputGroupAddon>
-								<Search aria-hidden="true" className="size-4" />
-							</InputGroupAddon>
-							<InputGroupInput
-								aria-label={t("admin_keys.search")}
-								placeholder={t("admin_keys.search")}
-								value={search}
-								onChange={(event) => setSearch(event.target.value)}
-							/>
-						</InputGroup>
-						<Select
-							value={status}
-							onValueChange={(value) => {
-								setStatus(value);
-								setPage(0);
-							}}
-						>
-							<SelectTrigger
-								aria-label={t("admin_keys.status")}
-								className="h-11! w-auto min-w-36 xl:h-10!"
-							>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								{["all", "unused", "used"].map((value) => (
-									<SelectItem key={value} value={value}>
-										{t(
-											`admin_keys.${value === "unused" ? "available" : value}`,
-										)}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						<Popover open={ownerOpen} onOpenChange={setOwnerOpen}>
-							<PopoverTrigger asChild>
-								<Button
-									type="button"
-									variant="outline"
-									size="xl"
-									className="h-11 xl:h-10"
-								>
-									<Filter aria-hidden="true" />
-									{t("admin_keys.owner")}
-									{owner && (
-										<span className="rounded-full bg-muted px-1.5 text-xs">
-											1
-										</span>
-									)}
-								</Button>
-							</PopoverTrigger>
-							<PopoverContent
-								align="end"
-								className="w-80 max-w-[calc(100vw-2rem)]"
-							>
-								<form
-									className="space-y-3"
-									onSubmit={(event) => {
-										event.preventDefault();
-										const value = ownerDraft.trim();
-										if (value && !uuid.test(value)) {
-											setOwnerError(t("admin_keys.invalid_owner"));
-											return;
-										}
-										setOwner(value || undefined);
-										setPage(0);
-										setOwnerError("");
-										setOwnerOpen(false);
-									}}
-								>
-									<label htmlFor="invite-owner" className="text-sm font-medium">
-										{t("admin_keys.owner_id")}
-									</label>
-									<InputGroup>
-										<InputGroupInput
-											id="invite-owner"
-											value={ownerDraft}
-											placeholder={t("admin_keys.owner_placeholder")}
-											aria-invalid={Boolean(ownerError)}
-											onChange={(event) => {
-												setOwnerDraft(event.target.value);
-												setOwnerError("");
-											}}
-										/>
-									</InputGroup>
-									{ownerError && (
-										<p role="alert" className="text-xs text-destructive">
-											{ownerError}
-										</p>
-									)}
-									<div className="flex justify-end gap-2">
-										<Button
-											type="button"
-											variant="ghost"
-											size="xl"
-											onClick={() => {
-												setOwnerDraft("");
-												setOwner(undefined);
-												setOwnerError("");
-												setPage(0);
-												setOwnerOpen(false);
-											}}
-										>
-											{t("admin_keys.clear")}
-										</Button>
-										<Button type="submit" size="xl">
-											{t("admin_keys.apply")}
-										</Button>
-									</div>
-								</form>
-							</PopoverContent>
-						</Popover>
-					</div>
+					<InvitationKeyFilters
+						data={keys.data?.content ?? []}
+						status={status}
+						owner={owner}
+						search={search}
+						onSearchChange={setSearch}
+						onStatusChange={(value) => {
+							setStatus(value);
+							setPage(0);
+						}}
+						onOwnerChange={(value) => {
+							setOwner(value);
+							setPage(0);
+						}}
+					/>
 				</div>
 				<div aria-busy={keys.isPending}>
 					{keys.isPending && !accessDenied ? (
@@ -437,44 +329,47 @@ export function AdminInvitationKeys({ userId }: { userId: string }) {
 						</div>
 					)}
 				</div>
-				{keys.data && !accessDenied && keys.data.totalPages > 0 && (
-					<footer className="flex flex-wrap items-center justify-between gap-3 border-t p-4 sm:px-6">
-						<p className="text-sm text-muted-foreground">
-							{t("admin_keys.page", {
-								page: page + 1,
-								pages: keys.data.totalPages,
-							})}
-						</p>
-						<div className="flex gap-2">
-							<Button
-								type="button"
-								variant="outline"
-								size="icon-xl"
-								aria-label={t("admin_keys.previous")}
-								disabled={page === 0 || keys.isFetching}
-								onClick={() => {
-									setSearch("");
-									setPage((current) => current - 1);
-								}}
-							>
-								<ChevronLeft aria-hidden="true" />
-							</Button>
-							<Button
-								type="button"
-								variant="outline"
-								size="icon-xl"
-								aria-label={t("admin_keys.next")}
-								disabled={page + 1 >= keys.data.totalPages || keys.isFetching}
-								onClick={() => {
-									setSearch("");
-									setPage((current) => current + 1);
-								}}
-							>
-								<ChevronRight aria-hidden="true" />
-							</Button>
-						</div>
-					</footer>
-				)}
+				{keys.data &&
+					used !== null &&
+					!accessDenied &&
+					keys.data.totalPages > 0 && (
+						<footer className="flex flex-wrap items-center justify-between gap-3 border-t p-4 sm:px-6">
+							<p className="text-sm text-muted-foreground">
+								{t("admin_keys.page", {
+									page: page + 1,
+									pages: keys.data.totalPages,
+								})}
+							</p>
+							<div className="flex gap-2">
+								<Button
+									type="button"
+									variant="outline"
+									size="icon-xl"
+									aria-label={t("admin_keys.previous")}
+									disabled={page === 0 || keys.isFetching}
+									onClick={() => {
+										setSearch("");
+										setPage((current) => current - 1);
+									}}
+								>
+									<ChevronLeft aria-hidden="true" />
+								</Button>
+								<Button
+									type="button"
+									variant="outline"
+									size="icon-xl"
+									aria-label={t("admin_keys.next")}
+									disabled={page + 1 >= keys.data.totalPages || keys.isFetching}
+									onClick={() => {
+										setSearch("");
+										setPage((current) => current + 1);
+									}}
+								>
+									<ChevronRight aria-hidden="true" />
+								</Button>
+							</div>
+						</footer>
+					)}
 			</Surface>
 			{generateOpen && !accessDenied && (
 				<GenerateInvitationKeysDialog

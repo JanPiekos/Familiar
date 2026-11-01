@@ -1,5 +1,8 @@
 const en = {
 	admin_keys: {
+		clear_owner: "Clear owner filter",
+		quick_quantity: "Quick quantity",
+		key_column: "Invitation key",
 		title: "Admin dashboard",
 		eyebrow: "Administration",
 		description: "Manage creator access to the closed beta. Generate invitation keys and follow their usage.",

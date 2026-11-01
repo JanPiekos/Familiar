@@ -2,6 +2,9 @@ import type en from "./en";
 
 const pl = {
 	admin_keys: {
+		clear_owner: "Wyczyść filtr właściciela",
+		quick_quantity: "Szybki wybór liczby",
+		key_column: "Klucz zaproszenia",
 		title: "Panel administratora",
 		eyebrow: "Administracja",
 		description: "Zarządzaj dostępem twórców do zamkniętej bety. Generuj klucze zaproszeń i sprawdzaj ich wykorzystanie.",

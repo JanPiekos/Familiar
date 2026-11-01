@@ -8,7 +8,7 @@ import {
 } from "@/api/admin/invitation-keys";
 import { CreationDialogLayout } from "@/components/layout/creation-dialog-layout";
 import { Button } from "@/components/ui/button";
-import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
+import { InputGroup, InputGroupNumberInput } from "@/components/ui/input-group";
 import { ApiFetchError } from "@/lib/fetch";
 import { copyInvitationKeys } from "./invitation-key-list";
 
@@ -21,12 +21,12 @@ export function GenerateInvitationKeysDialog({
 }) {
 	const { t } = useTranslation();
 	const id = useId();
-	const [count, setCount] = useState("10");
+	const [count, setCount] = useState<number | undefined>(10);
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState("");
 	const [generated, setGenerated] = useState<InvitationKey[] | null>(null);
 	const lock = useRef(false);
-	const valid = count.trim() !== "" && isInvitationKeyCount(Number(count));
+	const valid = count !== undefined && isInvitationKeyCount(count);
 	const generate = async () => {
 		if (lock.current || !valid || generated) return;
 		lock.current = true;
@@ -154,28 +154,50 @@ export function GenerateInvitationKeysDialog({
 						void generate();
 					}}
 				>
-					<div className="space-y-2">
+					<fieldset disabled={busy} className="space-y-3">
 						<label htmlFor={`${id}-count`} className="text-sm font-medium">
 							{t("admin_keys.quantity")}
 						</label>
-						<InputGroup>
-							<InputGroupInput
+						<InputGroup className="h-12">
+							<InputGroupNumberInput
 								id={`${id}-count`}
-								type="number"
+								role="spinbutton"
+								inputMode="numeric"
+								aria-valuemin={1}
+								aria-valuemax={100}
+								aria-valuenow={count}
 								min={1}
 								max={100}
-								step={1}
+								stepper={1}
 								required
 								value={count}
 								disabled={busy}
 								aria-describedby={`${id}-hint`}
-								onChange={(event) => setCount(event.target.value)}
+								onValueChange={setCount}
 							/>
 						</InputGroup>
+						<fieldset
+							className="flex gap-2"
+							aria-label={t("admin_keys.quick_quantity")}
+						>
+							{[5, 10, 25, 50].map((value) => (
+								<Button
+									key={value}
+									type="button"
+									size="xl"
+									variant={count === value ? "default" : "outline"}
+									aria-pressed={count === value}
+									className="flex-1"
+									onClick={() => setCount(value)}
+								>
+									{value}
+								</Button>
+							))}
+						</fieldset>
 						<p id={`${id}-hint`} className="text-sm text-muted-foreground">
 							{t("admin_keys.quantity_hint")}
 						</p>
-					</div>
+					</fieldset>
 					{error && (
 						<p role="alert" className="text-sm text-destructive">
 							{error}
