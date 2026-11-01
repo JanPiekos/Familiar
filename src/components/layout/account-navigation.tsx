@@ -43,24 +43,26 @@ export function AccountNavigation({ className }: { className?: string }) {
 				aria-busy={isPending}
 				className="pointer-events-auto flex min-w-0 max-w-full items-center gap-1.5 rounded-full border border-border/60 bg-background/95 p-1 shadow-lg backdrop-blur-xl lg:gap-1 lg:border-transparent lg:bg-background lg:p-1 lg:shadow-none"
 			>
-				<Button
-					variant={isChat ? "default" : "secondary"}
-					size="icon-xl"
-					className="size-10"
-					asChild
-				>
-					<Link
-						to={localizePath("/chat", i18n.language)}
-						aria-label={t("header.navigation.messages", "Messages")}
-						aria-current={isChat ? "page" : undefined}
+				{!isPending && user && (
+					<Button
+						variant={isChat ? "default" : "secondary"}
+						size="icon-xl"
+						className="size-10"
+						asChild
 					>
-						{isChat ? (
-							<SolidChat aria-hidden="true" />
-						) : (
-							<OutlineChat aria-hidden="true" />
-						)}
-					</Link>
-				</Button>
+						<Link
+							to={localizePath("/chat", i18n.language)}
+							aria-label={t("header.navigation.messages", "Messages")}
+							aria-current={isChat ? "page" : undefined}
+						>
+							{isChat ? (
+								<SolidChat aria-hidden="true" />
+							) : (
+								<OutlineChat aria-hidden="true" />
+							)}
+						</Link>
+					</Button>
+				)}
 				{isPending ? (
 					<div aria-hidden="true" className="flex items-center gap-2">
 						<Skeleton className="h-10 w-24 rounded-full" />
