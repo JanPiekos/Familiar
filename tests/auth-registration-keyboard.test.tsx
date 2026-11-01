@@ -25,7 +25,7 @@ beforeEach(async () => {
 	await i18n.changeLanguage("en");
 	render(
 		<I18nextProvider i18n={i18n}>
-			<RegisterForm onSuccess={vi.fn()} />
+			<RegisterForm onSuccess={vi.fn()} onModeChange={vi.fn()} />
 		</I18nextProvider>,
 	);
 });
