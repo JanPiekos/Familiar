@@ -810,7 +810,7 @@ export function ProfilePortfolio({
 										role="group"
 										aria-label={folder.name}
 										tabIndex={-1}
-										className="group/folder relative w-40 shrink-0 snap-start"
+										className="group group/folder relative w-40 shrink-0 snap-start"
 									>
 										<Link
 											to="/{-$locale}/user/$username/$tab/folder/$folderSlug"
