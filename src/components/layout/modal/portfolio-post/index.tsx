@@ -364,7 +364,10 @@ function PostMedia({
 			key={post.id}
 			warnings={post.contentWarnings}
 			variant={preview ? "compact" : "default"}
-			hideButtonClassName={preview ? "right-3 top-3 size-10" : undefined}
+			hideButtonClassName={cn(
+				preview && "right-3 size-10",
+				images.length > 1 ? "top-9" : preview && "top-3",
+			)}
 			className="size-full"
 		>
 			<div
@@ -403,49 +406,62 @@ function PostMedia({
 
 				{images.length > 1 && (
 					<>
-						<Button
-							type="button"
-							variant="secondary"
-							size="icon-xl"
-							aria-label={t(
-								"components.portfolio.post.previous_media",
-								"Previous image",
-							)}
-							className="absolute left-4 top-1/2 z-10 -translate-y-1/2"
-							onClick={goToPreviousMedia}
-						>
-							<OutlineChevronLeft className="size-5" />
-						</Button>
+						<div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-between px-4">
+							<Button
+								type="button"
+								variant="secondary"
+								size="icon-xl"
+								aria-label={t(
+									"components.portfolio.post.previous_media",
+									"Previous image",
+								)}
+								className="pointer-events-auto active:translate-y-0!"
+								onClick={goToPreviousMedia}
+							>
+								<OutlineChevronLeft className="size-5" />
+							</Button>
 
-						<Button
-							type="button"
-							variant="secondary"
-							size="icon-xl"
-							aria-label={t(
-								"components.portfolio.post.next_media",
-								"Next image",
-							)}
-							className="absolute right-4 top-1/2 z-10 -translate-y-1/2"
-							onClick={goToNextMedia}
-						>
-							<OutlineChevronRight className="size-5" />
-						</Button>
+							<Button
+								type="button"
+								variant="secondary"
+								size="icon-xl"
+								aria-label={t(
+									"components.portfolio.post.next_media",
+									"Next image",
+								)}
+								className="pointer-events-auto active:translate-y-0!"
+								onClick={goToNextMedia}
+							>
+								<OutlineChevronRight className="size-5" />
+							</Button>
+						</div>
 
-						<div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/35 px-2.5 py-2 backdrop-blur-sm">
+						<div
+							aria-hidden="true"
+							className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-linear-to-b from-black/45 to-transparent"
+						/>
+						<div className="absolute left-1/2 top-0 z-10 flex w-3/4 -translate-x-1/2 gap-1">
 							{images.map((image, index) => (
 								<button
 									key={image.id || index}
 									type="button"
+									aria-current={index === activeMediaIndex ? "true" : undefined}
 									aria-label={t("ui.show_image_value0", {
 										defaultValue: "Show image {{value0}}",
 										value0: index + 1,
 									})}
-									className={cn(
-										"size-1.5 rounded-full bg-white/50 transition-all",
-										index === activeMediaIndex && "w-4 bg-white",
-									)}
+									className="group/indicator flex h-8 min-w-0 flex-1 cursor-pointer items-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-white"
 									onClick={() => setActiveMediaIndex(index)}
-								/>
+								>
+									<span
+										aria-hidden="true"
+										className={cn(
+											"h-0.75 w-full rounded-full bg-white/35 transition-colors group-hover/indicator:bg-white/70 motion-reduce:transition-none",
+											index === activeMediaIndex &&
+												"bg-white group-hover/indicator:bg-white",
+										)}
+									/>
+								</button>
 							))}
 						</div>
 					</>
@@ -767,7 +783,10 @@ export function PortfolioPostPage({
 								variant="secondary"
 								size="icon-xl"
 								aria-label={t("ui.back", "Back")}
-								className="absolute left-4 top-4 z-30"
+								className={cn(
+									"absolute left-4 z-30",
+									controller.images.length > 1 ? "top-9" : "top-4",
+								)}
 								onClick={onBack}
 							>
 								<ArrowLeft className="size-5" />
