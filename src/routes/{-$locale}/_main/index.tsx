@@ -27,16 +27,9 @@ export function HomePage() {
 				<div className="grid md:grid-cols-[1.2fr_0.8fr]">
 					<div className="flex flex-col items-start p-6 sm:p-10 xl:p-12">
 						<div className="flex w-full items-center justify-between gap-4">
-							<Surface
-								variant="secondary"
-								className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-medium"
-							>
-								<span
-									aria-hidden="true"
-									className="size-1.5 rounded-full bg-amber-500"
-								/>
+							<p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground/60">
 								{t("pages.home.beta")}
-							</Surface>
+							</p>
 							<SolidLogo
 								size={32}
 								className="text-primary md:hidden"
