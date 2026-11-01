@@ -1,3 +1,4 @@
+import { Surface } from "@heroui/react";
 import { ArrowUpRight, ExternalLink, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -64,69 +65,87 @@ export function ExternalLinkGuard() {
 						source.current.focus({ preventScroll: true });
 				}}
 			>
-				<AlertDialogHeader className="block shrink-0 space-y-3 p-6 pb-0 text-left">
-					<div
-						className="flex size-12 items-center justify-center rounded-full bg-secondary text-foreground"
-						aria-hidden="true"
-					>
-						<ExternalLink className="size-5" />
-					</div>
-					<AlertDialogTitle className="text-xl text-foreground">
-						{t("external_link_guard.title")}
-					</AlertDialogTitle>
-					<AlertDialogDescription className="leading-relaxed">
-						{t("external_link_guard.description")}
-					</AlertDialogDescription>
-				</AlertDialogHeader>
-				<div className="min-h-0 space-y-4 overflow-y-auto overscroll-contain p-6">
-					<div className="rounded-2xl border bg-muted/30 p-4">
-						<p className="mb-2 text-xs font-medium text-muted-foreground">
-							{t("external_link_guard.destination")}
-						</p>
-						<p
-							dir="ltr"
-							className="break-all text-base font-semibold text-foreground"
-						>
-							{destination?.host}
-						</p>
-						<p
-							dir="ltr"
-							className="mt-1 break-all text-sm text-muted-foreground"
-						>
-							{destination?.href}
-						</p>
-					</div>
-					<div className="flex items-start gap-3 rounded-2xl bg-muted/40 p-4">
-						<ShieldCheck
-							className="mt-0.5 size-5 shrink-0 text-muted-foreground"
+				<Surface className="flex min-h-0 flex-col overflow-hidden rounded-[inherit]">
+					<AlertDialogHeader className="block shrink-0 space-y-3 p-6 pb-0 text-left">
+						<Surface
+							variant="secondary"
+							className="flex size-12 items-center justify-center rounded-full"
 							aria-hidden="true"
-						/>
-						<div className="space-y-1.5 text-sm">
-							<p className="font-medium text-foreground">
-								{t("external_link_guard.safety_title")}
+						>
+							<ExternalLink className="size-5" />
+						</Surface>
+						<AlertDialogTitle className="text-xl text-foreground">
+							{t("external_link_guard.title")}
+						</AlertDialogTitle>
+						<AlertDialogDescription className="leading-relaxed text-foreground/80">
+							{t("external_link_guard.description")}
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<div className="min-h-0 space-y-4 overflow-y-auto overscroll-contain p-6">
+						<Surface
+							variant="secondary"
+							className="rounded-2xl border border-border p-4"
+						>
+							<p className="mb-2 text-xs font-medium text-foreground/70">
+								{t("external_link_guard.destination")}
 							</p>
-							<p className="leading-relaxed text-muted-foreground">
-								{t("external_link_guard.safety_description")}
+							<p
+								dir="ltr"
+								className="break-all text-base font-semibold text-foreground"
+							>
+								{destination?.host}
 							</p>
-						</div>
+							<p
+								dir="ltr"
+								className="mt-1 break-all text-sm text-foreground/80"
+							>
+								{destination?.href}
+							</p>
+						</Surface>
+						<Surface
+							variant="secondary"
+							className="flex items-start gap-3 rounded-2xl border border-border p-4"
+						>
+							<ShieldCheck
+								className="mt-0.5 size-5 shrink-0"
+								aria-hidden="true"
+							/>
+							<div className="space-y-1.5 text-sm">
+								<p className="font-medium text-foreground">
+									{t("external_link_guard.safety_title")}
+								</p>
+								<p className="leading-relaxed">
+									{t("external_link_guard.safety_description")}
+								</p>
+							</div>
+						</Surface>
 					</div>
-				</div>
-				<AlertDialogFooter className="shrink-0 border-t bg-muted/20 p-4">
-					<AlertDialogCancel size="xl" className="h-12 min-w-0">
-						{t("external_link_guard.stay")}
-					</AlertDialogCancel>
-					<AlertDialogAction
-						size="xl"
-						className="h-12 min-w-0"
-						onClick={() => {
-							if (destination)
-								window.open(destination.href, "_blank", "noopener,noreferrer");
-						}}
+					<Surface
+						variant="secondary"
+						className="shrink-0 border-t border-border"
 					>
-						{t("external_link_guard.continue")}
-						<ArrowUpRight aria-hidden="true" />
-					</AlertDialogAction>
-				</AlertDialogFooter>
+						<AlertDialogFooter className="p-4">
+							<AlertDialogCancel size="xl" className="h-12 min-w-0">
+								{t("external_link_guard.stay")}
+							</AlertDialogCancel>
+							<AlertDialogAction
+								size="xl"
+								className="h-12 min-w-0"
+								onClick={() => {
+									if (destination)
+										window.open(
+											destination.href,
+											"_blank",
+											"noopener,noreferrer",
+										);
+								}}
+							>
+								{t("external_link_guard.continue")}
+								<ArrowUpRight aria-hidden="true" />
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</Surface>
+				</Surface>
 			</AlertDialogContent>
 		</AlertDialog>
 	);
