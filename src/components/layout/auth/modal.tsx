@@ -82,7 +82,7 @@ function AuthModal({ defaultTab = "login" }: AuthModalProps) {
 								</Button>
 							</DrawerClose>
 						</DrawerHeader>
-						<div className="px-4 pb-4">
+						<div className="auth-form min-h-0 overflow-y-auto px-4 pb-4">
 							<AuthContent
 								tab={tab}
 								setTab={setTab}
@@ -102,7 +102,7 @@ function AuthModal({ defaultTab = "login" }: AuthModalProps) {
 								{t("ui.reset_your_password", "Reset your password")}
 							</DrawerTitle>
 						</DrawerHeader>
-						<div className="px-4 pb-4">
+						<div className="auth-form min-h-0 overflow-y-auto px-4 pb-4">
 							<ForgotForm
 								onModeChange={() => {
 									setForgotOpen(false);
@@ -163,10 +163,9 @@ function AuthContent({
 			<aside className="relative hidden h-full flex-col gap-4 bg-muted/40 p-6 md:flex">
 				<AuthArtworkImage
 					artwork={artwork}
-					className="absolute inset-0 h-full w-full rounded-r-lg object-cover"
+					className="absolute inset-0 h-full w-full"
 				/>
-				<div className="absolute inset-0 rounded-r-lg bg-black/50" />
-				<div className="z-10 flex flex-col gap-2 text-white">
+				<div className="z-10 flex flex-col gap-2 text-foreground">
 					<div className="space-y-1">
 						<h3 className="flex items-center gap-2 font-semibold text-sm">
 							<SolidLogo size={28} aria-hidden="true" />
@@ -182,7 +181,7 @@ function AuthContent({
 				</div>
 			</aside>
 
-			<section className="max-h-[80vh] min-w-0 overflow-x-hidden overflow-y-auto p-4">
+			<section className="auth-form max-h-[80vh] min-w-0 overflow-x-hidden overflow-y-auto p-4">
 				<div className="mb-3 flex justify-end">
 					<DialogClose asChild>
 						<Button

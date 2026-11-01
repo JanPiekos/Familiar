@@ -587,6 +587,11 @@ const en = {
 		"artist-dashboard": "Dashboard",
 	},
 	auth: {
+		navigation: "Account access",
+		brand: {
+			title: "Make room for your creativity.",
+			description: "A place to share your work and make yourself at home.",
+		},
 		login: {
 			cta: "Login",
 			title: "Welcome back",
@@ -739,9 +744,9 @@ const en = {
 		account_type: {
 			label: "Account Type",
 			client_title: "Client Account",
-			client_description: "For individuals looking to connect with artists.",
-			artist_title: "Artist Account",
-			artist_description: "For artists looking to connect with clients.",
+			client_description: "For individuals looking to connect with creators.",
+			artist_title: "Creator Account",
+			artist_description: "For creators looking to connect with clients.",
 			client_badge: "Default",
 		},
 	},

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	OutlineEye,
@@ -31,6 +31,7 @@ function LoginForm({ onSuccess, onForgot }: LoginFormProps) {
 	const [showPassword, setShowPassword] = useState(false);
 	const { login: authLogin, isPending } = useAuth();
 	const { t } = useTranslation();
+	const fieldId = useId();
 
 	const form = useFormValidation({
 		schema: login,
@@ -51,7 +52,9 @@ function LoginForm({ onSuccess, onForgot }: LoginFormProps) {
 		}
 	};
 
-	const passwordToggleLabel = showPassword ? "Hide password" : "Show password";
+	const passwordToggleLabel = t(
+		showPassword ? "auth.password.hide" : "auth.password.show",
+	);
 
 	return (
 		<Form {...form}>
@@ -74,7 +77,9 @@ function LoginForm({ onSuccess, onForgot }: LoginFormProps) {
 
 							return (
 								<FormItem data-invalid={invalid}>
-									<FormLabel>{t("auth.email.label")}</FormLabel>
+									<FormLabel htmlFor={`${fieldId}-email`}>
+										{t("auth.email.label")}
+									</FormLabel>
 
 									<FormControl>
 										<InputGroup>
@@ -84,7 +89,9 @@ function LoginForm({ onSuccess, onForgot }: LoginFormProps) {
 
 											<InputGroupInput
 												placeholder={t("auth.email.placeholder")}
-												type="text"
+												id={`${fieldId}-email`}
+												type="email"
+												inputMode="email"
 												autoComplete="email"
 												{...field}
 												aria-invalid={fieldState.invalid}
@@ -106,7 +113,9 @@ function LoginForm({ onSuccess, onForgot }: LoginFormProps) {
 
 							return (
 								<FormItem data-invalid={invalid}>
-									<FormLabel>{t("auth.password.label")}</FormLabel>
+									<FormLabel htmlFor={`${fieldId}-password`}>
+										{t("auth.password.label")}
+									</FormLabel>
 
 									<FormControl>
 										<InputGroup>
@@ -116,6 +125,7 @@ function LoginForm({ onSuccess, onForgot }: LoginFormProps) {
 
 											<InputGroupInput
 												placeholder={t("auth.password.placeholder")}
+												id={`${fieldId}-password`}
 												type={showPassword ? "text" : "password"}
 												autoComplete="current-password"
 												{...field}
