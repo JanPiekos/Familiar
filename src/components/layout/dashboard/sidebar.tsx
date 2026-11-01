@@ -62,7 +62,7 @@ export function DashboardNavigation({
 			</p>
 			<nav
 				aria-label={t("dashboard_workspace.navigation")}
-				className="flex gap-1 overflow-x-auto rounded-3xl border bg-surface p-2 lg:flex-col"
+				className="flex gap-1 overflow-x-auto rounded-3xl border bg-surface p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col"
 			>
 				{links.map(({ path: to, label, icon: Icon }) => (
 					<Button
