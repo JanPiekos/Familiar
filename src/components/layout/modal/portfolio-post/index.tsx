@@ -48,7 +48,7 @@ import { useUserByUsername } from "@/hooks/user/use-user";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import { ContentWarningOverlay } from "../../content-warning-overlay";
-import User from "../../profile/user";
+import { UserIdentityContent } from "../../profile/user";
 import { PostViewerLayout } from "./post-viewer-layout";
 import { PostWarningsDialog } from "./post-warnings-dialog";
 
@@ -244,7 +244,9 @@ function PostHeader({ controller }: { controller: Controller }) {
 
 	return (
 		<div className="flex min-w-0 items-center gap-3">
-			<User avatarSize="default" user={profileUser} />
+			{profileUser && (
+				<UserIdentityContent avatarSize="default" user={profileUser} />
+			)}
 		</div>
 	);
 }

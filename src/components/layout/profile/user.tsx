@@ -42,7 +42,7 @@ type UserButtonContentProps = {
 	avatarBadgeClassName?: string;
 };
 
-function UserButtonContent({
+export function UserIdentityContent({
 	user,
 	showInfo = true,
 	showAvatar = true,
@@ -208,7 +208,7 @@ export default function User({
 	);
 
 	const triggerContent = (
-		<UserButtonContent
+		<UserIdentityContent
 			user={resolvedUser}
 			showInfo={showInfo}
 			showAvatar={showAvatar}
