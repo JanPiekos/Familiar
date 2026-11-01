@@ -12,6 +12,7 @@ export function useUpdateProfile() {
 			// Cancel older reads so they cannot overwrite the saved profile.
 			await queryClient.cancelQueries({ queryKey: ["users"] });
 			queryClient.setQueryData(["users", "me"], user);
+			queryClient.setQueryData(["users", "session", user.userId], user);
 			queryClient.setQueryData(["users", "id", user.userId], user);
 			queryClient.setQueryData(["users", "username", user.username], user);
 		},
