@@ -1,9 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { type ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SolidLogo } from "@/components/icons/assets/logo/logo";
 import { localizePath } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 import { AccountNavigation } from "./account-navigation";
 
 export default function Header() {
@@ -11,46 +9,15 @@ export default function Header() {
 	return (
 		<header className="sticky top-0 z-50 px-4 lg:px-8">
 			<div className="flex h-0 items-center justify-between gap-4 lg:h-16">
-				<NavWrapper className="hidden lg:flex">
-					<Link
-						to={localizePath("/", i18n.language)}
-						className="mx-3 flex h-10 items-center gap-x-2 rounded-full"
-					>
-						<SolidLogo size={40} className="text-primary" aria-hidden="true" />
-						<span className="text-base font-bold tracking-wider text-primary uppercase">
-							{t("header.title")}
-						</span>
-					</Link>
-				</NavWrapper>
+				<Link
+					to={localizePath("/", i18n.language)}
+					aria-label={t("header.title")}
+					className="hidden size-[50px] shrink-0 items-center justify-center rounded-full border border-border/60 bg-background text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex"
+				>
+					<SolidLogo size={40} aria-hidden="true" />
+				</Link>
 				<AccountNavigation />
 			</div>
 		</header>
-	);
-}
-
-function NavWrapper({
-	children,
-	className,
-}: {
-	children: ReactNode;
-	className?: string;
-}) {
-	const [isScrolled, setIsScrolled] = useState(false);
-	useEffect(() => {
-		const handleScroll = () => setIsScrolled(window.scrollY > 0);
-		handleScroll();
-		window.addEventListener("scroll", handleScroll, { passive: true });
-		return () => window.removeEventListener("scroll", handleScroll);
-	}, []);
-	return (
-		<nav
-			className={cn(
-				"flex items-center gap-1 rounded-full border border-transparent bg-background p-1 transition-shadow duration-200",
-				isScrolled ? "shadow-lg" : "shadow-none",
-				className,
-			)}
-		>
-			{children}
-		</nav>
 	);
 }
