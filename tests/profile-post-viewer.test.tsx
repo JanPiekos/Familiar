@@ -12,6 +12,7 @@ import { I18nextProvider } from "react-i18next";
 import en from "@/i18n/en";
 import pl from "@/i18n/pl";
 const data = vi.hoisted(() => ({
+	pending: false,
 	post: {
 		id: "first",
 		title: "Wide artwork",
@@ -28,7 +29,7 @@ const data = vi.hoisted(() => ({
 vi.mock("@/hooks/portfolio/use-portfolio", () => ({
 	useArtistPortfolioPost: () => ({
 		data: data.post,
-		isPending: false,
+		isPending: data.pending,
 		isError: false,
 	}),
 	useDeletePortfolioPost: () => ({ mutateAsync: vi.fn(), isPending: false }),
@@ -55,11 +56,14 @@ import { PortfolioPostModal } from "@/components/layout/modal/portfolio-post";
 import { PostViewerLayout } from "@/components/layout/modal/portfolio-post/post-viewer-layout";
 const clients: QueryClient[] = [];
 beforeEach(() => {
+	data.pending = false;
 	data.post.id = "first";
 	data.post.contentWarnings = [];
 });
 afterEach(() => {
 	cleanup();
+	vi.restoreAllMocks();
+	vi.unstubAllGlobals();
 	clients.forEach((client) => client.clear());
 	clients.length = 0;
 });
@@ -113,7 +117,7 @@ it("fits the first artwork and keeps the frame stable while navigating a mixed-r
 	expect(dialog.style.getPropertyValue("--post-ratio")).toBe("3");
 	expect(screen.queryByRole("link", { name: "View full size" })).toBeNull();
 	fireEvent.click(screen.getByRole("button", { name: /^Close$/ }));
-	expect(close).toHaveBeenCalledWith(false);
+	await waitFor(() => expect(close).toHaveBeenCalledWith(false));
 });
 it("resets the frame for a different post and ignores invalid image dimensions", async () => {
 	function View({ id }: { id: string }) {
@@ -169,7 +173,130 @@ it("handles video metadata and Escape without focusing media controls", async ()
 	);
 	expect(document.activeElement).toBe(dialog);
 	fireEvent.keyDown(dialog, { key: "Escape" });
-	expect(close).toHaveBeenCalledWith(false);
+	await waitFor(() => expect(close).toHaveBeenCalledWith(false));
+});
+it("keeps the same dialog while loading becomes artwork", async () => {
+	data.pending = true;
+	const close = vi.fn();
+	const view = await mount(
+		<PortfolioPostModal
+			postId="first"
+			username="artist"
+			open
+			onOpenChange={close}
+		/>,
+	);
+	const dialog = screen.getByRole("dialog", { name: "Loading post..." });
+	data.pending = false;
+	view.rerender(
+		<PortfolioPostModal
+			postId="first"
+			username="artist"
+			open
+			onOpenChange={close}
+		/>,
+	);
+	expect(screen.getByRole("dialog", { name: "Wide artwork" })).toBe(dialog);
+	expect(document.activeElement).toBe(dialog);
+	expect(close).not.toHaveBeenCalled();
+});
+it("fits cached image dimensions when the portal mounts, before its load event", async () => {
+	vi.spyOn(HTMLImageElement.prototype, "naturalWidth", "get").mockReturnValue(
+		1500,
+	);
+	vi.spyOn(HTMLImageElement.prototype, "naturalHeight", "get").mockReturnValue(
+		500,
+	);
+	vi.spyOn(HTMLImageElement.prototype, "complete", "get").mockReturnValue(
+		false,
+	);
+	await mount(
+		<PortfolioPostModal
+			postId="first"
+			username="artist"
+			open
+			onOpenChange={vi.fn()}
+		/>,
+	);
+	expect(
+		screen.getByRole("dialog").style.getPropertyValue("--post-ratio"),
+	).toBe("3");
+});
+
+// jsdom has no animation engine; expose live state names to Radix Presence.
+function enableDialogAnimations() {
+	const getStyle = globalThis.getComputedStyle;
+	vi.stubGlobal("CSS", { escape: (value: string) => value });
+	vi.spyOn(globalThis, "getComputedStyle").mockImplementation(
+		(element, pseudo) => {
+			const style = getStyle(element, pseudo);
+			if (!element.hasAttribute("data-post-viewer")) return style;
+			return new Proxy(style, {
+				get(target, property) {
+					return property === "animationName"
+						? element.getAttribute("data-state") === "closed"
+							? "post-viewer-exit"
+							: "post-viewer-enter"
+						: Reflect.get(target, property, target);
+				},
+			});
+		},
+	);
+}
+function endExit(element: Element) {
+	const event = new Event("animationend", { bubbles: true });
+	Object.defineProperty(event, "animationName", { value: "post-viewer-exit" });
+	fireEvent(element, event);
+}
+it.each(["button", "escape", "backdrop"])(
+	"waits for the exit animation before route dismissal via %s",
+	async (action) => {
+		enableDialogAnimations();
+		const close = vi.fn();
+		await mount(
+			<PortfolioPostModal
+				postId="first"
+				username="artist"
+				open
+				onOpenChange={close}
+			/>,
+		);
+		const dialog = screen.getByRole("dialog");
+		if (action === "button")
+			fireEvent.click(screen.getByRole("button", { name: "Close" }));
+		else if (action === "escape") fireEvent.keyDown(dialog, { key: "Escape" });
+		else {
+			await new Promise((resolve) => setTimeout(resolve, 0));
+			const overlay = document.querySelector('[data-slot="dialog-overlay"]')!;
+			fireEvent.pointerDown(overlay, { button: 0, pointerType: "mouse" });
+			fireEvent.click(overlay);
+		}
+		await waitFor(() =>
+			expect(dialog.getAttribute("data-state")).toBe("closed"),
+		);
+		expect(dialog.isConnected).toBe(true);
+		expect(close).not.toHaveBeenCalled();
+		endExit(dialog.querySelector("img")!);
+		expect(close).not.toHaveBeenCalled();
+		endExit(dialog);
+		await waitFor(() => expect(close).toHaveBeenCalledExactlyOnceWith(false));
+	},
+);
+it("does not navigate later if another route unmounts a closing post", async () => {
+	enableDialogAnimations();
+	const close = vi.fn();
+	const view = await mount(
+		<PortfolioPostModal
+			postId="first"
+			username="artist"
+			open
+			onOpenChange={close}
+		/>,
+	);
+	fireEvent.click(screen.getByRole("button", { name: "Close" }));
+	view.unmount();
+	await new Promise((resolve) => setTimeout(resolve, 0));
+	expect(close).not.toHaveBeenCalled();
 });
 it("keeps content warnings covered and owner dialogs accessible from the inside menu", async () => {
 	data.post.contentWarnings = ["Violence"];

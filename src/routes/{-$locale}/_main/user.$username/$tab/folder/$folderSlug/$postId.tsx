@@ -83,6 +83,7 @@ function PostContent({
 			to: "/{-$locale}/user/$username/$tab/folder/$folderSlug",
 			params: { locale, username: user.username, tab, folderSlug },
 			replace: true,
+			resetScroll: isMobile || !isModal,
 		});
 	};
 

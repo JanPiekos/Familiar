@@ -71,6 +71,7 @@ function RouteComponent() {
 					tab: "portfolio",
 				},
 				replace: true,
+				resetScroll: isMobile || !isModal,
 			});
 		};
 

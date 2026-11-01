@@ -387,6 +387,7 @@ function PostMedia({
 							key={currentMedia.id}
 							src={currentMediaPath}
 							alt={`${displayTitle} — ${activeMediaIndex + 1}`}
+							decoding="async"
 							className="size-full object-contain"
 						/>
 					)
@@ -646,60 +647,64 @@ export function PortfolioPostModal({
 
 	const { t, isPending, isError, post, displayTitle } = controller;
 
-	if (!open) return null;
-
 	if (isPending) {
 		return (
-			<PostViewerLayout
-				open={open}
-				onOpenChange={onOpenChange}
-				title={t("components.portfolio.post.loading", "Loading post...")}
-				mediaContent={
-					<div className="flex size-full min-h-0 items-center justify-center text-foreground">
-						<Spinner />
-					</div>
-				}
-				detailsHeaderContent={
-					<div className="flex items-center gap-3">
-						<div className="size-10 animate-pulse rounded-full bg-muted" />
-						<div className="space-y-2">
-							<div className="h-3 w-28 animate-pulse rounded bg-muted" />
-							<div className="h-2.5 w-20 animate-pulse rounded bg-muted" />
+			<>
+				<PostViewerLayout
+					key={postId}
+					open={open}
+					onOpenChange={onOpenChange}
+					title={t("components.portfolio.post.loading", "Loading post...")}
+					mediaContent={
+						<div className="flex size-full min-h-0 items-center justify-center text-foreground">
+							<Spinner />
 						</div>
-					</div>
-				}
-				detailsContent={
-					<div className="flex h-full min-h-75 items-center justify-center">
-						<Spinner />
-					</div>
-				}
-			/>
+					}
+					detailsHeaderContent={
+						<div className="flex items-center gap-3">
+							<div className="size-10 animate-pulse rounded-full bg-muted" />
+							<div className="space-y-2">
+								<div className="h-3 w-28 animate-pulse rounded bg-muted" />
+								<div className="h-2.5 w-20 animate-pulse rounded bg-muted" />
+							</div>
+						</div>
+					}
+					detailsContent={
+						<div className="flex h-full min-h-75 items-center justify-center">
+							<Spinner />
+						</div>
+					}
+				/>
+			</>
 		);
 	}
 
 	if (isError || !post) {
 		return (
-			<PostViewerLayout
-				open={open}
-				onOpenChange={onOpenChange}
-				title={t("components.portfolio.post.error", "Error")}
-				mediaContent={
-					<div className="flex size-full min-h-0 items-center justify-center px-6 text-center text-sm text-muted-foreground">
-						{t(
-							"components.portfolio.post.not_found",
-							"Post not found or could not be loaded.",
-						)}
-					</div>
-				}
-				detailsContent={<div />}
-			/>
+			<>
+				<PostViewerLayout
+					key={postId}
+					open={open}
+					onOpenChange={onOpenChange}
+					title={t("components.portfolio.post.error", "Error")}
+					mediaContent={
+						<div className="flex size-full min-h-0 items-center justify-center px-6 text-center text-sm text-muted-foreground">
+							{t(
+								"components.portfolio.post.not_found",
+								"Post not found or could not be loaded.",
+							)}
+						</div>
+					}
+					detailsContent={<div />}
+				/>
+			</>
 		);
 	}
 
 	return (
 		<>
 			<PostViewerLayout
-				key={post.id}
+				key={postId}
 				open={open}
 				onOpenChange={onOpenChange}
 				title={displayTitle}
