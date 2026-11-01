@@ -30,7 +30,7 @@
 /* One control size, including grouped fields and popover/select triggers. */
 .settings-panel [data-slot="input-group"]:has(> input),
 .settings-panel [data-slot="select-trigger"],
-.settings-panel [data-slot="button"][role="combobox"],
+.settings-panel [role="combobox"],
 .settings-panel [data-slot="button"][data-size="responsive-xl"],
 .settings-panel form [data-slot="button"][data-size="xl"],
 .settings-panel form [data-slot="button"][data-size="2xl"] {
@@ -43,7 +43,7 @@
 
 .settings-panel [data-slot="input-group-control"],
 .settings-panel [data-slot="input-group-addon"],
-.settings-panel [data-slot="select-trigger"] {
+.settings-panel [role="combobox"] {
 	font-size: 1rem;
 }
 

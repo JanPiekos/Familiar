@@ -415,7 +415,7 @@ export function UserSettingsPanel({
 			}
 		>
 			<Sidebar collapsible="none" className="hidden h-full border-r xl:flex">
-				<SidebarContent>
+				<SidebarContent className="gap-0">
 					<div className="flex min-h-18 shrink-0 items-center px-5">
 						<div>
 							<p className="font-semibold">
