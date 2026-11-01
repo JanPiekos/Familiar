@@ -195,7 +195,9 @@ describe("folder contents", () => {
 		async (locale) => {
 			state.posts = [artwork("a", "Fox portrait", ["folder-1", "folder-2"])];
 			await app(locale);
-			fireEvent.click(screen.getByRole("button", { name: "Remove post" }));
+			const trigger = screen.getByRole("button", { name: "Remove post" });
+			trigger.focus();
+			fireEvent.click(trigger);
 			expect(screen.getByRole("alertdialog").textContent).toContain(
 				folders[0].name,
 			);
@@ -206,6 +208,7 @@ describe("folder contents", () => {
 				}),
 			);
 			await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+			await waitFor(() => expect(document.activeElement).toBe(trigger));
 			expect(state.remove).not.toHaveBeenCalled();
 			fireEvent.click(screen.getByRole("button", { name: "Remove post" }));
 			fireEvent.click(
