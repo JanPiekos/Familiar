@@ -1,4 +1,26 @@
 const en = {
+	dashboard_workspace: {
+		title: "Dashboard",
+		workspace: "Your workspace",
+		overview: "Overview",
+		navigation: "Dashboard sections",
+		account: "Your account",
+		settings: "Account settings",
+		loading: "Loading your dashboard…",
+		sign_in_title: "Your workspace is waiting",
+		sign_in_description: "Sign in to manage your profile, portfolio, and creator tools.",
+		creator_only: "Creator tools",
+		creator_only_description: "Commission management is available to creator accounts. You can still manage your profile from the overview.",
+		welcome: "Welcome back, {{name}}",
+		description: "A place to manage your profile, share your work, and keep your creative projects in order.",
+		open_portfolio: "Open portfolio",
+		edit_profile: "Edit profile",
+		manage_work: "Manage your work",
+		requests_description: "Review incoming commission requests and follow their progress.",
+		services_description: "Create and update the services you offer to clients.",
+		forms_description: "Build reusable forms to collect the details you need for commissions.",
+		settings_description: "Update your profile, preferences, and account details.",
+	},
 	error_preview: {
 		title: "Error page preview",
 		description: "Choose an example to see the error screen.",
@@ -420,9 +442,9 @@ const en = {
 				"Read and manage your private conversations and commission messages on Familiar.",
 		},
 		dashboard: {
-			title: "Artist dashboard",
+			title: "Dashboard",
 			description:
-				"Manage your Familiar artist account, commissions, services, and request forms.",
+				"Manage your Familiar profile, portfolio, and creator workspace.",
 		},
 		dashboard_requests: {
 			title: "Commission requests",
