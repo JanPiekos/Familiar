@@ -200,6 +200,28 @@ it("keeps the same dialog while loading becomes artwork", async () => {
 	expect(document.activeElement).toBe(dialog);
 	expect(close).not.toHaveBeenCalled();
 });
+it("fits cached image dimensions when the portal mounts, before its load event", async () => {
+	vi.spyOn(HTMLImageElement.prototype, "naturalWidth", "get").mockReturnValue(
+		1500,
+	);
+	vi.spyOn(HTMLImageElement.prototype, "naturalHeight", "get").mockReturnValue(
+		500,
+	);
+	vi.spyOn(HTMLImageElement.prototype, "complete", "get").mockReturnValue(
+		false,
+	);
+	await mount(
+		<PortfolioPostModal
+			postId="first"
+			username="artist"
+			open
+			onOpenChange={vi.fn()}
+		/>,
+	);
+	expect(
+		screen.getByRole("dialog").style.getPropertyValue("--post-ratio"),
+	).toBe("3");
+});
 
 // jsdom has no animation engine; expose live state names to Radix Presence.
 function enableDialogAnimations() {

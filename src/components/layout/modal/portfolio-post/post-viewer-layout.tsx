@@ -3,7 +3,6 @@ import {
 	type CSSProperties,
 	type ReactNode,
 	useEffect,
-	useLayoutEffect,
 	useRef,
 	useState,
 } from "react";
@@ -48,7 +47,6 @@ export function PostViewerLayout({
 }: PostViewerLayoutProps) {
 	const { t } = useTranslation();
 	const content = useRef<HTMLDivElement>(null);
-	const media = useRef<HTMLElement>(null);
 	const measured = useRef(false);
 	const mounted = useRef(true);
 	const closeRequested = useRef(false);
@@ -85,15 +83,6 @@ export function PostViewerLayout({
 		measured.current = true;
 		setRatio(Math.min(6, Math.max(0.12, width / height)));
 	};
-
-	// A cached image may already be loaded when the dialog's portal mounts.
-	useLayoutEffect(() => {
-		if (measured.current || !open) return;
-		const image = media.current?.querySelector("img");
-		if (image?.complete) measure(image.naturalWidth, image.naturalHeight);
-		const video = media.current?.querySelector("video");
-		if (video?.readyState) measure(video.videoWidth, video.videoHeight);
-	});
 
 	const sizing = {
 		"--post-ratio": ratio,
@@ -180,7 +169,15 @@ export function PostViewerLayout({
 					</header>
 					<div className="flex min-h-0 flex-col overflow-y-auto overscroll-contain lg:h-[var(--post-height)] lg:flex-row lg:overflow-hidden">
 						<section
-							ref={media}
+							ref={(element) => {
+								if (!element || measured.current) return;
+								// Portal children mount after the parent's layout effects.
+								const image = element.querySelector("img");
+								if (image) measure(image.naturalWidth, image.naturalHeight);
+								const video = element.querySelector("video");
+								if (video?.readyState)
+									measure(video.videoWidth, video.videoHeight);
+							}}
 							onLoadCapture={(event) => {
 								if (event.target instanceof HTMLImageElement)
 									measure(
