@@ -1,17 +1,138 @@
-import { ScrollShadow } from "@heroui/react";
-import type { ReactNode } from "react";
+import {
+	type PointerEvent,
+	type ReactNode,
+	useLayoutEffect,
+	useRef,
+} from "react";
+
+type FolderDrag = {
+	id: number;
+	x: number;
+	y: number;
+	scroll: number;
+	active: boolean;
+};
 
 export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
+	const rowRef = useRef<HTMLDivElement>(null);
+	const contentRef = useRef<HTMLDivElement>(null);
+	const drag = useRef<FolderDrag | null>(null);
+	const suppressClick = useRef(false);
+
+	useLayoutEffect(() => {
+		const row = rowRef.current;
+		const content = contentRef.current;
+		if (!row || !content) return;
+		let frame: number | undefined;
+		const rtl = getComputedStyle(row).direction === "rtl";
+		const update = () => {
+			frame = undefined;
+			const max = Math.max(0, row.scrollWidth - row.clientWidth);
+			row.dataset.overflow = String(max > 1);
+			const position = Math.min(
+				max,
+				Math.max(0, rtl ? -row.scrollLeft : row.scrollLeft),
+			);
+			const fade = (hidden: number) => (hidden <= 1 ? 0 : Math.min(32, hidden));
+			const start = fade(position);
+			const end = fade(max - position);
+			const left = rtl ? end : start;
+			const right = rtl ? start : end;
+			const mask =
+				left || right
+					? `linear-gradient(to right, transparent, #000 ${left}px, #000 calc(100% - ${right}px), transparent)`
+					: "none";
+			row.style.maskImage = mask;
+			row.style.webkitMaskImage = mask;
+		};
+		const schedule = () => {
+			frame ??= requestAnimationFrame(update);
+		};
+		const observer = new ResizeObserver(schedule);
+		observer.observe(row);
+		observer.observe(content);
+		row.addEventListener("scroll", schedule, { passive: true });
+		update();
+		return () => {
+			observer.disconnect();
+			row.removeEventListener("scroll", schedule);
+			if (frame !== undefined) cancelAnimationFrame(frame);
+		};
+	}, []);
+
+	function finishDrag(event: PointerEvent<HTMLDivElement>) {
+		const current = drag.current;
+		if (!current || current.id !== event.pointerId) return;
+		drag.current = null;
+		delete event.currentTarget.dataset.dragging;
+		event.currentTarget.style.removeProperty("cursor");
+		if (!current.active) return;
+		suppressClick.current = true;
+		if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+			event.currentTarget.releasePointerCapture(event.pointerId);
+		}
+	}
+
 	return (
-		<ScrollShadow
-			orientation="horizontal"
-			hideScrollBar
-			size={32}
-			// Keep measured edge fades active without scroll timelines or motion effects.
-			data-scroll-shadow-mode="manual"
-			className="flex w-full min-w-0 snap-x snap-mandatory gap-4 overscroll-x-contain scroll-px-3 px-3 pt-2 pb-3 *:w-46 *:shrink-0 *:snap-start lg:scroll-px-0 lg:px-0 xl:scroll-px-3 xl:px-3"
+		<div
+			ref={rowRef}
+			data-slot="portfolio-folder-strip"
+			className="relative w-full min-w-0 snap-x snap-proximity overflow-x-auto overscroll-x-contain scroll-px-3 scrollbar-none select-none data-[dragging=true]:snap-none [@media(hover:hover)]:data-[overflow=true]:cursor-grab lg:scroll-px-0 xl:scroll-px-3"
+			onPointerDown={(event) => {
+				suppressClick.current = false;
+				if (event.pointerType !== "mouse" || event.button !== 0) return;
+				if (
+					event.currentTarget.scrollWidth <=
+					event.currentTarget.clientWidth + 1
+				)
+					return;
+				drag.current = {
+					id: event.pointerId,
+					x: event.clientX,
+					y: event.clientY,
+					scroll: event.currentTarget.scrollLeft,
+					active: false,
+				};
+			}}
+			onPointerMove={(event) => {
+				const current = drag.current;
+				if (!current || current.id !== event.pointerId) return;
+				const dx = event.clientX - current.x;
+				if (!current.active) {
+					if (
+						Math.abs(dx) < 6 ||
+						Math.abs(dx) < Math.abs(event.clientY - current.y)
+					)
+						return;
+					current.active = true;
+					event.currentTarget.dataset.dragging = "true";
+					event.currentTarget.style.cursor = "grabbing";
+					event.currentTarget.setPointerCapture(event.pointerId);
+				}
+				event.preventDefault();
+				event.currentTarget.scrollLeft = current.scroll - dx;
+			}}
+			onPointerUp={finishDrag}
+			onPointerCancel={finishDrag}
+			onLostPointerCapture={finishDrag}
+			onPointerLeave={(event) => {
+				if (!drag.current?.active) finishDrag(event);
+			}}
+			onDragStart={(event) => event.preventDefault()}
+			onClickCapture={(event) => {
+				if (suppressClick.current && event.detail > 0) {
+					event.preventDefault();
+					event.stopPropagation();
+				}
+				suppressClick.current = false;
+			}}
 		>
-			{children}
-		</ScrollShadow>
+			<div
+				ref={contentRef}
+				className="flex w-max min-w-full gap-4 px-3 pt-2 pb-3 *:w-46 *:shrink-0 *:snap-start *:cursor-inherit lg:px-0 xl:px-3"
+			>
+				{children}
+			</div>
+		</div>
 	);
 }
