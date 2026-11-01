@@ -53,6 +53,7 @@ import {
 import { useIsTablet } from "@/hooks/ui/use-mobile";
 import { getLocaleParam } from "@/lib/i18n";
 import { FolderCard } from "./folder-card";
+import { PortfolioFolderStrip } from "./folder-strip";
 import { PortfolioFolderView } from "./folder-view";
 import { ProfileFeed } from "./profile-feed";
 
@@ -726,9 +727,9 @@ export function ProfilePortfolio({
 							"components.portfolio.folder.catalogs",
 							"Portfolio folders",
 						)}
-						className="lg:px-0 xl:px-4"
+						className="min-w-0 lg:px-0 xl:px-4"
 					>
-						<div className="relative flex w-full min-w-0 snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-3 scroll-fade-x scroll-fade-4 px-3 pt-2 pb-3 lg:scroll-px-0 lg:px-0 xl:scroll-px-3 xl:px-3">
+						<PortfolioFolderStrip>
 							{filteredFolders.map((folder) => {
 								const catalogPosts = postsByCatalogId.get(folder.id) ?? [];
 								const preview = getFolderPreview(folder, catalogPosts);
@@ -743,7 +744,7 @@ export function ProfilePortfolio({
 											tab: "portfolio",
 											folderSlug: folder.id,
 										}}
-										className="w-40 shrink-0 snap-start rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+										className="rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 									>
 										<FolderCard
 											folder={folder}
@@ -754,7 +755,7 @@ export function ProfilePortfolio({
 									</Link>
 								);
 							})}
-						</div>
+						</PortfolioFolderStrip>
 					</section>
 				)}
 

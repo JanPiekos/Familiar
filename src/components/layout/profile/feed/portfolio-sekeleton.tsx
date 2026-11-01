@@ -3,11 +3,12 @@ import { MENU_SEARCH_HEIGHT_CLASS_NAME } from "@/components/ui/menu-styles";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { cn, createStaticList } from "@/lib/utils";
 import { FolderCardArtwork } from "./folder-artwork";
+import { PortfolioFolderStrip } from "./folder-strip";
 
 const FOLDERS = createStaticList("portfolio-folder-skeleton", 5);
 export function PortfolioFolderCardSkeleton() {
 	return (
-		<article className="flex h-full w-40 min-w-0 shrink-0 flex-col gap-3">
+		<article className="flex h-full min-w-0 flex-col gap-3">
 			<FolderCardArtwork>
 				<Skeleton className="size-full rounded-none" />
 				<Badge
@@ -107,11 +108,11 @@ export function PortfolioContentSkeleton({
 				<FolderHeaderSkeleton isOwner={isOwner} />
 			) : (
 				<section className="min-w-0 lg:px-0 xl:px-4">
-					<div className="flex w-full min-w-0 gap-4 overflow-hidden px-3 pt-2 pb-3 lg:px-0 xl:px-3">
+					<PortfolioFolderStrip showControls={false}>
 						{FOLDERS.map((item) => (
 							<PortfolioFolderCardSkeleton key={item.id} />
 						))}
-					</div>
+					</PortfolioFolderStrip>
 				</section>
 			)}
 			<PortfolioGridSkeleton
