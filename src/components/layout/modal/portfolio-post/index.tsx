@@ -39,6 +39,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ImageZoom } from "@/components/ui/image-zoom";
 import { Spinner } from "@/components/ui/spinner";
 import {
 	useArtistPortfolioPost,
@@ -383,12 +384,18 @@ function PostMedia({
 							className="size-full object-contain"
 						/>
 					) : (
-						<img
+						<ImageZoom
 							key={currentMedia.id}
 							src={currentMediaPath}
 							alt={`${displayTitle} — ${activeMediaIndex + 1}`}
-							className="size-full object-contain"
-						/>
+							className="size-full"
+						>
+							<img
+								src={currentMediaPath}
+								alt={`${displayTitle} — ${activeMediaIndex + 1}`}
+								className="size-full object-contain"
+							/>
+						</ImageZoom>
 					)
 				) : (
 					<div className="flex size-full min-h-75 items-center justify-center px-6 text-center text-white/70">
