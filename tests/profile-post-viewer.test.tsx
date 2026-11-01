@@ -54,9 +54,11 @@ vi.mock("@/api/commisions/index", () => ({ getTags: async () => [] }));
 import { PortfolioPostModal } from "@/components/layout/modal/portfolio-post";
 import { PostViewerLayout } from "@/components/layout/modal/portfolio-post/post-viewer-layout";
 const clients: QueryClient[] = [];
+const defaultImages = [...data.post.images];
 beforeEach(() => {
 	data.post.id = "first";
 	data.post.contentWarnings = [];
+	data.post.images = [...defaultImages];
 });
 afterEach(() => {
 	cleanup();
@@ -90,6 +92,52 @@ function imageLoaded(width: number, height: number) {
 	});
 	fireEvent.load(image);
 }
+it.each([
+	["en", "Show image", "Next image", "Previous image"],
+	["pl", "Pokaż obraz", "Następny obraz", "Poprzedni obraz"],
+])(
+	"keeps the current image indicator in sync with direct selection and looping arrows in %s",
+	async (locale, show, next, previous) => {
+		await mount(
+			<PortfolioPostModal
+				postId="first"
+				username="artist"
+				open
+				onOpenChange={() => {}}
+			/>,
+			locale,
+		);
+		const first = screen.getByRole("button", { name: `${show} 1` });
+		const second = screen.getByRole("button", { name: `${show} 2` });
+		expect(first.getAttribute("aria-current")).toBe("true");
+		expect(second.hasAttribute("aria-current")).toBe(false);
+		fireEvent.click(second);
+		expect(screen.getByRole("img").getAttribute("src")).toBe("/tall.png");
+		expect(first.hasAttribute("aria-current")).toBe(false);
+		expect(second.getAttribute("aria-current")).toBe("true");
+		fireEvent.click(screen.getByRole("button", { name: next }));
+		expect(screen.getByRole("img").getAttribute("src")).toBe("/wide.png");
+		expect(first.getAttribute("aria-current")).toBe("true");
+		fireEvent.click(screen.getByRole("button", { name: previous }));
+		expect(screen.getByRole("img").getAttribute("src")).toBe("/tall.png");
+		expect(second.getAttribute("aria-current")).toBe("true");
+	},
+);
+it("omits slider controls when a post only has one image", async () => {
+	data.post.images = [defaultImages[0]];
+	await mount(
+		<PortfolioPostModal
+			postId="first"
+			username="artist"
+			open
+			onOpenChange={() => {}}
+		/>,
+	);
+	expect(screen.getByRole("img").getAttribute("src")).toBe("/wide.png");
+	expect(screen.queryByRole("button", { name: "Next image" })).toBeNull();
+	expect(screen.queryByRole("button", { name: "Previous image" })).toBeNull();
+	expect(screen.queryByRole("button", { name: /Show image/ })).toBeNull();
+});
 it("fits the first artwork and keeps the frame stable while navigating a mixed-ratio gallery", async () => {
 	const close = vi.fn();
 	await mount(
