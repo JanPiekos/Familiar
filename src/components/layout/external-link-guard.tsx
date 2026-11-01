@@ -120,10 +120,7 @@ export function ExternalLinkGuard() {
 							</div>
 						</Surface>
 					</div>
-					<Surface
-						variant="secondary"
-						className="shrink-0 border-t border-border"
-					>
+					<Surface className="shrink-0">
 						<AlertDialogFooter className="p-4">
 							<AlertDialogCancel size="xl" className="h-12 min-w-0">
 								{t("external_link_guard.stay")}
