@@ -75,13 +75,12 @@ function setup() {
 	row.setPointerCapture = vi.fn();
 	row.releasePointerCapture = vi.fn();
 	row.hasPointerCapture = () => true;
-	row.scrollBy = vi.fn((options: ScrollToOptions) => {
+	row.scrollBy = vi.fn((options?: ScrollToOptions | number) => {
+		const distance =
+			typeof options === "number" ? options : (options?.left ?? 0);
 		row.scrollLeft = Math.max(
 			0,
-			Math.min(
-				metrics.contentWidth - metrics.width,
-				row.scrollLeft + (options.left ?? 0),
-			),
+			Math.min(metrics.contentWidth - metrics.width, row.scrollLeft + distance),
 		);
 		fireEvent.scroll(row);
 	});
