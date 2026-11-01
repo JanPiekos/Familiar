@@ -129,7 +129,7 @@ export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
 		>
 			<div
 				ref={contentRef}
-				className="flex w-max min-w-full gap-4 px-3 pt-2 pb-3 *:w-46 *:shrink-0 *:snap-start *:cursor-inherit lg:px-0 xl:px-3"
+				className="flex w-max min-w-full gap-4 px-3 pt-2 pb-3 *:w-46 *:shrink-0 *:snap-start *:cursor-inherit! lg:px-0 xl:px-3"
 			>
 				{children}
 			</div>
