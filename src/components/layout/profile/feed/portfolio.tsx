@@ -4,7 +4,7 @@ import {
 } from "@/components/layout/profile/portfolio-creation";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { Edit2, Folder, MoreHorizontal, Tag, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type {
 	CatalogResponse,
@@ -244,10 +244,30 @@ export function ProfilePortfolio({
 	const [deleteCatalogOpen, setDeleteCatalogOpen] = useState(false);
 	const [managedCatalog, setManagedCatalog] = useState<CatalogResponse>();
 	const [deleteCatalogFailed, setDeleteCatalogFailed] = useState(false);
+	const deletingCatalog = useRef<{
+		active: boolean;
+		returnToPortfolio: boolean;
+		onExited?: () => void;
+	} | null>(null);
 	const [addPostsOpen, setAddPostsOpen] = useState(false);
 
 	const updateCatalogMutation = useUpdateCatalog();
-	const deleteCatalogMutation = useDeleteCatalog();
+	const deleteCatalogMutation = useDeleteCatalog(() => {
+		const pending = deletingCatalog.current;
+		if (!pending?.active) return;
+		return new Promise<void>((resolve) => {
+			pending.onExited = resolve;
+			// Keep cached folder content until the confirmation has finished closing.
+			setDeleteCatalogOpen(false);
+		}).then(async () => {
+			if (pending.active && pending.returnToPortfolio) {
+				await navigate({
+					to: "/{-$locale}/user/$username/$tab",
+					params: { locale, username: username ?? "", tab: "portfolio" },
+				});
+			}
+		});
+	});
 	const removePostMutation = useRemovePortfolioPostFromCatalog();
 	const addPostMutation = useAddPortfolioPostToCatalog();
 
@@ -364,6 +384,13 @@ export function ProfilePortfolio({
 		setRenameCatalogOpen(false);
 		setDeleteCatalogOpen(false);
 		setManagedCatalog(undefined);
+		return () => {
+			const pending = deletingCatalog.current;
+			if (pending) {
+				pending.active = false;
+				pending.onExited?.();
+			}
+		};
 	}, [folderId, username]);
 
 	const handleRenameCatalog = async (
@@ -377,19 +404,22 @@ export function ProfilePortfolio({
 	};
 
 	const handleDeleteCatalog = async () => {
-		if (!managedFolder || deleteCatalogMutation.isPending) return;
+		if (!managedFolder || !deleteCatalogOpen || deleteCatalogMutation.isPending)
+			return;
+		const pending = {
+			active: true,
+			returnToPortfolio: managedFolder.id === currentFolder?.id,
+		};
+		deletingCatalog.current = pending;
 		setDeleteCatalogFailed(false);
 		try {
 			await deleteCatalogMutation.mutateAsync(managedFolder.id);
+			if (!pending.active) return;
 			setDeleteCatalogOpen(false);
-			if (managedFolder.id === currentFolder?.id) {
-				void navigate({
-					to: "/{-$locale}/user/$username/$tab",
-					params: { locale, username: username ?? "", tab: "portfolio" },
-				});
-			}
 		} catch {
-			setDeleteCatalogFailed(true);
+			if (pending.active) setDeleteCatalogFailed(true);
+		} finally {
+			if (deletingCatalog.current === pending) deletingCatalog.current = null;
 		}
 	};
 
@@ -635,7 +665,10 @@ export function ProfilePortfolio({
 						if (!deleteCatalogMutation.isPending) setDeleteCatalogOpen(open);
 					}}
 				>
-					<AlertDialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-3xl bg-background p-0 outline-none data-[size=default]:sm:max-w-md">
+					<AlertDialogContent
+						className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-3xl bg-background p-0 outline-none data-[size=default]:sm:max-w-md"
+						onCloseAutoFocus={() => deletingCatalog.current?.onExited?.()}
+					>
 						<div className="min-h-0 overflow-y-auto p-5 text-left sm:p-6">
 							<div
 								className="mb-4 flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive"
@@ -675,7 +708,7 @@ export function ProfilePortfolio({
 							<AlertDialogCancel
 								size="2xl"
 								className="flex-1 sm:flex-none"
-								disabled={deleteCatalogMutation.isPending}
+								disabled={deleteCatalogMutation.isPending || !deleteCatalogOpen}
 							>
 								{t("components.portfolio.folder.delete.cancel", "Cancel")}
 							</AlertDialogCancel>
@@ -684,7 +717,7 @@ export function ProfilePortfolio({
 								variant="destructive"
 								size="2xl"
 								className="flex-1 sm:flex-none"
-								disabled={deleteCatalogMutation.isPending}
+								disabled={deleteCatalogMutation.isPending || !deleteCatalogOpen}
 								onClick={(event) => {
 									event.preventDefault();
 									void handleDeleteCatalog();

@@ -27,7 +27,8 @@ vi.mock("@/hooks/portfolio/use-portfolio", async () => {
 	const { useMutation } = await import("@tanstack/react-query");
 	return {
 		useUpdateCatalog: () => useMutation({ mutationFn: state.rename }),
-		useDeleteCatalog: () => useMutation({ mutationFn: state.remove }),
+		useDeleteCatalog: (onDeleted?: () => void | Promise<void>) =>
+			useMutation({ mutationFn: state.remove, onSuccess: onDeleted }),
 		useRemovePortfolioPostFromCatalog: () => ({ mutateAsync: vi.fn() }),
 		useAddPortfolioPostToCatalog: () => ({ mutateAsync: vi.fn() }),
 	};
