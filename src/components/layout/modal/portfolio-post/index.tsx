@@ -436,7 +436,11 @@ function PostMedia({
 							</Button>
 						</div>
 
-						<div className="absolute inset-x-4 top-0 z-10 flex gap-1">
+						<div
+							aria-hidden="true"
+							className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-linear-to-b from-black/45 to-transparent"
+						/>
+						<div className="absolute left-1/2 top-0 z-10 flex w-1/3 -translate-x-1/2 gap-1">
 							{images.map((image, index) => (
 								<button
 									key={image.id || index}
@@ -452,7 +456,7 @@ function PostMedia({
 									<span
 										aria-hidden="true"
 										className={cn(
-											"h-0.75 w-full rounded-full bg-white/35 shadow-[0_1px_3px_rgb(0_0_0/0.5)] transition-colors group-hover/indicator:bg-white/70 motion-reduce:transition-none",
+											"h-0.75 w-full rounded-full bg-white/35 transition-colors group-hover/indicator:bg-white/70 motion-reduce:transition-none",
 											index === activeMediaIndex &&
 												"bg-white group-hover/indicator:bg-white",
 										)}
