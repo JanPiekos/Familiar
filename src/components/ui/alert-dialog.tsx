@@ -1,7 +1,8 @@
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
-import type * as React from "react";
+import * as React from "react";
 import { Button } from "src/components/ui/button";
 import { cn } from "@/lib/utils";
+import "./alert-dialog.css";
 
 function AlertDialog({
 	...props
@@ -44,14 +45,69 @@ function AlertDialogOverlay({
 function AlertDialogContent({
 	className,
 	size = "default",
+	ref,
 	...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
 	size?: "default" | "sm";
 }) {
+	const content = React.useRef<HTMLDivElement | null>(null);
+	const animation = React.useRef<Animation | null>(null);
+	const timeout = React.useRef<number | undefined>(undefined);
+	const stopFeedback = React.useCallback(() => {
+		animation.current?.cancel();
+		animation.current = null;
+		window.clearTimeout(timeout.current);
+		if (content.current) delete content.current.dataset.outsideFeedback;
+	}, []);
+	React.useEffect(() => stopFeedback, [stopFeedback]);
+	const setContent = React.useCallback(
+		(node: HTMLDivElement | null) => {
+			content.current = node;
+			const cleanup = typeof ref === "function" ? ref(node) : undefined;
+			if (ref && typeof ref !== "function") ref.current = node;
+			return () => {
+				stopFeedback();
+				content.current = null;
+				if (typeof cleanup === "function") cleanup();
+				else if (typeof ref === "function") ref(null);
+				else if (ref) ref.current = null;
+			};
+		},
+		[ref, stopFeedback],
+	);
+	const indicateRequiredChoice = (
+		event: React.PointerEvent<HTMLDivElement>,
+	) => {
+		if (event.button !== 0 || event.target !== event.currentTarget) return;
+		const element = content.current;
+		if (!element || element.dataset.state !== "open") return;
+		event.preventDefault();
+		stopFeedback();
+		element.dataset.outsideFeedback = "true";
+		timeout.current = window.setTimeout(() => {
+			delete element.dataset.outsideFeedback;
+		}, 400);
+		if (
+			window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ||
+			document.documentElement.dataset.a11yReduceMotion === "true"
+		)
+			return;
+		if (typeof element.animate !== "function") return;
+		// Add to the existing transform so centering and enter/exit motion stay intact.
+		const feedback = element.animate(
+			[0, -6, 6, -4, 4, 0].map((x) => ({ transform: `translateX(${x}px)` })),
+			{ duration: 320, easing: "ease-in-out", composite: "add" },
+		);
+		animation.current = feedback;
+		feedback.onfinish = () => {
+			if (animation.current === feedback) animation.current = null;
+		};
+	};
 	return (
 		<AlertDialogPortal>
-			<AlertDialogOverlay />
+			<AlertDialogOverlay onPointerDown={indicateRequiredChoice} />
 			<AlertDialogPrimitive.Content
+				ref={setContent}
 				data-slot="alert-dialog-content"
 				data-size={size}
 				className={cn(
