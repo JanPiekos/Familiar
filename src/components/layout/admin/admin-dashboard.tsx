@@ -217,25 +217,27 @@ export function AdminInvitationKeys({ userId }: { userId: string }) {
 					{t("admin_keys.generate")}
 				</Button>
 			</header>
-			<div className="grid gap-3 sm:grid-cols-3">
+			<div className="grid grid-cols-3 gap-2 sm:gap-3">
 				{counters.map(({ label, value, icon: Icon }) => (
 					<Surface
 						key={label}
-						className="flex items-center justify-between gap-4 rounded-3xl border p-5"
+						className="flex items-center justify-between gap-4 rounded-2xl border p-3 sm:rounded-3xl sm:p-5"
 					>
 						<div>
-							<p className="text-sm text-muted-foreground">{t(label)}</p>
+							<p className="text-xs text-muted-foreground sm:text-sm">
+								{t(label)}
+							</p>
 							{stats.isPending ? (
 								<Skeleton className="mt-2 h-9 w-20" />
 							) : (
-								<p className="mt-2 text-3xl font-semibold tabular-nums text-foreground">
+								<p className="mt-2 text-2xl font-semibold tabular-nums text-foreground sm:text-3xl">
 									{value === undefined || accessDenied
 										? "—"
 										: value.toLocaleString(i18n.language)}
 								</p>
 							)}
 						</div>
-						<div className="flex size-11 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+						<div className="hidden size-11 items-center justify-center rounded-2xl bg-muted text-muted-foreground sm:flex">
 							<Icon aria-hidden="true" className="size-5" />
 						</div>
 					</Surface>
