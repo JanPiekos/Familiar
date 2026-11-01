@@ -57,7 +57,7 @@ export function TabSelector<T extends string>({
 								value={item.id}
 								size={size}
 								className={cn(
-									"gap-2 bg-transparent!",
+									"gap-2 bg-transparent! data-[state=active]:text-primary",
 									item.disabled &&
 										"pointer-events-none cursor-not-allowed opacity-50",
 								)}

@@ -233,7 +233,7 @@ function TabContent({
 				<TabsList
 					className={cn(
 						"grid h-auto w-full grid-cols-2 rounded-lg bg-muted p-1",
-						"[&>button]:rounded-md [&>button]:py-2 [&>button]:text-muted-foreground [&>button]:text-sm [&>button]:transition-all [&>button]:data-[state=active]:bg-background [&>button]:data-[state=active]:text-foreground [&>button]:data-[state=active]:shadow-sm",
+						"[&>button]:rounded-md [&>button]:py-2 [&>button]:text-muted-foreground [&>button]:text-sm [&>button]:transition-all [&>button]:data-[state=active]:bg-primary [&>button]:data-[state=active]:text-primary-foreground [&>button]:data-[state=active]:shadow-sm",
 					)}
 				>
 					<TabsTrigger value="login">{t("ui.sign_in", "Sign In")}</TabsTrigger>
