@@ -440,7 +440,7 @@ function PostMedia({
 							aria-hidden="true"
 							className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-linear-to-b from-black/45 to-transparent"
 						/>
-						<div className="absolute left-1/2 top-0 z-10 flex w-1/2 -translate-x-1/2 gap-1">
+						<div className="absolute left-1/2 top-0 z-10 flex w-3/4 -translate-x-1/2 gap-1">
 							{images.map((image, index) => (
 								<button
 									key={image.id || index}
