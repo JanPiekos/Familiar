@@ -91,7 +91,7 @@ export function ExternalLinkGuard() {
 						</p>
 						<p
 							dir="ltr"
-							className="mt-1 max-h-24 overflow-y-auto break-all text-sm text-muted-foreground"
+							className="mt-1 break-all text-sm text-muted-foreground"
 						>
 							{destination?.href}
 						</p>
