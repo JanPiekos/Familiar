@@ -7,6 +7,26 @@
 	animation: settings-exit 140ms ease-in both;
 }
 
+.settings-dialog-overlay[data-state="open"] {
+	animation: settings-backdrop-enter 180ms ease-out;
+}
+
+.settings-dialog-overlay[data-state="closed"] {
+	animation: settings-backdrop-exit 140ms ease-in both;
+}
+
+@keyframes settings-backdrop-enter {
+	from {
+		opacity: 0;
+	}
+}
+
+@keyframes settings-backdrop-exit {
+	to {
+		opacity: 0;
+	}
+}
+
 @keyframes settings-enter {
 	from {
 		opacity: 0;
@@ -22,7 +42,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.settings-dialog {
+	.settings-dialog,
+	.settings-dialog-overlay {
 		animation-duration: 0.01ms !important;
 	}
 }

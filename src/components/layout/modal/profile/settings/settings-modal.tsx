@@ -308,6 +308,7 @@ export function UserSettingsModal({
 				ref={content}
 				tabIndex={-1}
 				showCloseButton={false}
+				overlayClassName="settings-dialog-overlay"
 				onOpenAutoFocus={(event) => {
 					event.preventDefault();
 					returnFocus.current =
