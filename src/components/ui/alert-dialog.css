@@ -1,4 +1,72 @@
+[data-slot="alert-dialog-content"][data-state="open"] {
+	animation: confirmation-enter 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+[data-slot="alert-dialog-content"][data-state="closed"] {
+	animation: confirmation-exit 140ms ease-in both;
+}
+
+[data-slot="alert-dialog-overlay"][data-state="open"] {
+	animation: confirmation-backdrop-enter 180ms ease-out both;
+}
+
+[data-slot="alert-dialog-overlay"][data-state="closed"] {
+	animation: confirmation-backdrop-exit 140ms ease-in both;
+}
+
+@keyframes confirmation-enter {
+	from {
+		opacity: 0;
+		scale: 0.96;
+	}
+	to {
+		opacity: 1;
+		scale: 1;
+	}
+}
+
+@keyframes confirmation-exit {
+	from {
+		opacity: 1;
+		scale: 1;
+	}
+	to {
+		opacity: 0;
+		scale: 0.98;
+	}
+}
+
+@keyframes confirmation-backdrop-enter {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes confirmation-backdrop-exit {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
 [data-slot="alert-dialog-content"][data-outside-feedback="true"] {
 	outline: 2px solid var(--ring);
 	outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-slot="alert-dialog-content"][data-state],
+	[data-slot="alert-dialog-overlay"][data-state] {
+		animation: none;
+	}
+}
+
+:root[data-a11y-reduce-motion="true"] [data-slot="alert-dialog-content"],
+:root[data-a11y-reduce-motion="true"] [data-slot="alert-dialog-overlay"] {
+	animation: none;
 }

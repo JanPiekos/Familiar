@@ -30,10 +30,56 @@ beforeEach(() => {
 });
 afterEach(() => {
 	cleanup();
+	vi.restoreAllMocks();
 	vi.useRealTimers();
 	vi.unstubAllGlobals();
 	delete document.documentElement.dataset.a11yReduceMotion;
 });
+
+// jsdom has no CSS animation engine; give Radix live names for its presence lifecycle.
+function enableConfirmationAnimations() {
+	const getStyle = globalThis.getComputedStyle;
+	vi.stubGlobal("CSS", { escape: (value: string) => value });
+	vi.spyOn(globalThis, "getComputedStyle").mockImplementation(
+		(element, pseudo) => {
+			const style = getStyle(element, pseudo);
+			if (element.getAttribute("data-slot") !== "alert-dialog-content")
+				return style;
+			return new Proxy(style, {
+				get(target, property) {
+					return property === "animationName"
+						? element.getAttribute("data-state") === "closed"
+							? "confirmation-exit"
+							: "confirmation-enter"
+						: Reflect.get(target, property, target);
+				},
+			});
+		},
+	);
+}
+
+it.each(["alert", "confirm"] as const)(
+	"keeps the %s mounted until its own exit animation finishes",
+	async (kind) => {
+		enableConfirmationAnimations();
+		const { dialog, onConfirm } = await mount(kind);
+		fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+		expect(dialog.dataset.state).toBe("closed");
+		expect(dialog.isConnected).toBe(true);
+		const finish = (target: Element) => {
+			const event = new Event("animationend", { bubbles: true });
+			Object.defineProperty(event, "animationName", {
+				value: "confirmation-exit",
+			});
+			fireEvent(target, event);
+		};
+		finish(dialog.querySelector("button")!);
+		expect(dialog.isConnected).toBe(true);
+		finish(dialog);
+		await waitFor(() => expect(dialog.isConnected).toBe(false));
+		expect(onConfirm).not.toHaveBeenCalled();
+	},
+);
 
 async function mount(
 	kind: "alert" | "confirm" = "alert",
