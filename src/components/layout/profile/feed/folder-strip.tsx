@@ -208,14 +208,14 @@ export function PortfolioFolderStrip({
 				data-edge="right"
 				className="pointer-events-none absolute inset-y-0 right-0 z-30 w-[var(--folder-fade-right,0px)] bg-linear-to-l from-background to-transparent"
 			/>
-			<div className="pointer-events-none absolute inset-x-0 top-1/2 z-40 flex -translate-y-1/2 items-center justify-between">
+			<div className="pointer-events-none absolute inset-x-0 top-1/2 z-40 flex -translate-y-1/2 items-center justify-between lg:-inset-x-3">
 				{showControls && canScroll.left && (
 					<Button
 						ref={leftButtonRef}
 						type="button"
 						variant="outline"
 						size="icon-xl"
-						className="pointer-events-auto bg-background shadow-sm lg:size-9 dark:bg-background"
+						className="pointer-events-auto bg-background shadow-sm hover:bg-muted focus-visible:bg-muted lg:size-9 dark:bg-background dark:hover:bg-muted"
 						aria-label={t(
 							"components.portfolio.folder.scroll_left",
 							"Scroll folders left",
@@ -232,7 +232,7 @@ export function PortfolioFolderStrip({
 						type="button"
 						variant="outline"
 						size="icon-xl"
-						className="pointer-events-auto ml-auto bg-background shadow-sm lg:size-9 dark:bg-background"
+						className="pointer-events-auto ml-auto bg-background shadow-sm hover:bg-muted focus-visible:bg-muted lg:size-9 dark:bg-background dark:hover:bg-muted"
 						aria-label={t(
 							"components.portfolio.folder.scroll_right",
 							"Scroll folders right",
