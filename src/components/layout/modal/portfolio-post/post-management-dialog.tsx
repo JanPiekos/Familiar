@@ -1,5 +1,5 @@
 import { FolderMinus, Trash2 } from "lucide-react";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import type { CatalogResponse } from "@/api/portfolio/catalogs/catalog-types";
@@ -63,7 +63,16 @@ export function PostManagementDialog({
 	const [destination, setDestination] = useState("");
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState("");
+	const [open, setOpen] = useState(true);
+	const mounted = useRef(false);
+	const returnFocus = useRef<HTMLElement | null>(null);
 	const lock = useRef(false);
+	useEffect(() => {
+		mounted.current = true;
+		return () => {
+			mounted.current = false;
+		};
+	}, []);
 	// Remember completed membership requests so retrying a partial move is safe.
 	const memberships = useRef(new Set(post.catalogIds ?? []));
 	const update = useUpdatePortfolioPost();
@@ -81,12 +90,17 @@ export function PostManagementDialog({
 			: Boolean(destination) &&
 				(!memberships.current.has(destination) ||
 					memberships.current.size !== 1);
+	const finish = () => {
+		if (isConfirmation) setOpen(false);
+		else onClose();
+	};
 	const close = () => {
-		if (!lock.current) onClose();
+		if (!lock.current) finish();
 	};
 	const save = async () => {
 		if (
 			lock.current ||
+			!open ||
 			!post.id ||
 			(action === "remove" && !folder?.id) ||
 			(!isConfirmation && !changed) ||
@@ -137,7 +151,7 @@ export function PostManagementDialog({
 						: `components.portfolio.post.manage.${action}_success`,
 				),
 			);
-			onClose();
+			finish();
 		} catch {
 			setError(
 				t(
@@ -161,12 +175,28 @@ export function PostManagementDialog({
 	if (isConfirmation)
 		return (
 			<AlertDialog
-				open
+				open={open}
 				onOpenChange={(open) => {
 					if (!open) close();
 				}}
 			>
-				<AlertDialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-3xl bg-background p-0 outline-none data-[size=default]:sm:max-w-md">
+				<AlertDialogContent
+					className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-3xl bg-background p-0 outline-none data-[size=default]:sm:max-w-md"
+					onOpenAutoFocus={() => {
+						returnFocus.current =
+							document.activeElement instanceof HTMLElement
+								? document.activeElement
+								: null;
+					}}
+					onCloseAutoFocus={(event) => {
+						if (open || !mounted.current) return;
+						event.preventDefault();
+						if (returnFocus.current?.isConnected)
+							returnFocus.current.focus({ preventScroll: true });
+						// Radix removes the content only after its exit animation ends.
+						onClose();
+					}}
+				>
 					<div className="min-h-0 overflow-y-auto p-5 text-left sm:p-6">
 						<div
 							className="mb-4 flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive"
@@ -193,7 +223,7 @@ export function PostManagementDialog({
 						<AlertDialogCancel
 							size="2xl"
 							className="flex-1 sm:flex-none"
-							disabled={busy}
+							disabled={busy || !open}
 						>
 							{t("ui.cancel")}
 						</AlertDialogCancel>
@@ -201,7 +231,10 @@ export function PostManagementDialog({
 							variant="destructive"
 							size="2xl"
 							disabled={
-								busy || !post.id || (action === "remove" && !folder?.id)
+								busy ||
+								!open ||
+								!post.id ||
+								(action === "remove" && !folder?.id)
 							}
 							className="flex-1 sm:flex-none"
 							onClick={(event) => {

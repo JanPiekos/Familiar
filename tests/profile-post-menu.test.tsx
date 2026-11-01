@@ -71,7 +71,11 @@ beforeEach(async () => {
 	Object.values(mutations).forEach((mock) => mock.mockResolvedValue(undefined));
 	window.HTMLElement.prototype.scrollIntoView = vi.fn();
 });
-afterEach(cleanup);
+afterEach(() => {
+	cleanup();
+	vi.restoreAllMocks();
+	vi.unstubAllGlobals();
+});
 
 describe("post card menus", () => {
 	function card(owner: boolean) {
@@ -129,6 +133,82 @@ describe("post card menus", () => {
 });
 
 describe("owner post management", () => {
+	// Expose live animation names to Radix Presence, which jsdom cannot calculate.
+	function animateConfirmation() {
+		const getStyle = globalThis.getComputedStyle;
+		vi.stubGlobal("CSS", { escape: (value: string) => value });
+		vi.spyOn(globalThis, "getComputedStyle").mockImplementation(
+			(element, pseudo) => {
+				const style = getStyle(element, pseudo);
+				if (element.getAttribute("data-slot") !== "alert-dialog-content")
+					return style;
+				return new Proxy(style, {
+					get(target, property) {
+						return property === "animationName"
+							? element.getAttribute("data-state") === "closed"
+								? "exit"
+								: "enter"
+							: Reflect.get(target, property, target);
+					},
+				});
+			},
+		);
+	}
+	function endExit(target: Element) {
+		const event = new Event("animationend", { bubbles: true });
+		Object.defineProperty(event, "animationName", { value: "exit" });
+		fireEvent(target, event);
+	}
+	it.each(["delete", "remove"] as const)(
+		"waits for %s confirmation exits when cancelled or escaped",
+		async (action) => {
+			animateConfirmation();
+			mount(
+				<PostManagementDialog
+					post={post}
+					action={action}
+					folders={folders}
+					folder={{ id: "old-1", name: "Sketches" }}
+					onClose={close}
+				/>,
+			);
+			const content = screen.getByRole("alertdialog");
+			if (action === "delete")
+				fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+			else fireEvent.keyDown(content, { key: "Escape" });
+			expect(content.dataset.state).toBe("closed");
+			expect(content.isConnected).toBe(true);
+			expect(close).not.toHaveBeenCalled();
+			endExit(content.querySelector("button")!);
+			expect(close).not.toHaveBeenCalled();
+			endExit(content);
+			await waitFor(() => expect(close).toHaveBeenCalledOnce());
+			expect(mutations.remove).not.toHaveBeenCalled();
+			expect(mutations.unfile).not.toHaveBeenCalled();
+		},
+	);
+	it("finishes the successful deletion exit without sending another request", async () => {
+		animateConfirmation();
+		dialog("delete");
+		const content = screen.getByRole("alertdialog");
+		const remove = screen.getByRole("button", { name: "Delete" });
+		fireEvent.click(remove);
+		await waitFor(() => expect(content.dataset.state).toBe("closed"));
+		expect(close).not.toHaveBeenCalled();
+		expect((remove as HTMLButtonElement).disabled).toBe(true);
+		fireEvent.click(remove);
+		expect(mutations.remove).toHaveBeenCalledOnce();
+		endExit(content);
+		await waitFor(() => expect(close).toHaveBeenCalledOnce());
+	});
+	it("does not call back after another route unmounts a closing confirmation", async () => {
+		animateConfirmation();
+		const view = dialog("delete");
+		fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+		view.unmount();
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		expect(close).not.toHaveBeenCalled();
+	});
 	it("updates post details while preserving media, tags, warnings, and folder memberships", async () => {
 		dialog("edit");
 		fireEvent.change(screen.getByRole("textbox", { name: "Title *" }), {
