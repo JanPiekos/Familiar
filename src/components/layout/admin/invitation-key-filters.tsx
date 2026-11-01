@@ -96,10 +96,13 @@ export function InvitationKeyFilters({
 						</PopoverTrigger>
 						<PopoverContent
 							align="end"
-							className="w-80 max-w-[calc(100vw-2rem)]"
+							aria-label={t("admin_keys.owner_id")}
+							sideOffset={8}
+							collisionPadding={16}
+							className="w-88 max-w-[calc(100vw-2rem)] p-4"
 						>
 							<form
-								className="space-y-3"
+								className="flex flex-col gap-4"
 								onSubmit={(event) => {
 									event.preventDefault();
 									const value = draft.trim();
@@ -117,31 +120,48 @@ export function InvitationKeyFilters({
 									setOpen(false);
 								}}
 							>
-								<label htmlFor="invite-owner" className="text-sm font-medium">
-									{t("admin_keys.owner_id")}
-								</label>
-								<InputGroup>
-									<InputGroupInput
-										id="invite-owner"
-										value={draft}
-										placeholder={t("admin_keys.owner_placeholder")}
-										aria-invalid={!!error}
-										onChange={(event) => {
-											setDraft(event.target.value);
-											setError("");
-										}}
-									/>
-								</InputGroup>
-								{error && (
-									<p role="alert" className="text-xs text-destructive">
-										{error}
-									</p>
-								)}
-								<div className="flex justify-end gap-2">
+								<div className="flex flex-col gap-2">
+									<label
+										htmlFor="invite-owner"
+										className="block text-sm font-medium"
+									>
+										{t("admin_keys.owner_id")}
+									</label>
+									<InputGroup className="h-11 lg:h-10">
+										<InputGroupInput
+											id="invite-owner"
+											value={draft}
+											placeholder={t("admin_keys.owner_placeholder")}
+											className="h-full"
+											autoComplete="off"
+											autoCapitalize="none"
+											spellCheck={false}
+											aria-invalid={!!error}
+											aria-describedby={
+												error ? "invite-owner-error" : undefined
+											}
+											onChange={(event) => {
+												setDraft(event.target.value);
+												setError("");
+											}}
+										/>
+									</InputGroup>
+									{error && (
+										<p
+											id="invite-owner-error"
+											role="alert"
+											className="text-xs leading-relaxed text-destructive"
+										>
+											{error}
+										</p>
+									)}
+								</div>
+								<div className="flex items-center justify-between gap-3">
 									<Button
 										type="button"
-										variant="ghost"
+										variant="outline"
 										size="xl"
+										className="h-11 px-5 lg:h-10"
 										onClick={() => {
 											onOwnerChange(undefined);
 											setDraft("");
@@ -151,7 +171,7 @@ export function InvitationKeyFilters({
 									>
 										{t("admin_keys.clear")}
 									</Button>
-									<Button type="submit" size="xl">
+									<Button type="submit" size="xl" className="h-11 px-5 lg:h-10">
 										{t("admin_keys.apply")}
 									</Button>
 								</div>
