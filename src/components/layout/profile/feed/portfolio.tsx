@@ -1,3 +1,4 @@
+import { Surface } from "@heroui/react";
 import {
 	PortfolioEmptyActions,
 	usePublishPortfolioCreation,
@@ -669,7 +670,7 @@ export function ProfilePortfolio({
 						className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-3xl bg-background p-0 outline-none data-[size=default]:sm:max-w-md"
 						onCloseAutoFocus={() => deletingCatalog.current?.onExited?.()}
 					>
-						<div className="min-h-0 overflow-y-auto p-5 text-left sm:p-6">
+						<Surface className="min-h-0 overflow-y-auto p-5 text-left sm:p-6">
 							<div
 								className="mb-4 flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive"
 								aria-hidden="true"
@@ -689,11 +690,14 @@ export function ProfilePortfolio({
 									"Are you sure you want to delete this folder? Posts inside it will not be deleted.",
 								)}
 							</AlertDialogDescription>
-							<div className="mt-4 rounded-2xl bg-muted/50 px-4 py-3">
+							<Surface
+								variant="secondary"
+								className="mt-4 rounded-2xl border border-border px-4 py-3"
+							>
 								<p className="line-clamp-2 break-words text-sm font-medium text-foreground">
 									{managedFolder.name}
 								</p>
-							</div>
+							</Surface>
 							{deleteCatalogFailed && (
 								<p role="alert" className="mt-4 text-sm text-destructive">
 									{t(
@@ -702,35 +706,44 @@ export function ProfilePortfolio({
 									)}
 								</p>
 							)}
-						</div>
+						</Surface>
 
-						<AlertDialogFooter className="shrink-0 flex-row border-t bg-muted/20 p-4 sm:px-6">
-							<AlertDialogCancel
-								size="2xl"
-								className="flex-1 sm:flex-none"
-								disabled={deleteCatalogMutation.isPending || !deleteCatalogOpen}
-							>
-								{t("components.portfolio.folder.delete.cancel", "Cancel")}
-							</AlertDialogCancel>
+						<Surface
+							variant="secondary"
+							className="shrink-0 border-t border-border"
+						>
+							<AlertDialogFooter className="flex-row p-4 sm:px-6">
+								<AlertDialogCancel
+									size="2xl"
+									className="flex-1 sm:flex-none"
+									disabled={
+										deleteCatalogMutation.isPending || !deleteCatalogOpen
+									}
+								>
+									{t("components.portfolio.folder.delete.cancel", "Cancel")}
+								</AlertDialogCancel>
 
-							<AlertDialogAction
-								variant="destructive"
-								size="2xl"
-								className="flex-1 sm:flex-none"
-								disabled={deleteCatalogMutation.isPending || !deleteCatalogOpen}
-								onClick={(event) => {
-									event.preventDefault();
-									void handleDeleteCatalog();
-								}}
-							>
-								{deleteCatalogMutation.isPending
-									? t(
-											"components.portfolio.folder.delete.deleting",
-											"Deleting...",
-										)
-									: t("components.portfolio.folder.delete.confirm", "Delete")}
-							</AlertDialogAction>
-						</AlertDialogFooter>
+								<AlertDialogAction
+									variant="destructive"
+									size="2xl"
+									className="flex-1 sm:flex-none"
+									disabled={
+										deleteCatalogMutation.isPending || !deleteCatalogOpen
+									}
+									onClick={(event) => {
+										event.preventDefault();
+										void handleDeleteCatalog();
+									}}
+								>
+									{deleteCatalogMutation.isPending
+										? t(
+												"components.portfolio.folder.delete.deleting",
+												"Deleting...",
+											)
+										: t("components.portfolio.folder.delete.confirm", "Delete")}
+								</AlertDialogAction>
+							</AlertDialogFooter>
+						</Surface>
 					</AlertDialogContent>
 				</AlertDialog>
 			</>
