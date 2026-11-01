@@ -14,10 +14,10 @@ export default function Header() {
 				<NavWrapper className="hidden lg:flex">
 					<Link
 						to={localizePath("/", i18n.language)}
-						className="mx-3 flex items-center gap-x-2"
+						className="mx-3 flex h-10 items-center gap-x-2 rounded-full"
 					>
-						<SolidLogo size={28} className="text-primary" aria-hidden="true" />
-						<span className="text-sm font-bold tracking-wider text-primary uppercase">
+						<SolidLogo size={40} className="text-primary" aria-hidden="true" />
+						<span className="text-base font-bold tracking-wider text-primary uppercase">
 							{t("header.title")}
 						</span>
 					</Link>
@@ -45,7 +45,7 @@ function NavWrapper({
 	return (
 		<nav
 			className={cn(
-				"flex items-center gap-1 rounded-full bg-background p-1 transition-shadow duration-200",
+				"flex items-center gap-1 rounded-full border border-transparent bg-background p-1 transition-shadow duration-200",
 				isScrolled ? "shadow-lg" : "shadow-none",
 				className,
 			)}
