@@ -805,6 +805,8 @@ const pl = {
 					title: "Nowy folder",
 				},
 				catalogs: "Foldery portfolio",
+				scroll_left: "Przewiń foldery w lewo",
+				scroll_right: "Przewiń foldery w prawo",
 				label: "Folder portfolio",
 				items: "{{count}} postów",
 				items_one: "{{count}} post",

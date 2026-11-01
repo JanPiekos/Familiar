@@ -108,7 +108,7 @@ export function PortfolioContentSkeleton({
 				<FolderHeaderSkeleton isOwner={isOwner} />
 			) : (
 				<section className="min-w-0 lg:px-0 xl:px-4">
-					<PortfolioFolderStrip>
+					<PortfolioFolderStrip showControls={false}>
 						{FOLDERS.map((item) => (
 							<PortfolioFolderCardSkeleton key={item.id} />
 						))}

@@ -10,6 +10,10 @@ import {
 } from "@testing-library/react";
 import { PortfolioFolderStrip } from "@/components/layout/profile/feed/folder-strip";
 
+vi.mock("react-i18next", () => ({
+	useTranslation: () => ({ t: (_key: string, fallback: string) => fallback }),
+}));
+
 let resize: ResizeObserverCallback;
 beforeEach(() => {
 	vi.stubGlobal(
@@ -42,6 +46,7 @@ beforeEach(() => {
 afterEach(() => {
 	cleanup();
 	vi.unstubAllGlobals();
+	delete document.documentElement.dataset.a11yReduceMotion;
 });
 
 function setup() {
@@ -57,6 +62,11 @@ function setup() {
 		'[data-slot="portfolio-folder-strip"]',
 	)!;
 	const viewport = row.parentElement!;
+	const content = row.firstElementChild as HTMLElement;
+	content.style.columnGap = "16px";
+	vi.spyOn(content.firstElementChild!, "getBoundingClientRect").mockReturnValue(
+		{ width: 184 } as DOMRect,
+	);
 	const metrics = { width: 800, contentWidth: 1208 };
 	Object.defineProperties(row, {
 		clientWidth: { get: () => metrics.width },
@@ -65,6 +75,16 @@ function setup() {
 	row.setPointerCapture = vi.fn();
 	row.releasePointerCapture = vi.fn();
 	row.hasPointerCapture = () => true;
+	row.scrollBy = vi.fn((options: ScrollToOptions) => {
+		row.scrollLeft = Math.max(
+			0,
+			Math.min(
+				metrics.contentWidth - metrics.width,
+				row.scrollLeft + (options.left ?? 0),
+			),
+		);
+		fireEvent.scroll(row);
+	});
 	act(() => resize([], {} as ResizeObserver));
 	const scroll = (left: number) => {
 		row.scrollLeft = left;
@@ -181,4 +201,73 @@ it("preserves native touch scrolling, vertical gestures, and secondary clicks", 
 	fireEvent.pointerUp(row);
 	expect(row.scrollLeft).toBe(0);
 	expect(row.setPointerCapture).not.toHaveBeenCalled();
+});
+
+it("moves one folder per arrow click and hides each arrow at its scroll limit", async () => {
+	const { row, link, scroll } = setup();
+	await waitFor(() =>
+		expect(
+			screen.getByRole("button", { name: "Scroll folders right" }),
+		).toBeDefined(),
+	);
+	expect(
+		screen.queryByRole("button", { name: "Scroll folders left" }),
+	).toBeNull();
+	const next = screen.getByRole("button", { name: "Scroll folders right" });
+	expect(next.getAttribute("aria-controls")).toBe(row.id);
+	fireEvent.click(next);
+	expect(row.scrollBy).toHaveBeenLastCalledWith({
+		left: 200,
+		behavior: "smooth",
+	});
+	await waitFor(() =>
+		expect(
+			screen.getByRole("button", { name: "Scroll folders left" }),
+		).toBeDefined(),
+	);
+	expect(row.scrollLeft).toBe(200);
+	fireEvent.click(screen.getByRole("button", { name: "Scroll folders left" }));
+	expect(row.scrollBy).toHaveBeenLastCalledWith({
+		left: -200,
+		behavior: "smooth",
+	});
+	await waitFor(() =>
+		expect(
+			screen.queryByRole("button", { name: "Scroll folders left" }),
+		).toBeNull(),
+	);
+	scroll(400);
+	await waitFor(() =>
+		expect(
+			screen.getByRole("button", { name: "Scroll folders right" }),
+		).toBeDefined(),
+	);
+	next.focus();
+	fireEvent.click(next);
+	await waitFor(() =>
+		expect(
+			screen.queryByRole("button", { name: "Scroll folders right" }),
+		).toBeNull(),
+	);
+	expect(row.scrollLeft).toBe(408);
+	expect(document.activeElement).toBe(link);
+});
+
+it("removes arrows when folders fit and respects reduced motion for arrow scrolling", async () => {
+	const { row, metrics } = setup();
+	await waitFor(() =>
+		expect(
+			screen.getByRole("button", { name: "Scroll folders right" }),
+		).toBeDefined(),
+	);
+	document.documentElement.dataset.a11yReduceMotion = "true";
+	fireEvent.click(screen.getByRole("button", { name: "Scroll folders right" }));
+	expect(row.scrollBy).toHaveBeenLastCalledWith({
+		left: 200,
+		behavior: "instant",
+	});
+	metrics.width = metrics.contentWidth;
+	row.scrollLeft = 0;
+	act(() => resize([], {} as ResizeObserver));
+	await waitFor(() => expect(screen.queryAllByRole("button")).toHaveLength(0));
 });

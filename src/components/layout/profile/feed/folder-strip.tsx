@@ -1,9 +1,17 @@
 import {
 	type PointerEvent,
 	type ReactNode,
+	useId,
 	useLayoutEffect,
 	useRef,
+	useState,
 } from "react";
+import { useTranslation } from "react-i18next";
+import {
+	OutlineChevronLeft,
+	OutlineChevronRight,
+} from "@/components/icons/icons";
+import { Button } from "@/components/ui/button";
 
 type FolderDrag = {
 	id: number;
@@ -13,10 +21,21 @@ type FolderDrag = {
 	active: boolean;
 };
 
-export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
+export function PortfolioFolderStrip({
+	children,
+	showControls = true,
+}: {
+	children: ReactNode;
+	showControls?: boolean;
+}) {
+	const { t } = useTranslation();
+	const id = useId();
 	const viewportRef = useRef<HTMLDivElement>(null);
 	const rowRef = useRef<HTMLDivElement>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
+	const leftButtonRef = useRef<HTMLButtonElement>(null);
+	const rightButtonRef = useRef<HTMLButtonElement>(null);
+	const [canScroll, setCanScroll] = useState({ left: false, right: false });
 	const drag = useRef<FolderDrag | null>(null);
 	const suppressClick = useRef(false);
 
@@ -26,6 +45,7 @@ export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
 		const content = contentRef.current;
 		if (!viewport || !row || !content) return;
 		let frame: number | undefined;
+		let previousEdges = "";
 		const rtl = getComputedStyle(row).direction === "rtl";
 		const update = () => {
 			frame = undefined;
@@ -42,6 +62,25 @@ export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
 			const right = rtl ? start : end;
 			viewport.style.setProperty("--folder-fade-left", `${left}px`);
 			viewport.style.setProperty("--folder-fade-right", `${right}px`);
+			const edges = `${left > 0}:${right > 0}`;
+			if (edges !== previousEdges) {
+				previousEdges = edges;
+				if (!left && document.activeElement === leftButtonRef.current) {
+					(
+						content.children[
+							rtl ? content.children.length - 1 : 0
+						] as HTMLElement
+					)?.focus({ preventScroll: true });
+				}
+				if (!right && document.activeElement === rightButtonRef.current) {
+					(
+						content.children[
+							rtl ? 0 : content.children.length - 1
+						] as HTMLElement
+					)?.focus({ preventScroll: true });
+				}
+				setCanScroll({ left: left > 0, right: right > 0 });
+			}
 		};
 		const schedule = () => {
 			frame ??= requestAnimationFrame(update);
@@ -57,6 +96,23 @@ export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
 			if (frame !== undefined) cancelAnimationFrame(frame);
 		};
 	}, []);
+
+	function scrollFolder(direction: -1 | 1) {
+		const row = rowRef.current;
+		const content = contentRef.current;
+		const first = content?.firstElementChild;
+		if (!row || !content || !first) return;
+		const step =
+			first.getBoundingClientRect().width +
+			(parseFloat(getComputedStyle(content).columnGap) || 0);
+		const reducedMotion =
+			window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ||
+			document.documentElement.dataset.a11yReduceMotion === "true";
+		row.scrollBy({
+			left: direction * step,
+			behavior: reducedMotion ? "instant" : "smooth",
+		});
+	}
 
 	function finishDrag(event: PointerEvent<HTMLDivElement>) {
 		const current = drag.current;
@@ -80,6 +136,7 @@ export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
 			{/* biome-ignore lint/a11y/useSemanticElements: This groups folder links rather than form fields. */}
 			<div
 				ref={rowRef}
+				id={id}
 				role="group"
 				data-slot="portfolio-folder-strip"
 				className="relative w-full min-w-0 overflow-x-auto overscroll-x-contain scroll-px-3 scrollbar-none select-none [@media(hover:hover)]:data-[overflow=true]:cursor-grab lg:scroll-px-0 xl:scroll-px-3"
@@ -151,6 +208,42 @@ export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
 				data-edge="right"
 				className="pointer-events-none absolute inset-y-0 right-0 z-30 w-[var(--folder-fade-right,0px)] bg-linear-to-l from-background to-transparent"
 			/>
+			<div className="pointer-events-none absolute inset-x-0 top-1/2 z-40 flex -translate-y-1/2 items-center justify-between">
+				{showControls && canScroll.left && (
+					<Button
+						ref={leftButtonRef}
+						type="button"
+						variant="outline"
+						size="icon-xl"
+						className="pointer-events-auto bg-background shadow-sm lg:size-9 dark:bg-background"
+						aria-label={t(
+							"components.portfolio.folder.scroll_left",
+							"Scroll folders left",
+						)}
+						aria-controls={id}
+						onClick={() => scrollFolder(-1)}
+					>
+						<OutlineChevronLeft aria-hidden="true" />
+					</Button>
+				)}
+				{showControls && canScroll.right && (
+					<Button
+						ref={rightButtonRef}
+						type="button"
+						variant="outline"
+						size="icon-xl"
+						className="pointer-events-auto ml-auto bg-background shadow-sm lg:size-9 dark:bg-background"
+						aria-label={t(
+							"components.portfolio.folder.scroll_right",
+							"Scroll folders right",
+						)}
+						aria-controls={id}
+						onClick={() => scrollFolder(1)}
+					>
+						<OutlineChevronRight aria-hidden="true" />
+					</Button>
+				)}
+			</div>
 		</div>
 	);
 }
