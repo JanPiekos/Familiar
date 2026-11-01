@@ -5,6 +5,7 @@ import {
 	render,
 	screen,
 	waitFor,
+	within,
 } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createInstance } from "i18next";
@@ -12,6 +13,9 @@ import { I18nextProvider } from "react-i18next";
 import en from "@/i18n/en";
 import pl from "@/i18n/pl";
 const data = vi.hoisted(() => ({
+	remove: vi.fn(),
+	update: vi.fn(),
+	viewerId: "artist",
 	post: {
 		id: "first",
 		title: "Wide artwork",
@@ -31,8 +35,16 @@ vi.mock("@/hooks/portfolio/use-portfolio", () => ({
 		isPending: false,
 		isError: false,
 	}),
-	useDeletePortfolioPost: () => ({ mutateAsync: vi.fn(), isPending: false }),
-	useUpdatePortfolioPost: () => ({ mutateAsync: vi.fn(), isPending: false }),
+	useDeletePortfolioPost: () => ({
+		mutateAsync: data.remove,
+		isPending: false,
+	}),
+	useUpdatePortfolioPost: () => ({
+		mutateAsync: data.update,
+		isPending: false,
+	}),
+	useAddPortfolioPostToCatalog: () => ({ mutateAsync: vi.fn() }),
+	useRemovePortfolioPostFromCatalog: () => ({ mutateAsync: vi.fn() }),
 }));
 vi.mock("@/hooks/user/use-user", () => ({
 	useUserByUsername: () => ({
@@ -41,7 +53,7 @@ vi.mock("@/hooks/user/use-user", () => ({
 	}),
 }));
 vi.mock("@/providers/auth", () => ({
-	useAuth: () => ({ user: { userId: "artist", username: "artist" } }),
+	useAuth: () => ({ user: { userId: data.viewerId, username: data.viewerId } }),
 }));
 vi.mock("@/components/layout/profile/user", () => ({
 	default: () => (
@@ -51,17 +63,204 @@ vi.mock("@/components/layout/profile/user", () => ({
 	),
 }));
 vi.mock("@/api/commisions/index", () => ({ getTags: async () => [] }));
-import { PortfolioPostModal } from "@/components/layout/modal/portfolio-post";
+import {
+	PortfolioPostModal,
+	PortfolioPostPage,
+} from "@/components/layout/modal/portfolio-post";
 import { PostViewerLayout } from "@/components/layout/modal/portfolio-post/post-viewer-layout";
 const clients: QueryClient[] = [];
 beforeEach(() => {
+	data.remove.mockReset().mockResolvedValue(undefined);
+	data.update.mockReset().mockResolvedValue(undefined);
+	data.viewerId = "artist";
 	data.post.id = "first";
 	data.post.contentWarnings = [];
 });
 afterEach(() => {
 	cleanup();
+	vi.restoreAllMocks();
+	vi.unstubAllGlobals();
 	clients.forEach((client) => client.clear());
 	clients.length = 0;
+});
+
+it.each([
+	["modal", "More options"],
+	["page", "More"],
+])(
+	"opens the working editor from the %s and only saves changed fields",
+	async (view, more) => {
+		const close = vi.fn();
+		await mount(
+			view === "modal" ? (
+				<PortfolioPostModal
+					postId="first"
+					username="artist"
+					open
+					onOpenChange={close}
+				/>
+			) : (
+				<PortfolioPostPage postId="first" username="artist" />
+			),
+		);
+		fireEvent.keyDown(screen.getByRole("button", { name: more }), {
+			key: "ArrowDown",
+		});
+		fireEvent.click(await screen.findByRole("menuitem", { name: "Edit post" }));
+		const editor = screen.getByRole("dialog", { name: "Edit post" });
+		const title = within(editor).getByRole("textbox", { name: "Title *" });
+		expect((title as HTMLInputElement).value).toBe("Wide artwork");
+		fireEvent.change(title, { target: { value: " Updated artwork " } });
+		fireEvent.click(
+			within(editor).getByRole("button", { name: "Save changes" }),
+		);
+		await waitFor(() =>
+			expect(data.update).toHaveBeenCalledExactlyOnceWith({
+				postId: "first",
+				data: { title: "Updated artwork" },
+			}),
+		);
+		await waitFor(() =>
+			expect(screen.queryByRole("dialog", { name: "Edit post" })).toBeNull(),
+		);
+		expect(screen.getByRole("img")).toBeTruthy();
+		expect(close).not.toHaveBeenCalled();
+	},
+);
+
+it("keeps a failed edit open for retry and cancels without closing the viewer", async () => {
+	data.update.mockRejectedValueOnce(new Error("Unavailable"));
+	const close = vi.fn();
+	await mount(
+		<PortfolioPostModal
+			postId="first"
+			username="artist"
+			open
+			onOpenChange={close}
+		/>,
+	);
+	fireEvent.keyDown(screen.getByRole("button", { name: "More options" }), {
+		key: "ArrowDown",
+	});
+	fireEvent.click(await screen.findByRole("menuitem", { name: "Edit post" }));
+	const editor = screen.getByRole("dialog", { name: "Edit post" });
+	fireEvent.change(
+		within(editor).getByRole("textbox", { name: "Description" }),
+		{ target: { value: "Updated description" } },
+	);
+	fireEvent.click(within(editor).getByRole("button", { name: "Save changes" }));
+	expect(await within(editor).findByRole("alert")).toBeTruthy();
+	expect(editor.isConnected).toBe(true);
+	expect(close).not.toHaveBeenCalled();
+	fireEvent.click(within(editor).getByRole("button", { name: "Save changes" }));
+	await waitFor(() => expect(data.update).toHaveBeenCalledTimes(2));
+	await waitFor(() =>
+		expect(screen.queryByRole("dialog", { name: "Edit post" })).toBeNull(),
+	);
+	fireEvent.keyDown(screen.getByRole("button", { name: "More options" }), {
+		key: "ArrowDown",
+	});
+	fireEvent.click(await screen.findByRole("menuitem", { name: "Edit post" }));
+	fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+	await waitFor(() =>
+		expect(screen.queryByRole("dialog", { name: "Edit post" })).toBeNull(),
+	);
+	expect(data.update).toHaveBeenCalledTimes(2);
+	expect(close).not.toHaveBeenCalled();
+});
+
+it("uses the post confirmation without deleting or closing the viewer on cancel", async () => {
+	const close = vi.fn();
+	await mount(
+		<PortfolioPostModal
+			postId="first"
+			username="artist"
+			open
+			onOpenChange={close}
+		/>,
+	);
+	fireEvent.keyDown(screen.getByRole("button", { name: "More options" }), {
+		key: "ArrowDown",
+	});
+	fireEvent.click(await screen.findByRole("menuitem", { name: "Delete post" }));
+	const confirmation = screen.getByRole("alertdialog", {
+		name: "Delete post?",
+	});
+	expect(within(confirmation).getByText("Wide artwork")).toBeTruthy();
+	expect(data.remove).not.toHaveBeenCalled();
+	fireEvent.click(within(confirmation).getByRole("button", { name: "Cancel" }));
+	await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+	expect(screen.getByRole("dialog", { name: "Wide artwork" })).toBeTruthy();
+	expect(close).not.toHaveBeenCalled();
+	expect(data.remove).not.toHaveBeenCalled();
+});
+
+it("does not offer edit or delete to visitors", async () => {
+	data.viewerId = "visitor";
+	await mount(
+		<PortfolioPostModal
+			postId="first"
+			username="artist"
+			open
+			onOpenChange={() => {}}
+		/>,
+	);
+	fireEvent.keyDown(screen.getByRole("button", { name: "More options" }), {
+		key: "ArrowDown",
+	});
+	expect(
+		await screen.findByRole("menuitem", { name: "Report post" }),
+	).toBeTruthy();
+	expect(screen.queryByRole("menuitem", { name: "Edit post" })).toBeNull();
+	expect(screen.queryByRole("menuitem", { name: "Delete post" })).toBeNull();
+	expect(data.update).not.toHaveBeenCalled();
+	expect(data.remove).not.toHaveBeenCalled();
+});
+
+it("finishes the delete confirmation exit before dismissing the post viewer", async () => {
+	const getStyle = globalThis.getComputedStyle;
+	vi.stubGlobal("CSS", { escape: (value: string) => value });
+	vi.spyOn(globalThis, "getComputedStyle").mockImplementation(
+		(element, pseudo) => {
+			const style = getStyle(element, pseudo);
+			if (element.getAttribute("data-slot") !== "alert-dialog-content")
+				return style;
+			return new Proxy(style, {
+				get(target, property) {
+					return property === "animationName"
+						? element.getAttribute("data-state") === "closed"
+							? "exit"
+							: "enter"
+						: Reflect.get(target, property, target);
+				},
+			});
+		},
+	);
+	const close = vi.fn();
+	await mount(
+		<PortfolioPostModal
+			postId="first"
+			username="artist"
+			open
+			onOpenChange={close}
+		/>,
+	);
+	fireEvent.keyDown(screen.getByRole("button", { name: "More options" }), {
+		key: "ArrowDown",
+	});
+	fireEvent.click(await screen.findByRole("menuitem", { name: "Delete post" }));
+	const confirmation = screen.getByRole("alertdialog");
+	const remove = screen.getByRole("button", { name: "Delete" });
+	fireEvent.click(remove);
+	await waitFor(() => expect(confirmation.dataset.state).toBe("closed"));
+	expect(confirmation.isConnected).toBe(true);
+	expect(close).not.toHaveBeenCalled();
+	fireEvent.click(remove);
+	expect(data.remove).toHaveBeenCalledExactlyOnceWith("first");
+	const finish = new Event("animationend", { bubbles: true });
+	Object.defineProperty(finish, "animationName", { value: "exit" });
+	fireEvent(confirmation, finish);
+	await waitFor(() => expect(close).toHaveBeenCalledExactlyOnceWith(false));
 });
 async function mount(children: React.ReactNode, locale = "en") {
 	const i18n = createInstance();

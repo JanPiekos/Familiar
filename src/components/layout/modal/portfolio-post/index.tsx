@@ -9,7 +9,7 @@ import {
 	ShieldAlert,
 	Trash2,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
@@ -21,16 +21,7 @@ import {
 	OutlineSend,
 } from "@/components/icons/icons";
 import { EmptyPage } from "@/components/layout/empty-page";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -49,6 +40,8 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import { ContentWarningOverlay } from "../../content-warning-overlay";
 import User from "../../profile/user";
+import { PostConfirmationContent } from "./post-confirmation-content";
+import { PostManagementDialog } from "./post-management-dialog";
 import { PostViewerLayout } from "./post-viewer-layout";
 import { PostWarningsDialog } from "./post-warnings-dialog";
 
@@ -96,6 +89,22 @@ function usePortfolioPostController({
 	const deletePostMutation = useDeletePortfolioPost();
 
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [editDialogOpen, setEditDialogOpen] = useState(false);
+	const deleteRequest = useRef<{
+		active: boolean;
+		onExited?: () => void;
+	} | null>(null);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Changing posts or profiles cancels completion of the old view's deletion.
+	useEffect(
+		() => () => {
+			const pending = deleteRequest.current;
+			if (pending) {
+				pending.active = false;
+				pending.onExited?.();
+			}
+		},
+		[postId, requestedUsername],
+	);
 	const [warningsDialogOpen, setWarningsDialogOpen] = useState(false);
 	const [activeMediaIndex, setActiveMediaIndex] = useState(0);
 	const [liked, setLiked] = useState(false);
@@ -104,6 +113,7 @@ function usePortfolioPostController({
 	useEffect(() => {
 		setActiveMediaIndex(0);
 		setWarningsDialogOpen(false);
+		setEditDialogOpen(false);
 	}, [postId]);
 
 	useEffect(() => {
@@ -177,8 +187,19 @@ function usePortfolioPostController({
 	};
 
 	const handleDelete = async () => {
+		if (
+			deleteRequest.current ||
+			!deleteDialogOpen ||
+			deletePostMutation.isPending
+		)
+			return;
+		const pending: { active: boolean; onExited?: () => void } = {
+			active: true,
+		};
+		deleteRequest.current = pending;
 		try {
 			await deletePostMutation.mutateAsync(postId);
+			if (!pending.active) return;
 
 			toast.success(
 				t(
@@ -187,7 +208,10 @@ function usePortfolioPostController({
 				),
 			);
 
-			setDeleteDialogOpen(false);
+			await new Promise<void>((resolve) => {
+				pending.onExited = resolve;
+				setDeleteDialogOpen(false);
+			});
 
 			await Promise.all([
 				queryClient.invalidateQueries({
@@ -198,11 +222,14 @@ function usePortfolioPostController({
 				}),
 			]);
 
-			onDeleted?.();
+			if (pending.active) onDeleted?.();
 		} catch {
-			toast.error(
-				t("components.portfolio.post.delete.error", "Failed to delete post"),
-			);
+			if (pending.active)
+				toast.error(
+					t("components.portfolio.post.delete.error", "Failed to delete post"),
+				);
+		} finally {
+			if (deleteRequest.current === pending) deleteRequest.current = null;
 		}
 	};
 
@@ -216,6 +243,8 @@ function usePortfolioPostController({
 		deletePostMutation,
 		deleteDialogOpen,
 		setDeleteDialogOpen,
+		editDialogOpen,
+		setEditDialogOpen,
 		warningsDialogOpen,
 		setWarningsDialogOpen,
 		activeMediaIndex,
@@ -234,6 +263,7 @@ function usePortfolioPostController({
 		goToPreviousMedia,
 		goToNextMedia,
 		handleDelete,
+		finishDeleteExit: () => deleteRequest.current?.onExited?.(),
 	};
 }
 
@@ -254,6 +284,7 @@ function PostMoreMenuItems({ controller }: { controller: Controller }) {
 		t,
 		canManagePost,
 		setDeleteDialogOpen,
+		setEditDialogOpen,
 		setWarningsDialogOpen,
 		post,
 		profileUser,
@@ -262,17 +293,7 @@ function PostMoreMenuItems({ controller }: { controller: Controller }) {
 	if (canManagePost) {
 		return (
 			<>
-				<DropdownMenuItem
-					disabled
-					onSelect={() => {
-						toast.info(
-							t(
-								"components.portfolio.post.edit_coming_soon",
-								"Edit feature coming soon!",
-							),
-						);
-					}}
-				>
+				<DropdownMenuItem onSelect={() => setEditDialogOpen(true)}>
 					<Edit2 className="size-4" />
 					{t("components.portfolio.post.manage.edit", "Edit post")}
 				</DropdownMenuItem>
@@ -584,6 +605,20 @@ function PostActions({ controller }: { controller: Controller }) {
 	);
 }
 
+function EditPostDialog({ controller }: { controller: Controller }) {
+	const { post, canManagePost, editDialogOpen, setEditDialogOpen } = controller;
+	if (!post || !canManagePost || !editDialogOpen) return null;
+	return (
+		<PostManagementDialog
+			key={post.id}
+			post={post}
+			action="edit"
+			folders={[]}
+			onClose={() => setEditDialogOpen(false)}
+		/>
+	);
+}
+
 function DeletePostDialog({ controller }: { controller: Controller }) {
 	const {
 		t,
@@ -591,43 +626,36 @@ function DeletePostDialog({ controller }: { controller: Controller }) {
 		setDeleteDialogOpen,
 		deletePostMutation,
 		handleDelete,
+		finishDeleteExit,
+		post,
 	} = controller;
 
 	return (
-		<AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-			<AlertDialogContent>
-				<AlertDialogHeader>
-					<AlertDialogTitle>
-						{t("components.portfolio.post.delete.title", "Delete post?")}
-					</AlertDialogTitle>
-
-					<AlertDialogDescription>
-						{t(
-							"components.portfolio.post.delete.description",
-							"Are you sure you want to delete this post? This action cannot be undone.",
-						)}
-					</AlertDialogDescription>
-				</AlertDialogHeader>
-
-				<AlertDialogFooter>
-					<AlertDialogCancel>
-						{t("components.portfolio.post.delete.cancel", "Cancel")}
-					</AlertDialogCancel>
-
-					<AlertDialogAction
-						disabled={deletePostMutation.isPending}
-						onClick={(event) => {
-							event.preventDefault();
-							void handleDelete();
-						}}
-						className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-					>
-						{deletePostMutation.isPending
-							? t("components.portfolio.post.delete.deleting", "Deleting...")
-							: t("components.portfolio.post.delete.confirm", "Delete")}
-					</AlertDialogAction>
-				</AlertDialogFooter>
-			</AlertDialogContent>
+		<AlertDialog
+			open={deleteDialogOpen}
+			onOpenChange={(open) => {
+				if (!deletePostMutation.isPending) setDeleteDialogOpen(open);
+			}}
+		>
+			<PostConfirmationContent
+				title={t("components.portfolio.post.delete.title", "Delete post?")}
+				description={t(
+					"components.portfolio.post.delete.description",
+					"Are you sure you want to delete this post? This action cannot be undone.",
+				)}
+				postTitle={post?.title}
+				icon={<Trash2 className="size-5" />}
+				disabled={deletePostMutation.isPending || !deleteDialogOpen}
+				confirmText={
+					deletePostMutation.isPending
+						? t("components.portfolio.post.delete.deleting", "Deleting...")
+						: t("components.portfolio.post.delete.confirm", "Delete")
+				}
+				onConfirm={() => {
+					void handleDelete();
+				}}
+				onCloseAutoFocus={finishDeleteExit}
+			/>
 		</AlertDialog>
 	);
 }
@@ -711,6 +739,7 @@ export function PortfolioPostModal({
 			/>
 
 			<DeletePostDialog controller={controller} />
+			<EditPostDialog controller={controller} />
 			{controller.canManagePost && controller.warningsDialogOpen && (
 				<PostWarningsDialog
 					post={post}
@@ -814,6 +843,7 @@ export function PortfolioPostPage({
 			</main>
 
 			<DeletePostDialog controller={controller} />
+			<EditPostDialog controller={controller} />
 			{controller.canManagePost && controller.warningsDialogOpen && (
 				<PostWarningsDialog
 					post={post}

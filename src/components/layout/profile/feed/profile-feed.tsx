@@ -12,6 +12,7 @@ import type {
 	PortfolioPostImageResponse,
 	PortfolioPostResponse,
 } from "@/api/portfolio/posts/post-types";
+import type { PostManagementAction } from "@/components/layout/modal/portfolio-post/post-management-dialog";
 import { OutlineFolderAddOuLc } from "@/components/icons/icons";
 import { EmptyPage } from "@/components/layout/empty-page";
 import { usePortfolioImageBuckets } from "@/hooks/portfolio/use-portfolio-image-buckets";
@@ -31,6 +32,10 @@ interface ProfileFeedProps {
 	onPostClick?: (post: PortfolioPostResponse) => void;
 	variant?: "feed" | "portfolio";
 	isOwner?: boolean;
+	onManagePost?: (
+		post: PortfolioPostResponse,
+		action: PostManagementAction,
+	) => void;
 	onRemoveFromCatalog?: (postId: string) => void;
 }
 
@@ -86,6 +91,7 @@ export function ProfileFeed({
 	onPostClick,
 	variant = "feed",
 	isOwner = false,
+	onManagePost,
 	onRemoveFromCatalog,
 }: ProfileFeedProps) {
 	const { t } = useTranslation();
@@ -368,6 +374,7 @@ export function ProfileFeed({
 										handlePostClick={handlePostClick}
 										style={node.style}
 										isOwner={isOwner}
+										onManagePost={onManagePost}
 										onRemoveFromCatalog={onRemoveFromCatalog}
 									/>
 								);
@@ -402,6 +409,7 @@ export function ProfileFeed({
 										handlePostClick={handlePostClick}
 										style={node.style}
 										isOwner={isOwner}
+										onManagePost={onManagePost}
 										onRemoveFromCatalog={onRemoveFromCatalog}
 									/>
 								);
@@ -438,6 +446,7 @@ export function ProfileFeed({
 									handlePostClick={handlePostClick}
 									style={node.style}
 									isOwner={isOwner}
+									onManagePost={onManagePost}
 									onRemoveFromCatalog={onRemoveFromCatalog}
 								/>
 							);
