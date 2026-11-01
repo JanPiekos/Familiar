@@ -56,13 +56,14 @@ function setup() {
 	const row = container.querySelector<HTMLDivElement>(
 		'[data-slot="portfolio-folder-strip"]',
 	)!;
+	const viewport = row.parentElement!;
 	const metrics = { width: 800, contentWidth: 1208 };
 	Object.defineProperties(row, {
 		clientWidth: { get: () => metrics.width },
 		scrollWidth: { get: () => metrics.contentWidth },
 	});
 	// jsdom rejects mask gradients with calc(); real browser checks cover CSS parsing.
-	Object.defineProperties(row.style, {
+	Object.defineProperties(viewport.style, {
 		maskImage: { value: "none", writable: true },
 		webkitMaskImage: { value: "none", writable: true },
 	});
@@ -75,9 +76,10 @@ function setup() {
 		fireEvent.scroll(row);
 	};
 	const fades = () =>
-		(row.style.maskImage.match(/[\d.]+px/g) ?? []).map(parseFloat);
+		(viewport.style.maskImage.match(/[\d.]+px/g) ?? []).map(parseFloat);
 	return {
 		row,
+		viewport,
 		link: screen.getByRole("link"),
 		open,
 		metrics,
@@ -88,7 +90,7 @@ function setup() {
 }
 
 it("grows each fade only as far as the hidden content and clears it at the reached edge", async () => {
-	const { row, scroll, fades } = setup();
+	const { row, viewport, scroll, fades } = setup();
 	await waitFor(() => expect(fades()).toEqual([0, 32]));
 	scroll(2);
 	await waitFor(() => expect(fades()).toEqual([2, 32]));
@@ -105,15 +107,16 @@ it("grows each fade only as far as the hidden content and clears it at the reach
 	await waitFor(() => expect(fades()).toEqual([0, 32]));
 	scroll(-20);
 	await waitFor(() => expect(fades()).toEqual([0, 32]));
-	expect(row.style.webkitMaskImage).toBe(row.style.maskImage);
+	expect(viewport.style.webkitMaskImage).toBe(viewport.style.maskImage);
+	expect(row.style.maskImage).toBe("");
 });
 
 it("refreshes fades when the viewport or folder content resizes", async () => {
-	const { row, metrics, scroll, fades, rerender } = setup();
+	const { row, viewport, metrics, scroll, fades, rerender } = setup();
 	await waitFor(() => expect(fades()).toEqual([0, 32]));
 	metrics.width = 1208;
 	act(() => resize([], {} as ResizeObserver));
-	await waitFor(() => expect(row.style.maskImage).toBe("none"));
+	await waitFor(() => expect(viewport.style.maskImage).toBe("none"));
 	metrics.width = 390;
 	act(() => resize([], {} as ResizeObserver));
 	await waitFor(() => expect(fades()).toEqual([0, 32]));
@@ -126,7 +129,7 @@ it("refreshes fades when the viewport or folder content resizes", async () => {
 		</PortfolioFolderStrip>,
 	);
 	act(() => resize([], {} as ResizeObserver));
-	await waitFor(() => expect(row.style.maskImage).toBe("none"));
+	await waitFor(() => expect(viewport.style.maskImage).toBe("none"));
 	expect(row.dataset.overflow).toBe("false");
 });
 
