@@ -138,6 +138,7 @@ it("drags with a mouse, releases capture, and suppresses only the click caused b
 	expect(row.dataset.dragging).toBe("true");
 	expect(row.setPointerCapture).toHaveBeenCalledWith(1);
 	fireEvent.pointerUp(row);
+	expect(row.scrollLeft).toBe(240);
 	expect(row.dataset.dragging).toBeUndefined();
 	expect(row.releasePointerCapture).toHaveBeenCalledWith(1);
 	fireEvent.click(link, { detail: 1 });

@@ -79,7 +79,7 @@ export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
 			ref={rowRef}
 			role="group"
 			data-slot="portfolio-folder-strip"
-			className="relative w-full min-w-0 snap-x snap-proximity overflow-x-auto overscroll-x-contain scroll-px-3 scrollbar-none select-none data-[dragging=true]:snap-none [@media(hover:hover)]:data-[overflow=true]:cursor-grab lg:scroll-px-0 xl:scroll-px-3"
+			className="relative w-full min-w-0 overflow-x-auto overscroll-x-contain scroll-px-3 scrollbar-none select-none [@media(hover:hover)]:data-[overflow=true]:cursor-grab lg:scroll-px-0 xl:scroll-px-3"
 			onPointerDown={(event) => {
 				suppressClick.current = false;
 				if (event.pointerType !== "mouse" || event.button !== 0) return;
@@ -131,7 +131,7 @@ export function PortfolioFolderStrip({ children }: { children: ReactNode }) {
 		>
 			<div
 				ref={contentRef}
-				className="flex w-max min-w-full gap-4 px-3 pt-2 pb-3 *:w-46 *:shrink-0 *:snap-start *:cursor-inherit! lg:px-0 xl:px-3"
+				className="flex w-max min-w-full gap-4 px-3 pt-2 pb-3 *:w-46 *:shrink-0 *:cursor-inherit! lg:px-0 xl:px-3"
 			>
 				{children}
 			</div>
