@@ -1,11 +1,12 @@
 import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogDescription,
-	DialogFooter,
-} from "@/components/ui/dialog";
+	AlertDialog,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogDescription,
+	AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { ReactNode } from "react";
@@ -42,35 +43,38 @@ export function ConfirmDialog({
 	isPending = false,
 	variant = "destructive",
 }: ConfirmDialogProps) {
-	useTranslation();
+	const { t } = useTranslation();
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent showCloseButton={false} className="max-w-md p-3">
-				<DialogHeader className="gap-2">
+		<AlertDialog open={open} onOpenChange={onOpenChange}>
+			<AlertDialogContent
+				className="rounded-3xl p-3 data-[size=default]:sm:max-w-md"
+				onOpenAutoFocus={(event) => {
+					if (isPending && event.target instanceof HTMLElement) {
+						event.preventDefault();
+						event.target.focus({ preventScroll: true });
+					}
+				}}
+			>
+				<AlertDialogHeader className="block space-y-2 text-left">
 					<div className="flex items-center justify-between">
-						<DialogTitle className="text-xl">{title}</DialogTitle>
-						<Button
+						<AlertDialogTitle className="text-xl">{title}</AlertDialogTitle>
+						<AlertDialogCancel
 							size={"icon-lg"}
 							variant="ghost"
-							onClick={() => onOpenChange(false)}
+							aria-label={t("ui.close", "Close")}
 							disabled={isPending}
 						>
 							<OutlineClose />
-						</Button>
+						</AlertDialogCancel>
 					</div>
-					<DialogDescription className="text-base">
+					<AlertDialogDescription className="text-base">
 						{description}
-					</DialogDescription>
-				</DialogHeader>
-				<DialogFooter className="mt-4 gap-2">
-					<Button
-						size="xl"
-						variant="outline"
-						onClick={() => onOpenChange(false)}
-						disabled={isPending}
-					>
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter className="mt-4 gap-2">
+					<AlertDialogCancel size="xl" variant="outline" disabled={isPending}>
 						{cancelText}
-					</Button>
+					</AlertDialogCancel>
 					<Button
 						size="xl"
 						variant={variant}
@@ -86,8 +90,8 @@ export function ConfirmDialog({
 							confirmText
 						)}
 					</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
 	);
 }
