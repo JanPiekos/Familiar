@@ -118,6 +118,8 @@ function UserButtonContent({
 	);
 }
 
+export { UserButtonContent as UserIdentityContent };
+
 type UserProps = {
 	user?: UserIdentity | null;
 	showInfo?: boolean;
