@@ -16,7 +16,10 @@ import { ImageZoom } from "@/components/ui/image-zoom";
 import en from "@/i18n/en";
 import pl from "@/i18n/pl";
 
-afterEach(cleanup);
+afterEach(() => {
+	cleanup();
+	vi.restoreAllMocks();
+});
 async function mount(children: ReactNode, locale = "en") {
 	const i18n = createInstance();
 	await i18n.init({
@@ -82,19 +85,58 @@ describe("animated image viewer", () => {
 	});
 	it("fits the full artwork when it finishes loading after opening", async () => {
 		await mount(<Artwork />);
-		const source = screen.getByRole("img");
 		fireEvent.click(screen.getByRole("button", { name: "Enlarge Artwork" }));
 		const dialog = await screen.findByRole("dialog", { name: "Artwork" });
-		Object.defineProperties(source, {
+		const enlarged = within(dialog).getByRole("img");
+		Object.defineProperties(enlarged, {
 			naturalWidth: { value: 3000 },
 			naturalHeight: { value: 1000 },
 		});
-		fireEvent.load(within(dialog).getByRole("img"));
+		fireEvent.load(enlarged);
 		const width = parseFloat(dialog.style.getPropertyValue("--zoom-width"));
 		const height = parseFloat(dialog.style.getPropertyValue("--zoom-height"));
 		expect(width / height).toBeCloseTo(3);
 		expect(width).toBeLessThan(window.innerWidth);
 		expect(height).toBeLessThan(window.innerHeight);
+	});
+	it("does not remeasure a cached image when its enlarged copy loads", async () => {
+		await mount(<Artwork />);
+		const source = screen.getByRole("img");
+		Object.defineProperties(source, {
+			naturalWidth: { value: 1200 },
+			naturalHeight: { value: 800 },
+		});
+		const measure = vi.spyOn(source, "getBoundingClientRect");
+		fireEvent.click(screen.getByRole("button", { name: "Enlarge Artwork" }));
+		const dialog = await screen.findByRole("dialog", { name: "Artwork" });
+		const enlarged = within(dialog).getByRole("img");
+		Object.defineProperties(enlarged, {
+			naturalWidth: { value: 1200 },
+			naturalHeight: { value: 800 },
+		});
+		expect(measure).toHaveBeenCalledTimes(1);
+		fireEvent.load(enlarged);
+		expect(measure).toHaveBeenCalledTimes(1);
+	});
+	it("coalesces resize events into one measurement per animation frame", async () => {
+		const callbacks: FrameRequestCallback[] = [];
+		vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation(
+			(callback) => {
+				callbacks.push(callback);
+				return callbacks.length;
+			},
+		);
+		await mount(<Artwork />);
+		const measure = vi.spyOn(screen.getByRole("img"), "getBoundingClientRect");
+		fireEvent.click(screen.getByRole("button", { name: "Enlarge Artwork" }));
+		await screen.findByRole("dialog", { name: "Artwork" });
+		fireEvent.resize(window);
+		fireEvent.resize(window);
+		fireEvent.resize(window);
+		expect(callbacks).toHaveLength(1);
+		expect(measure).toHaveBeenCalledTimes(1);
+		callbacks[0](0);
+		expect(measure).toHaveBeenCalledTimes(2);
 	});
 	it("requires revealing warnings and closes only the enlarged layer above a post", async () => {
 		const closePost = vi.fn();

@@ -2,6 +2,7 @@ import { Dialog as DialogPrimitive } from "radix-ui";
 import {
 	type CSSProperties,
 	type ReactNode,
+	useCallback,
 	useEffect,
 	useRef,
 	useState,
@@ -19,14 +20,19 @@ import {
 } from "./dialog";
 import "./image-zoom.css";
 
-function measureFrame(button: HTMLButtonElement, circle: boolean) {
+function measureFrame(
+	button: HTMLButtonElement,
+	circle: boolean,
+	loadedImage?: HTMLImageElement,
+) {
 	const image = button.querySelector("img");
+	const intrinsicImage = loadedImage?.naturalWidth ? loadedImage : image;
 	const bounds = (image ?? button).getBoundingClientRect();
 	let { x, y, width, height } = bounds;
 	const ratio = circle
 		? 1
-		: image?.naturalWidth && image.naturalHeight
-			? image.naturalWidth / image.naturalHeight
+		: intrinsicImage?.naturalWidth && intrinsicImage.naturalHeight
+			? intrinsicImage.naturalWidth / intrinsicImage.naturalHeight
 			: Math.max(1, width) / Math.max(1, height);
 	// An object-contain image's element includes the surrounding letterbox space.
 	if (image && getComputedStyle(image).objectFit === "contain") {
@@ -47,17 +53,22 @@ function measureFrame(button: HTMLButtonElement, circle: boolean) {
 	);
 	const targetHeight = targetWidth / ratio;
 	return {
-		"--zoom-from-x": `${x}px`,
-		"--zoom-from-y": `${y}px`,
-		"--zoom-from-width": `${width}px`,
-		"--zoom-from-height": `${height}px`,
-		"--zoom-from-radius": getComputedStyle(button).borderRadius,
-		"--zoom-x": `${(window.innerWidth - targetWidth) / 2}px`,
-		"--zoom-y": `${(window.innerHeight - targetHeight) / 2}px`,
-		"--zoom-width": `${targetWidth}px`,
-		"--zoom-height": `${targetHeight}px`,
-		"--zoom-radius": circle ? "50%" : "0px",
-	} as CSSProperties;
+		ratio,
+		style: {
+			"--zoom-translate-x": `${x + width / 2 - window.innerWidth / 2}px`,
+			"--zoom-translate-y": `${y + height / 2 - window.innerHeight / 2}px`,
+			// Uniform scaling keeps cropped covers from stretching as they open.
+			"--zoom-scale": Math.max(
+				0.001,
+				Math.min(width / targetWidth, height / targetHeight),
+			),
+			"--zoom-x": `${(window.innerWidth - targetWidth) / 2}px`,
+			"--zoom-y": `${(window.innerHeight - targetHeight) / 2}px`,
+			"--zoom-width": `${targetWidth}px`,
+			"--zoom-height": `${targetHeight}px`,
+			"--zoom-radius": circle ? "50%" : "0px",
+		} as CSSProperties,
+	};
 }
 
 /** Enlarges the displayed image from its actual on-screen frame and back. */
@@ -76,22 +87,45 @@ export function ImageZoom({
 }) {
 	const { t } = useTranslation();
 	const trigger = useRef<HTMLButtonElement>(null);
+	const enlargedImage = useRef<HTMLImageElement>(null);
 	const [open, setOpen] = useState(false);
 	const [failed, setFailed] = useState(false);
 	const [frame, setFrame] = useState<CSSProperties>();
+	const frameRatio = useRef(0);
+	const updateFrame = useCallback(
+		(loadedImage?: HTMLImageElement) => {
+			if (!trigger.current) return;
+			const nextFrame = measureFrame(
+				trigger.current,
+				circle,
+				loadedImage ?? enlargedImage.current ?? undefined,
+			);
+			frameRatio.current = nextFrame.ratio;
+			setFrame(nextFrame.style);
+		},
+		[circle],
+	);
 	const onOpenChange = (next: boolean) => {
-		if (trigger.current) setFrame(measureFrame(trigger.current, circle));
+		updateFrame();
 		if (next) setFailed(false);
 		setOpen(next);
 	};
 	useEffect(() => {
 		if (!open) return;
+		let pendingFrame = 0;
 		const resize = () => {
-			if (trigger.current) setFrame(measureFrame(trigger.current, circle));
+			if (pendingFrame) return;
+			pendingFrame = requestAnimationFrame(() => {
+				pendingFrame = 0;
+				updateFrame();
+			});
 		};
 		window.addEventListener("resize", resize);
-		return () => window.removeEventListener("resize", resize);
-	}, [open, circle]);
+		return () => {
+			window.removeEventListener("resize", resize);
+			cancelAnimationFrame(pendingFrame);
+		};
+	}, [open, updateFrame]);
 
 	if (!src) return <>{children}</>;
 	return (
@@ -113,7 +147,7 @@ export function ImageZoom({
 			<DialogPortal>
 				<DialogOverlay
 					data-image-zoom-overlay=""
-					className="z-90 bg-black/85 duration-300 motion-reduce:animate-none"
+					className="z-90 bg-black/85 duration-200 motion-reduce:animate-none"
 				/>
 				<DialogPrimitive.Content
 					data-slot="dialog-content"
@@ -140,7 +174,7 @@ export function ImageZoom({
 							type="button"
 							aria-label={t("ui.image_zoom.close_image")}
 							className={cn(
-								"flex size-full cursor-zoom-out items-center justify-center overflow-hidden rounded-[inherit] border-0 p-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white",
+								"image-zoom-media flex size-full cursor-zoom-out items-center justify-center overflow-hidden rounded-[inherit] border-0 p-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white",
 								circle && "bg-background",
 							)}
 						>
@@ -156,13 +190,22 @@ export function ImageZoom({
 								</span>
 							) : (
 								<img
+									ref={enlargedImage}
 									src={src}
 									alt={alt}
+									decoding="async"
 									draggable={false}
 									className="block size-full object-cover"
-									onLoad={() => {
-										if (trigger.current)
-											setFrame(measureFrame(trigger.current, circle));
+									onLoad={(event) => {
+										const image = event.currentTarget;
+										const ratio = circle
+											? 1
+											: image.naturalWidth / image.naturalHeight;
+										if (
+											ratio > 0 &&
+											Math.abs(ratio - frameRatio.current) > 0.001
+										)
+											updateFrame(image);
 									}}
 									onError={() => setFailed(true)}
 								/>
