@@ -24,6 +24,7 @@ import {
 	type CSSProperties,
 	type ReactNode,
 	useEffect,
+	useLayoutEffect,
 	useMemo,
 	useRef,
 	useState,
@@ -277,13 +278,13 @@ export function UserSettingsModal({
 	const returnFocus = useRef<HTMLElement | null>(null);
 	const afterClose = useRef<(() => void) | null>(null);
 	const mounted = useRef(true);
-	useEffect(() => {
+	useLayoutEffect(() => {
 		mounted.current = true;
 		return () => {
 			mounted.current = false;
 		};
 	}, []);
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (open) {
 			afterClose.current = null;
 			setClosing(false);
