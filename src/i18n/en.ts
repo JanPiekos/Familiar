@@ -777,6 +777,7 @@ const en = {
 			folder: {
 				back: "Back to portfolio",
 				manage: {
+					options: "Manage folder: {{name}}",
 					rename: "Rename folder",
 					delete: "Delete folder",
 				},
@@ -786,6 +787,7 @@ const en = {
 						"Are you sure you want to delete this folder? Posts inside it will not be deleted.",
 					cancel: "Cancel",
 					deleting: "Deleting...",
+					error: "The folder could not be deleted. Please try again.",
 					confirm: "Delete",
 				},
 				filters: {

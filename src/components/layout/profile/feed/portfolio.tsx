@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import type {
 	CatalogResponse,
 	CreateCatalogRequest,
+	UpdateCatalogRequest,
 } from "@/api/portfolio/catalogs/catalog-types";
 import type {
 	CreatePortfolioPostRequest,
@@ -242,6 +243,8 @@ export function ProfilePortfolio({
 	const [createPostOpen, setCreatePostOpen] = useState(false);
 	const [renameCatalogOpen, setRenameCatalogOpen] = useState(false);
 	const [deleteCatalogOpen, setDeleteCatalogOpen] = useState(false);
+	const [managedCatalog, setManagedCatalog] = useState<CatalogResponse>();
+	const [deleteCatalogFailed, setDeleteCatalogFailed] = useState(false);
 	const [addPostsOpen, setAddPostsOpen] = useState(false);
 
 	const updateCatalogMutation = useUpdateCatalog();
@@ -318,6 +321,7 @@ export function ProfilePortfolio({
 	const currentFolder =
 		propCurrentFolder ??
 		(folderId ? folders.find((folder) => folder.id === folderId) : undefined);
+	const managedFolder = managedCatalog ?? currentFolder;
 
 	const currentFolderPosts = useMemo(
 		() => (currentFolder ? (postsByCatalogId.get(currentFolder.id) ?? []) : []),
@@ -354,12 +358,19 @@ export function ProfilePortfolio({
 		});
 	}, [folders]);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Changing profiles or folders must reset their local filters and management dialogs.
 	useEffect(() => {
 		setFilters(INITIAL_FILTER_STATE);
 		setSearchQuery("");
-	}, [folderId]);
+		setRenameCatalogOpen(false);
+		setDeleteCatalogOpen(false);
+		setManagedCatalog(undefined);
+	}, [folderId, username]);
 
-	const handleRenameCatalog = async (catalogId: string, data: any) => {
+	const handleRenameCatalog = async (
+		catalogId: string,
+		data: UpdateCatalogRequest,
+	) => {
 		return updateCatalogMutation.mutateAsync({
 			catalogId,
 			data,
@@ -367,19 +378,20 @@ export function ProfilePortfolio({
 	};
 
 	const handleDeleteCatalog = async () => {
-		if (!currentFolder) return;
-
-		await deleteCatalogMutation.mutateAsync(currentFolder.id);
-		setDeleteCatalogOpen(false);
-
-		navigate({
-			to: "/{-$locale}/user/$username/$tab",
-			params: {
-				locale,
-				username: username ?? "",
-				tab: "portfolio",
-			},
-		});
+		if (!managedFolder || deleteCatalogMutation.isPending) return;
+		setDeleteCatalogFailed(false);
+		try {
+			await deleteCatalogMutation.mutateAsync(managedFolder.id);
+			setDeleteCatalogOpen(false);
+			if (managedFolder.id === currentFolder?.id) {
+				void navigate({
+					to: "/{-$locale}/user/$username/$tab",
+					params: { locale, username: username ?? "", tab: "portfolio" },
+				});
+			}
+		} catch {
+			setDeleteCatalogFailed(true);
+		}
 	};
 
 	const handleRemovePostFromCatalog = async (postId: string) => {
@@ -548,60 +560,84 @@ export function ProfilePortfolio({
 		}
 	};
 
-	if (folderId && currentFolder) {
-		const folderActions = canManageCatalogs ? (
-			<div className="flex shrink-0 items-center">
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button variant="ghost" size="icon-xl">
-							<MoreHorizontal className="size-5" />
-							<span className="sr-only">
-								{t("ui.manage_folder", "Manage folder")}
-							</span>
-						</Button>
-					</DropdownMenuTrigger>
+	function folderMenu(folder: CatalogResponse, onCard = false) {
+		return (
+			<DropdownMenu modal={false}>
+				<DropdownMenuTrigger asChild>
+					<Button
+						type="button"
+						variant={onCard ? "outline" : "ghost"}
+						size="icon-xl"
+						className={
+							onCard
+								? "absolute right-2 top-8 z-20 bg-background text-foreground shadow-sm hover:bg-muted dark:bg-background dark:hover:bg-muted transition-opacity lg:size-9 lg:opacity-0 lg:group-hover/folder:opacity-100 lg:group-focus-within/folder:opacity-100 data-[state=open]:opacity-100 [@media(hover:none)]:opacity-100"
+								: undefined
+						}
+						aria-label={
+							onCard
+								? t("components.portfolio.folder.manage.options", {
+										name: folder.name,
+									})
+								: t("ui.manage_folder", "Manage folder")
+						}
+						onPointerDown={(event) => event.stopPropagation()}
+						onClick={(event) => event.stopPropagation()}
+					>
+						<MoreHorizontal className="size-5" />
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent
+					align="end"
+					onPointerDown={(event) => event.stopPropagation()}
+					onClick={(event) => event.stopPropagation()}
+					onCloseAutoFocus={(event) => {
+						if (renameCatalogOpen || deleteCatalogOpen) event.preventDefault();
+					}}
+				>
+					<DropdownMenuItem
+						onSelect={() => {
+							setManagedCatalog(folder);
+							setRenameCatalogOpen(true);
+						}}
+					>
+						<Edit2 />
+						{t("components.portfolio.folder.manage.rename", "Rename folder")}
+					</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem
+						variant="destructive"
+						onSelect={() => {
+							setManagedCatalog(folder);
+							setDeleteCatalogFailed(false);
+							setDeleteCatalogOpen(true);
+						}}
+					>
+						<Trash2 />
+						{t("components.portfolio.folder.manage.delete", "Delete folder")}
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+		);
+	}
 
-					<DropdownMenuContent align="end">
-						<DropdownMenuItem onClick={() => setRenameCatalogOpen(true)}>
-							<Edit2 />
-							{t("components.portfolio.folder.manage.rename", "Rename folder")}
-						</DropdownMenuItem>
-
-						<DropdownMenuSeparator />
-
-						<DropdownMenuItem
-							variant="destructive"
-							onClick={() => setDeleteCatalogOpen(true)}
-						>
-							<Trash2 />
-							{t("components.portfolio.folder.manage.delete", "Delete folder")}
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-
-				<AddFolderPostsModal
-					open={addPostsOpen}
-					onOpenChange={setAddPostsOpen}
-					folderId={currentFolder.id}
-					posts={posts}
-					onAddPost={(postId) =>
-						addPostMutation.mutateAsync({ postId, catalogId: currentFolder.id })
-					}
-				/>
+	const managementDialogs =
+		canManageCatalogs && managedFolder ? (
+			<>
 				<RenameCatalogModal
 					open={renameCatalogOpen}
 					onOpenChange={setRenameCatalogOpen}
-					catalog={currentFolder}
+					catalog={managedFolder}
 					onRenameCatalog={handleRenameCatalog}
 					isRenaming={updateCatalogMutation.isPending}
 				/>
-
 				<AlertDialog
 					open={deleteCatalogOpen}
-					onOpenChange={setDeleteCatalogOpen}
+					onOpenChange={(open) => {
+						if (!deleteCatalogMutation.isPending) setDeleteCatalogOpen(open);
+					}}
 				>
-					<AlertDialogContent>
-						<AlertDialogHeader>
+					<AlertDialogContent className="rounded-3xl">
+						<AlertDialogHeader className="block space-y-2 text-left">
 							<AlertDialogTitle>
 								{t(
 									"components.portfolio.folder.delete.title",
@@ -615,14 +651,30 @@ export function ProfilePortfolio({
 									"Are you sure you want to delete this folder? Posts inside it will not be deleted.",
 								)}
 							</AlertDialogDescription>
+							<p className="text-sm font-semibold break-words">
+								{managedFolder.name}
+							</p>
 						</AlertDialogHeader>
+						{deleteCatalogFailed && (
+							<p role="alert" className="text-sm text-destructive">
+								{t(
+									"components.portfolio.folder.delete.error",
+									"The folder could not be deleted. Please try again.",
+								)}
+							</p>
+						)}
 
 						<AlertDialogFooter>
-							<AlertDialogCancel>
+							<AlertDialogCancel
+								size="xl"
+								disabled={deleteCatalogMutation.isPending}
+							>
 								{t("components.portfolio.folder.delete.cancel", "Cancel")}
 							</AlertDialogCancel>
 
 							<AlertDialogAction
+								size="xl"
+								disabled={deleteCatalogMutation.isPending}
 								onClick={(event) => {
 									event.preventDefault();
 									void handleDeleteCatalog();
@@ -639,6 +691,24 @@ export function ProfilePortfolio({
 						</AlertDialogFooter>
 					</AlertDialogContent>
 				</AlertDialog>
+			</>
+		) : null;
+
+	if (folderId && currentFolder) {
+		const folderActions = canManageCatalogs ? (
+			<div className="flex shrink-0 items-center">
+				{folderMenu(currentFolder)}
+
+				<AddFolderPostsModal
+					open={addPostsOpen}
+					onOpenChange={setAddPostsOpen}
+					folderId={currentFolder.id}
+					posts={posts}
+					onAddPost={(postId) =>
+						addPostMutation.mutateAsync({ postId, catalogId: currentFolder.id })
+					}
+				/>
+				{managementDialogs}
 			</div>
 		) : undefined;
 
@@ -734,24 +804,33 @@ export function ProfilePortfolio({
 								const preview = getFolderPreview(folder, catalogPosts);
 
 								return (
-									<Link
+									// biome-ignore lint/a11y/useSemanticElements: This groups folder navigation and management controls, not form fields.
+									<div
 										key={folder.id}
-										to="/{-$locale}/user/$username/$tab/folder/$folderSlug"
-										params={{
-											locale,
-											username: username ?? "",
-											tab: "portfolio",
-											folderSlug: folder.id,
-										}}
-										className="w-40 shrink-0 snap-start rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+										role="group"
+										aria-label={folder.name}
+										tabIndex={-1}
+										className="group/folder relative w-40 shrink-0 snap-start"
 									>
-										<FolderCard
-											folder={folder}
-											fallbackCoverSrc={preview.coverSrc}
-											contentWarnings={preview.contentWarnings}
-											itemCount={catalogPosts.length}
-										/>
-									</Link>
+										<Link
+											to="/{-$locale}/user/$username/$tab/folder/$folderSlug"
+											params={{
+												locale,
+												username: username ?? "",
+												tab: "portfolio",
+												folderSlug: folder.id,
+											}}
+											className="block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+										>
+											<FolderCard
+												folder={folder}
+												fallbackCoverSrc={preview.coverSrc}
+												contentWarnings={preview.contentWarnings}
+												itemCount={catalogPosts.length}
+											/>
+										</Link>
+										{canManageCatalogs && folderMenu(folder, true)}
+									</div>
 								);
 							})}
 						</div>
@@ -767,6 +846,8 @@ export function ProfilePortfolio({
 					className="lg:mx-0 xl:mx-4"
 				/>
 			</div>
+
+			{managementDialogs}
 
 			{canManageCatalogs && onCreateCatalog && (
 				<CreateCatalogModal
