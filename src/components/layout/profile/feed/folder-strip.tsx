@@ -12,6 +12,7 @@ import {
 	OutlineChevronRight,
 } from "@/components/icons/icons";
 import { Button } from "@/components/ui/button";
+import "./folder-strip.css";
 
 type FolderDrag = {
 	id: number;
@@ -209,39 +210,55 @@ export function PortfolioFolderStrip({
 				className="pointer-events-none absolute inset-y-0 right-0 z-30 w-[var(--folder-fade-right,0px)] bg-linear-to-l from-background to-transparent"
 			/>
 			<div className="pointer-events-none absolute inset-x-0 top-1/2 z-40 flex -translate-y-1/2 items-center justify-between lg:-inset-x-3">
-				{showControls && canScroll.left && (
-					<Button
-						ref={leftButtonRef}
-						type="button"
-						variant="outline"
-						size="icon-xl"
-						className="pointer-events-auto bg-background shadow-sm hover:bg-muted focus-visible:bg-muted lg:size-9 dark:bg-background dark:hover:bg-muted"
-						aria-label={t(
-							"components.portfolio.folder.scroll_left",
-							"Scroll folders left",
-						)}
-						aria-controls={id}
-						onClick={() => scrollFolder(-1)}
+				{showControls && (
+					<div
+						className="portfolio-folder-arrow"
+						data-visible={canScroll.left}
+						aria-hidden={!canScroll.left}
 					>
-						<OutlineChevronLeft aria-hidden="true" />
-					</Button>
+						<Button
+							ref={leftButtonRef}
+							type="button"
+							variant="outline"
+							size="icon-xl"
+							disabled={!canScroll.left}
+							tabIndex={canScroll.left ? 0 : -1}
+							className="pointer-events-auto bg-background shadow-sm hover:bg-muted focus-visible:bg-muted active:translate-y-0! disabled:opacity-100 lg:size-9 dark:bg-background dark:hover:bg-muted"
+							aria-label={t(
+								"components.portfolio.folder.scroll_left",
+								"Scroll folders left",
+							)}
+							aria-controls={id}
+							onClick={() => scrollFolder(-1)}
+						>
+							<OutlineChevronLeft aria-hidden="true" />
+						</Button>
+					</div>
 				)}
-				{showControls && canScroll.right && (
-					<Button
-						ref={rightButtonRef}
-						type="button"
-						variant="outline"
-						size="icon-xl"
-						className="pointer-events-auto ml-auto bg-background shadow-sm hover:bg-muted focus-visible:bg-muted lg:size-9 dark:bg-background dark:hover:bg-muted"
-						aria-label={t(
-							"components.portfolio.folder.scroll_right",
-							"Scroll folders right",
-						)}
-						aria-controls={id}
-						onClick={() => scrollFolder(1)}
+				{showControls && (
+					<div
+						className="portfolio-folder-arrow ml-auto"
+						data-visible={canScroll.right}
+						aria-hidden={!canScroll.right}
 					>
-						<OutlineChevronRight aria-hidden="true" />
-					</Button>
+						<Button
+							ref={rightButtonRef}
+							type="button"
+							variant="outline"
+							size="icon-xl"
+							disabled={!canScroll.right}
+							tabIndex={canScroll.right ? 0 : -1}
+							className="pointer-events-auto bg-background shadow-sm hover:bg-muted focus-visible:bg-muted active:translate-y-0! disabled:opacity-100 lg:size-9 dark:bg-background dark:hover:bg-muted"
+							aria-label={t(
+								"components.portfolio.folder.scroll_right",
+								"Scroll folders right",
+							)}
+							aria-controls={id}
+							onClick={() => scrollFolder(1)}
+						>
+							<OutlineChevronRight aria-hidden="true" />
+						</Button>
+					</div>
 				)}
 			</div>
 		</div>

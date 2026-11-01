@@ -250,6 +250,16 @@ it("moves one folder per arrow click and hides each arrow at its scroll limit", 
 	);
 	expect(row.scrollLeft).toBe(408);
 	expect(document.activeElement).toBe(link);
+	expect(next.isConnected).toBe(true);
+	expect((next as HTMLButtonElement).disabled).toBe(true);
+	expect(next.tabIndex).toBe(-1);
+	scroll(200);
+	await waitFor(() =>
+		expect(screen.getByRole("button", { name: "Scroll folders right" })).toBe(
+			next,
+		),
+	);
+	expect((next as HTMLButtonElement).disabled).toBe(false);
 });
 
 it("removes arrows when folders fit and respects reduced motion for arrow scrolling", async () => {
