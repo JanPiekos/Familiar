@@ -34,7 +34,6 @@ import {
 	AlertDialogContent,
 	AlertDialogDescription,
 	AlertDialogFooter,
-	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -636,50 +635,60 @@ export function ProfilePortfolio({
 						if (!deleteCatalogMutation.isPending) setDeleteCatalogOpen(open);
 					}}
 				>
-					<AlertDialogContent className="rounded-3xl">
-						<AlertDialogHeader className="block space-y-2 text-left">
-							<AlertDialogTitle>
+					<AlertDialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-3xl bg-background p-0 outline-none data-[size=default]:sm:max-w-md">
+						<div className="min-h-0 overflow-y-auto p-5 text-left sm:p-6">
+							<div
+								className="mb-4 flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive"
+								aria-hidden="true"
+							>
+								<Trash2 className="size-5" />
+							</div>
+							<AlertDialogTitle className="text-xl leading-snug text-foreground">
 								{t(
 									"components.portfolio.folder.delete.title",
 									"Delete folder?",
 								)}
 							</AlertDialogTitle>
 
-							<AlertDialogDescription>
+							<AlertDialogDescription className="mt-2 text-pretty leading-relaxed text-foreground/70">
 								{t(
 									"components.portfolio.folder.delete.description",
 									"Are you sure you want to delete this folder? Posts inside it will not be deleted.",
 								)}
 							</AlertDialogDescription>
-							<p className="text-sm font-semibold break-words">
-								{managedFolder.name}
-							</p>
-						</AlertDialogHeader>
-						{deleteCatalogFailed && (
-							<p role="alert" className="text-sm text-destructive">
-								{t(
-									"components.portfolio.folder.delete.error",
-									"The folder could not be deleted. Please try again.",
-								)}
-							</p>
-						)}
+							<div className="mt-4 rounded-2xl bg-muted/50 px-4 py-3">
+								<p className="line-clamp-2 break-words text-sm font-medium text-foreground">
+									{managedFolder.name}
+								</p>
+							</div>
+							{deleteCatalogFailed && (
+								<p role="alert" className="mt-4 text-sm text-destructive">
+									{t(
+										"components.portfolio.folder.delete.error",
+										"The folder could not be deleted. Please try again.",
+									)}
+								</p>
+							)}
+						</div>
 
-						<AlertDialogFooter>
+						<AlertDialogFooter className="shrink-0 flex-row border-t bg-muted/20 p-4 sm:px-6">
 							<AlertDialogCancel
-								size="xl"
+								size="2xl"
+								className="flex-1 sm:flex-none"
 								disabled={deleteCatalogMutation.isPending}
 							>
 								{t("components.portfolio.folder.delete.cancel", "Cancel")}
 							</AlertDialogCancel>
 
 							<AlertDialogAction
-								size="xl"
+								variant="destructive"
+								size="2xl"
+								className="flex-1 sm:flex-none"
 								disabled={deleteCatalogMutation.isPending}
 								onClick={(event) => {
 									event.preventDefault();
 									void handleDeleteCatalog();
 								}}
-								className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 							>
 								{deleteCatalogMutation.isPending
 									? t(
