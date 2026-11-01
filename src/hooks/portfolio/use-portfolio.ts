@@ -299,11 +299,17 @@ export function useUpdateCatalog() {
 	});
 }
 
-export function useDeleteCatalog() {
+export function useDeleteCatalog(onDeleted?: () => void | Promise<void>) {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (catalogId: string) => deleteCatalog(catalogId),
-		onSuccess: () => invalidatePortfolio(queryClient),
+		onSuccess: async () => {
+			try {
+				await onDeleted?.();
+			} finally {
+				await invalidatePortfolio(queryClient);
+			}
+		},
 	});
 }
 
