@@ -5,7 +5,6 @@ import { SolidLogo } from "@/components/icons/assets/logo/logo";
 import { localizePath } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { AccountNavigation } from "./account-navigation";
-import { SiteNavigationLinks } from "./site-navigation";
 
 export default function Header() {
 	const { t, i18n } = useTranslation();
@@ -15,14 +14,13 @@ export default function Header() {
 				<NavWrapper className="hidden lg:flex">
 					<Link
 						to={localizePath("/", i18n.language)}
-						className="mr-2 ml-3 flex items-center gap-x-2"
+						className="mx-3 flex items-center gap-x-2"
 					>
 						<SolidLogo size={28} className="text-primary" aria-hidden="true" />
 						<span className="text-sm font-bold tracking-wider text-primary uppercase">
 							{t("header.title")}
 						</span>
 					</Link>
-					<SiteNavigationLinks layout="header" />
 				</NavWrapper>
 				<AccountNavigation />
 			</div>

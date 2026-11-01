@@ -153,8 +153,6 @@ function GuestNavigationMenu() {
 					aria-label={t("header.navigation.account", "Account navigation")}
 					className="flex min-h-0 flex-col gap-1 overflow-y-auto overscroll-contain px-3 pb-[max(1rem,env(safe-area-inset-bottom))]"
 				>
-					<SiteNavigationLinks onNavigate={() => setOpen(false)} />
-					<Separator className="my-2" />
 					<Button
 						asChild
 						variant="ghost"
