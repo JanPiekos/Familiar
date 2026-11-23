@@ -4,6 +4,7 @@ import { getSeoLinks, seo } from "@/lib/seo";
 import type { Meta } from "@/types/seo";
 
 export const ROUTE_SEO = {
+	"/{-$locale}/_main/admin": { key: "admin", private: true },
 	"/{-$locale}/error-preview": { key: "error_preview", private: true },
 	"/{-$locale}/_main": { key: "home" },
 	"/{-$locale}/_main/": { key: "home" },

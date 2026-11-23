@@ -126,6 +126,23 @@ afterEach(() => {
 });
 
 describe("mobile account dock", () => {
+	it.each([TRoles.Admin, TRoles.Artist, TRoles.Moderator, TRoles.User])(
+		"only exposes administration to the admin role: %s",
+		async (role) => {
+			state.user!.roles = [role];
+			const { navigation } = await renderNavigation();
+			fireEvent.click(
+				within(navigation).getByRole("button", { name: "Hasira" }),
+			);
+			const drawer = await screen.findByRole("dialog");
+			const link = within(drawer).queryByRole("link", {
+				name: "Panel administratora",
+			});
+			if (role === TRoles.Admin)
+				expect(link?.getAttribute("href")).toBe("/pl/admin");
+			else expect(link).toBeNull();
+		},
+	);
 	it("keeps one set of artist controls without a top hamburger, with localized chat navigation", async () => {
 		const { router, navigation } = await renderNavigation();
 		expect(
