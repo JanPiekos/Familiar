@@ -522,9 +522,9 @@ const pl = {
 			keywords: "sztuka, familiar, zlecenia",
 		},
 		home: {
-			title: "Strona główna",
+			title: "Zamknięta beta",
 			description:
-				"Udostępniaj prace, twórz portfolio oraz poznawaj artystów i klientów w Familiar.",
+				"Familiar jest w fazie zamkniętych testów beta. Przestrzeń dla twórców do dzielenia się pracami i nawiązywania kontaktów, dostępna obecnie z zaproszeniem.",
 		},
 		profile: {
 			title: "Profil (@{{username}})",
@@ -757,8 +757,17 @@ const pl = {
 	},
 	pages: {
 		home: {
-			title: "Strona główna",
-			description: "Strona w trakcie renowacji.",
+			title: "Nowe miejsce dla Twojej kreatywności.",
+			description: "Familiar jest obecnie w fazie zamkniętych testów beta. Tworzymy przestrzeń, w której twórcy mogą dzielić się swoimi pracami, nawiązywać kontakty i czuć się jak u siebie.",
+			beta: "Zamknięta beta",
+			sign_in: "Zaloguj się",
+			invitation: "Mam zaproszenie",
+			profile: "Przejdź do mojego profilu",
+			invitation_only: "Dostęp jest obecnie możliwy tylko z zaproszeniem.",
+			welcome_back: "Dziękujemy, że jesteś częścią naszej społeczności testerów.",
+			brand_note: "Z myślą o Twojej kreatywności.",
+			testing_title: "Tworzymy Familiar razem z Tobą.",
+			testing_description: "Funkcje mogą się zmieniać, a niektóre elementy wciąż wymagają dopracowania. Twoje opinie pomagają nam rozwijać Familiar.",
 		},
 	},
 	states: {

@@ -515,9 +515,9 @@ const en = {
 			keywords: "art, familiar, commission",
 		},
 		home: {
-			title: "Home",
+			title: "Closed beta",
 			description:
-				"Share your art, build a portfolio, and connect with artists and clients on Familiar.",
+				"Familiar is in closed beta testing. A creative space for sharing your work and connecting with others, currently available by invitation.",
 		},
 		profile: {
 			title: "Profile (@{{username}})",
@@ -747,8 +747,17 @@ const en = {
 	},
 	pages: {
 		home: {
-			title: "Home",
-			description: "Page is under construction.",
+			title: "A new home for your creativity.",
+			description: "Familiar is currently in closed beta testing. We're building a space for creators to share their work, connect, and feel at home.",
+			beta: "Closed beta",
+			sign_in: "Sign in",
+			invitation: "I have an invitation",
+			profile: "Go to my profile",
+			invitation_only: "Access is currently by invitation only.",
+			welcome_back: "Thanks for being part of our early community.",
+			brand_note: "Made for your creative side.",
+			testing_title: "A work in progress, shaped together.",
+			testing_description: "Features may change, and you might find a few rough edges. Your feedback helps us make Familiar better.",
 		},
 	},
 	states: {
