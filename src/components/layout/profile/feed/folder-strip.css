@@ -1,0 +1,43 @@
+.portfolio-folder-arrow {
+	opacity: 0;
+	transform: scale(0.96);
+	transform-origin: center;
+	transition:
+		opacity 140ms ease-out,
+		transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.portfolio-folder-arrow[data-visible="true"] {
+	opacity: 1;
+	transform: scale(1);
+}
+
+@starting-style {
+	.portfolio-folder-arrow[data-visible="true"] {
+		opacity: 0;
+		transform: scale(0.96);
+	}
+}
+
+@media (hover: hover) {
+	.portfolio-folder-arrow[data-visible="true"]:hover {
+		transform: scale(1.008);
+	}
+}
+
+.portfolio-folder-arrow[data-visible="true"]:active {
+	transform: scale(0.992);
+	transition-duration: 80ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.portfolio-folder-arrow {
+		transform: none !important;
+		transition: none !important;
+	}
+}
+
+:root[data-a11y-reduce-motion="true"] .portfolio-folder-arrow {
+	transform: none !important;
+	transition: none !important;
+}

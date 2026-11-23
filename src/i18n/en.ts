@@ -795,6 +795,8 @@ const en = {
 					title: "New folder",
 				},
 				catalogs: "Portfolio folders",
+				scroll_left: "Scroll folders left",
+				scroll_right: "Scroll folders right",
 				label: "Portfolio folder",
 				items: "{{count}} posts",
 				items_one: "{{count}} post",
