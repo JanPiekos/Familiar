@@ -1,7 +1,8 @@
+import { Dialog as DialogPrimitive } from "radix-ui";
 import {
 	type CSSProperties,
 	type ReactNode,
-	useLayoutEffect,
+	useEffect,
 	useRef,
 	useState,
 } from "react";
@@ -10,8 +11,9 @@ import { OutlineClose, OutlineMore } from "@/components/icons/icons";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
-	DialogContent,
 	DialogDescription,
+	DialogOverlay,
+	DialogPortal,
 	DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -19,6 +21,7 @@ import {
 	DropdownMenuContent,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import "./post-viewer-layout.css";
 
 interface PostViewerLayoutProps {
 	open: boolean;
@@ -44,9 +47,30 @@ export function PostViewerLayout({
 }: PostViewerLayoutProps) {
 	const { t } = useTranslation();
 	const content = useRef<HTMLDivElement>(null);
-	const media = useRef<HTMLElement>(null);
 	const measured = useRef(false);
+	const mounted = useRef(true);
+	const closeRequested = useRef(false);
+	const returnFocus = useRef<HTMLElement | null>(null);
+	const [closing, setClosing] = useState(false);
 	const [ratio, setRatio] = useState(1);
+	useEffect(() => {
+		mounted.current = true;
+		return () => {
+			mounted.current = false;
+		};
+	}, []);
+	useEffect(() => {
+		if (open) {
+			closeRequested.current = false;
+			setClosing(false);
+		}
+	}, [open]);
+	const handleOpenChange = (next: boolean) => {
+		if (next) return onOpenChange(true);
+		if (!open || closeRequested.current) return;
+		closeRequested.current = true;
+		setClosing(true);
+	};
 	const measure = (width: number, height: number) => {
 		if (
 			measured.current ||
@@ -59,14 +83,6 @@ export function PostViewerLayout({
 		measured.current = true;
 		setRatio(Math.min(6, Math.max(0.12, width / height)));
 	};
-
-	// A cached image may already be loaded when the dialog's portal mounts.
-	useLayoutEffect(() => {
-		const image = media.current?.querySelector("img");
-		if (image?.complete) measure(image.naturalWidth, image.naturalHeight);
-		const video = media.current?.querySelector("video");
-		if (video?.readyState) measure(video.videoWidth, video.videoHeight);
-	});
 
 	const sizing = {
 		"--post-ratio": ratio,
@@ -81,87 +97,115 @@ export function PostViewerLayout({
 	} as CSSProperties;
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent
-				ref={content}
-				tabIndex={-1}
-				showCloseButton={false}
-				style={sizing}
-				onOpenAutoFocus={(event) => {
-					event.preventDefault();
-					content.current?.focus({ preventScroll: true });
-				}}
-				onInteractOutside={(event) => {
-					if (
-						event.target instanceof Element &&
-						event.target.closest(
-							'[data-sonner-toast], [data-radix-menu-content], [data-slot="dialog-content"], [role="alertdialog"]',
-						)
-					)
+		<Dialog open={open && !closing} onOpenChange={handleOpenChange}>
+			<DialogPortal>
+				<DialogOverlay className="post-viewer-overlay" />
+				<DialogPrimitive.Content
+					ref={content}
+					data-slot="dialog-content"
+					data-post-viewer=""
+					tabIndex={-1}
+					style={sizing}
+					onOpenAutoFocus={(event) => {
 						event.preventDefault();
-				}}
-				className="flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-6xl flex-col gap-0 overflow-hidden rounded-3xl bg-background p-0 sm:max-w-6xl lg:w-[var(--post-width)]"
-			>
-				<DialogTitle className="sr-only">{title}</DialogTitle>
-				<DialogDescription className="sr-only">
-					{t("ui.view_details", "View details")}
-				</DialogDescription>
-				<header className="flex min-h-18 shrink-0 items-center gap-3 border-b px-4 py-3">
-					<div className="min-w-0 flex-1">{detailsHeaderContent}</div>
-					{moreMenuContent && (
-						<DropdownMenu modal={false}>
-							<DropdownMenuTrigger asChild>
-								<Button
-									type="button"
-									variant="ghost"
-									size="icon-xl"
-									aria-label={t("ui.more_options", "More options")}
-								>
-									<OutlineMore aria-hidden="true" />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								{moreMenuContent}
-							</DropdownMenuContent>
-						</DropdownMenu>
-					)}
-					<Button
-						type="button"
-						variant="ghost"
-						size="icon-xl"
-						aria-label={t("ui.close", "Close")}
-						onClick={() => onOpenChange(false)}
-					>
-						<OutlineClose aria-hidden="true" />
-					</Button>
-				</header>
-				<div className="flex min-h-0 flex-col overflow-y-auto overscroll-contain lg:h-[var(--post-height)] lg:flex-row lg:overflow-hidden">
-					<section
-						ref={media}
-						onLoadCapture={(event) => {
-							if (event.target instanceof HTMLImageElement)
-								measure(event.target.naturalWidth, event.target.naturalHeight);
-						}}
-						onLoadedMetadataCapture={(event) => {
-							if (event.target instanceof HTMLVideoElement)
-								measure(event.target.videoWidth, event.target.videoHeight);
-						}}
-						className="relative h-[var(--post-compact-height)] min-h-48 min-w-0 shrink-0 bg-muted/30 lg:h-full lg:min-h-0 lg:flex-1"
-					>
-						<div className="size-full overflow-hidden">{mediaContent}</div>
-					</section>
-					<aside className="flex min-h-0 min-w-0 shrink-0 flex-col border-t bg-background lg:w-[var(--post-details)] lg:border-t-0 lg:border-l">
-						<div className="min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain">
-							{detailsContent}
-						</div>
-						{detailsFooterContent && (
-							<footer className="shrink-0 border-t">
-								{detailsFooterContent}
-							</footer>
+						returnFocus.current =
+							document.activeElement instanceof HTMLElement
+								? document.activeElement
+								: null;
+						content.current?.focus({ preventScroll: true });
+					}}
+					onCloseAutoFocus={(event) => {
+						if (!closeRequested.current || !mounted.current) return;
+						event.preventDefault();
+						closeRequested.current = false;
+						if (returnFocus.current?.isConnected)
+							returnFocus.current.focus({ preventScroll: true });
+						// Radix fires this after its exit animation and portal have finished.
+						onOpenChange(false);
+					}}
+					onInteractOutside={(event) => {
+						if (
+							event.target instanceof Element &&
+							event.target.closest(
+								'[data-sonner-toast], [data-radix-menu-content], [data-slot="dialog-content"], [role="alertdialog"]',
+							)
+						)
+							event.preventDefault();
+					}}
+					className="post-viewer-dialog fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-6xl flex-col gap-0 overflow-hidden rounded-3xl border bg-background p-0 shadow-lg outline-none lg:w-[var(--post-width)]"
+				>
+					<DialogTitle className="sr-only">{title}</DialogTitle>
+					<DialogDescription className="sr-only">
+						{t("ui.view_details", "View details")}
+					</DialogDescription>
+					<header className="flex min-h-18 shrink-0 items-center gap-3 border-b px-4 py-3">
+						<div className="min-w-0 flex-1">{detailsHeaderContent}</div>
+						{moreMenuContent && (
+							<DropdownMenu modal={false}>
+								<DropdownMenuTrigger asChild>
+									<Button
+										type="button"
+										variant="ghost"
+										size="icon-xl"
+										aria-label={t("ui.more_options", "More options")}
+									>
+										<OutlineMore aria-hidden="true" />
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end">
+									{moreMenuContent}
+								</DropdownMenuContent>
+							</DropdownMenu>
 						)}
-					</aside>
-				</div>
-			</DialogContent>
+						<Button
+							type="button"
+							variant="ghost"
+							size="icon-xl"
+							aria-label={t("ui.close", "Close")}
+							onClick={() => handleOpenChange(false)}
+						>
+							<OutlineClose aria-hidden="true" />
+						</Button>
+					</header>
+					<div className="flex min-h-0 flex-col overflow-y-auto overscroll-contain lg:h-[var(--post-height)] lg:flex-row lg:overflow-hidden">
+						<section
+							ref={(element) => {
+								if (!element || measured.current) return;
+								// Portal children mount after the parent's layout effects.
+								const image = element.querySelector("img");
+								if (image) measure(image.naturalWidth, image.naturalHeight);
+								const video = element.querySelector("video");
+								if (video?.readyState)
+									measure(video.videoWidth, video.videoHeight);
+							}}
+							onLoadCapture={(event) => {
+								if (event.target instanceof HTMLImageElement)
+									measure(
+										event.target.naturalWidth,
+										event.target.naturalHeight,
+									);
+							}}
+							onLoadedMetadataCapture={(event) => {
+								if (event.target instanceof HTMLVideoElement)
+									measure(event.target.videoWidth, event.target.videoHeight);
+							}}
+							className="relative h-[var(--post-compact-height)] min-h-48 min-w-0 shrink-0 bg-muted/30 lg:h-full lg:min-h-0 lg:flex-1"
+						>
+							<div className="size-full overflow-hidden">{mediaContent}</div>
+						</section>
+						<aside className="flex min-h-0 min-w-0 shrink-0 flex-col border-t bg-background lg:w-[var(--post-details)] lg:border-t-0 lg:border-l">
+							<div className="min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain">
+								{detailsContent}
+							</div>
+							{detailsFooterContent && (
+								<footer className="shrink-0 border-t">
+									{detailsFooterContent}
+								</footer>
+							)}
+						</aside>
+					</div>
+				</DialogPrimitive.Content>
+			</DialogPortal>
 		</Dialog>
 	);
 }

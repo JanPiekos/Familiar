@@ -1,0 +1,44 @@
+.post-viewer-dialog {
+	transform: translate3d(-50%, -50%, 0);
+	will-change: transform, opacity;
+}
+.post-viewer-dialog[data-state="open"] {
+	animation: post-viewer-enter 180ms ease-out;
+}
+.post-viewer-dialog[data-state="closed"] {
+	animation: post-viewer-exit 140ms ease-in both;
+}
+.post-viewer-overlay[data-state="open"] {
+	animation: post-viewer-backdrop-enter 180ms ease-out;
+}
+.post-viewer-overlay[data-state="closed"] {
+	animation: post-viewer-backdrop-exit 140ms ease-in both;
+}
+@keyframes post-viewer-enter {
+	from {
+		opacity: 0;
+		transform: translate3d(-50%, calc(-50% + 8px), 0);
+	}
+}
+@keyframes post-viewer-exit {
+	to {
+		opacity: 0;
+		transform: translate3d(-50%, calc(-50% + 6px), 0);
+	}
+}
+@keyframes post-viewer-backdrop-enter {
+	from {
+		opacity: 0;
+	}
+}
+@keyframes post-viewer-backdrop-exit {
+	to {
+		opacity: 0;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.post-viewer-dialog,
+	.post-viewer-overlay {
+		animation-duration: 0.01ms !important;
+	}
+}
