@@ -1,0 +1,101 @@
+/* Settings uses the same quiet entry as the post viewer, without scaling media. */
+.settings-dialog[data-state="open"] {
+	animation: settings-enter 180ms ease-out;
+}
+
+.settings-dialog[data-state="closed"] {
+	animation: settings-exit 140ms ease-in both;
+}
+
+.settings-dialog-overlay[data-state="open"] {
+	animation: settings-backdrop-enter 180ms ease-out;
+}
+
+.settings-dialog-overlay[data-state="closed"] {
+	animation: settings-backdrop-exit 140ms ease-in both;
+}
+
+@keyframes settings-backdrop-enter {
+	from {
+		opacity: 0;
+	}
+}
+
+@keyframes settings-backdrop-exit {
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes settings-enter {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+}
+
+@keyframes settings-exit {
+	to {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.settings-dialog,
+	.settings-dialog-overlay {
+		animation-duration: 0.01ms !important;
+	}
+}
+
+/* One control size, including grouped fields and popover/select triggers. */
+.settings-panel [data-slot="input-group"]:has(> input),
+.settings-panel [data-slot="select-trigger"],
+.settings-panel [role="combobox"],
+.settings-panel [data-slot="button"][data-size="responsive-xl"],
+.settings-panel form [data-slot="button"][data-size="xl"],
+.settings-panel form [data-slot="button"][data-size="2xl"] {
+	min-height: 3rem;
+}
+
+.settings-panel input[data-slot="input-group-control"] {
+	min-height: calc(3rem - 2px);
+}
+
+.settings-panel [data-slot="input-group-control"],
+.settings-panel [data-slot="input-group-addon"],
+.settings-panel [role="combobox"] {
+	font-size: 1rem;
+}
+
+.settings-panel textarea[data-slot="input-group-control"] {
+	padding: 0.75rem 1rem;
+}
+
+.settings-panel [data-slot="field-group"] {
+	gap: 1.5rem;
+}
+
+.settings-panel [data-slot="field"][data-orientation="vertical"] {
+	gap: 0.5rem;
+}
+
+.settings-panel [data-slot="field-description"] {
+	margin-block: 0;
+}
+
+.settings-panel label {
+	display: flex;
+	line-height: 1.5;
+}
+
+.settings-panel [data-slot="input-group-addon"]:has(> button) {
+	flex-shrink: 0;
+	margin-inline: 0;
+	padding: 0 0.25rem;
+}
+
+.settings-panel [data-slot="input-group-addon"] > button {
+	min-width: 2.5rem;
+	height: 2.5rem;
+}
