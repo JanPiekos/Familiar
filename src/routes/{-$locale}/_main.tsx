@@ -1,6 +1,5 @@
 import { createFileRoute, Outlet, useMatch } from "@tanstack/react-router";
 import { Container } from "@/components/layout/container";
-import FloatingToolbar from "@/components/layout/floating-toolbar";
 import Footer from "@/components/layout/footer";
 import Header from "@/components/layout/header";
 import { PortfolioCreationProvider } from "@/components/layout/profile/portfolio-creation";
@@ -34,7 +33,6 @@ function MainLayout() {
 					>
 						<Outlet />
 					</main>
-					<FloatingToolbar />
 					{!isAuthPage && <Footer />}
 				</Container>
 			</div>

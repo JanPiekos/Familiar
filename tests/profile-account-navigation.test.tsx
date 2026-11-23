@@ -15,16 +15,16 @@ import {
 	Outlet,
 	RouterProvider,
 } from "@tanstack/react-router";
-import { createInstance } from "i18next";
 import { I18nextProvider } from "react-i18next";
 import type { TUserResponse } from "@/types/user";
 import { TRoles } from "@/types/user/roles";
-import en from "@/i18n/en";
-import pl from "@/i18n/pl";
+import i18n, { syncLanguage } from "@/lib/i18n";
+import { ThemeProvider } from "@/providers/theme";
 
 const state = vi.hoisted(() => ({
 	user: null as TUserResponse | null,
 	pending: false,
+	compact: true,
 	logout: vi.fn(),
 }));
 vi.mock("@/providers/auth", () => ({
@@ -35,8 +35,8 @@ vi.mock("@/providers/auth", () => ({
 	}),
 }));
 vi.mock("@/hooks/ui/use-mobile", () => ({
-	useIsMobile: () => true,
-	useIsTablet: () => true,
+	useIsMobile: () => state.compact,
+	useIsTablet: () => state.compact,
 }));
 vi.mock("@/components/layout/profile/avatar", () => ({
 	default: ({ user }: { user: TUserResponse }) => (
@@ -47,20 +47,15 @@ import Header from "@/components/layout/header";
 import { Route as DashboardIndexRoute } from "@/routes/{-$locale}/dashboard/index";
 
 async function renderNavigation(locale = "pl", path = "/pl/user/hasira") {
-	const i18n = createInstance();
-	await i18n.init({
-		lng: locale,
-		fallbackLng: "en",
-		resources: { en: { translation: en }, pl: { translation: pl } },
-		interpolation: { escapeValue: false },
-	});
+	await syncLanguage(locale);
+	window.history.replaceState({}, "", path);
 	document.documentElement.lang = locale;
 	const root = createRootRoute({
 		component: () => (
-			<>
+			<ThemeProvider>
 				<Header />
 				<Outlet />
-			</>
+			</ThemeProvider>
 		),
 	});
 	const page = createRoute({
@@ -110,6 +105,8 @@ beforeEach(() => {
 		createdAt: "2026-10-26",
 	};
 	state.pending = false;
+	state.compact = true;
+	localStorage.clear();
 	window.scrollTo = vi.fn();
 	window.matchMedia = vi.fn().mockImplementation(() => ({
 		matches: false,
@@ -120,8 +117,10 @@ beforeEach(() => {
 		dispatchEvent: vi.fn(),
 	}));
 });
-afterEach(() => {
+afterEach(async () => {
 	cleanup();
+	localStorage.clear();
+	await syncLanguage("en");
 	document.documentElement.lang = "en";
 });
 
@@ -253,4 +252,129 @@ describe("mobile account dock", () => {
 			within(navigation).queryByRole("link", { name: "Zaloguj" }),
 		).toBeNull();
 	});
+
+	it.each([false, true])(
+		"offers desktop appearance choices to guests=%s",
+		async (guest) => {
+			state.compact = false;
+			if (guest) state.user = null;
+			const { navigation } = await renderNavigation("en", "/user/hasira");
+			fireEvent.keyDown(
+				within(navigation).getByRole("button", {
+					name: guest ? "Account navigation" : "Hasira",
+				}),
+				{ key: "ArrowDown" },
+			);
+			const appearance = await screen.findByRole("menuitem", {
+				name: /^Appearance/,
+			});
+			if (guest)
+				expect(screen.queryByRole("menuitem", { name: "Logout" })).toBeNull();
+			fireEvent.keyDown(appearance, { key: "ArrowRight" });
+			expect(
+				await screen.findByRole("menuitemradio", { name: "OLED" }),
+			).toBeDefined();
+			fireEvent.click(screen.getByRole("menuitemradio", { name: "Dark" }));
+			await waitFor(() =>
+				expect(localStorage.getItem("familiar-theme")).toBe("dark"),
+			);
+			expect(document.documentElement.classList.contains("dark")).toBe(true);
+			await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+		},
+	);
+
+	it("keeps mobile theme selection in the account sheet", async () => {
+		const { navigation } = await renderNavigation();
+		fireEvent.click(within(navigation).getByRole("button", { name: "Hasira" }));
+		const drawer = await screen.findByRole("dialog");
+		fireEvent.click(within(drawer).getByText("Wygląd"));
+		fireEvent.click(within(drawer).getByRole("radio", { name: "Ciemny" }));
+		await waitFor(() =>
+			expect(localStorage.getItem("familiar-theme")).toBe("dark"),
+		);
+		expect(
+			within(drawer)
+				.getByRole("radio", { name: "Ciemny" })
+				.getAttribute("aria-checked"),
+		).toBe("true");
+		expect(screen.getByRole("dialog")).toBe(drawer);
+	});
+
+	it.each([false, true])(
+		"searches flagged languages and preserves the URL on mobile=%s",
+		async (compact) => {
+			state.compact = compact;
+			state.user = null;
+			const { router, navigation } = await renderNavigation(
+				"en",
+				"/user/hasira?settings=profile#portfolio",
+			);
+			const trigger = within(navigation).getByRole("button", {
+				name: "Account navigation",
+			});
+			if (compact) {
+				fireEvent.click(trigger);
+				const drawer = await screen.findByRole("dialog");
+				fireEvent.click(within(drawer).getByText("Language"));
+			} else {
+				fireEvent.keyDown(trigger, { key: "ArrowDown" });
+				fireEvent.keyDown(
+					await screen.findByRole("menuitem", { name: /^Language/ }),
+					{ key: "ArrowRight" },
+				);
+			}
+			const role = compact ? "radio" : "menuitemradio";
+			const english = await screen.findByRole(role, { name: "English" });
+			expect(english.getAttribute("aria-checked")).toBe("true");
+			expect(
+				within(english.closest("label") ?? english).getByText("\u{1f1fa}\u{1f1f8}"),
+			).toBeDefined();
+			let search = await screen.findByRole("textbox", {
+				name: "Search languages",
+			});
+			if (!compact) {
+				await waitFor(() => expect(document.activeElement).toBe(search));
+				fireEvent.keyDown(search, { key: "Escape" });
+				await waitFor(() =>
+					expect(
+						screen.queryByRole("textbox", { name: "Search languages" }),
+					).toBeNull(),
+				);
+				fireEvent.keyDown(trigger, { key: "ArrowDown" });
+				fireEvent.keyDown(
+					await screen.findByRole("menuitem", { name: /^Language/ }),
+					{ key: "ArrowRight" },
+				);
+				search = await screen.findByRole("textbox", {
+					name: "Search languages",
+				});
+			}
+			fireEvent.change(search, { target: { value: "unavailable language" } });
+			expect(screen.getByRole("status").textContent).toBe("No language found");
+			expect(screen.queryByRole(role, { name: "English" })).toBeNull();
+			fireEvent.change(search, { target: { value: "pl" } });
+			expect(screen.getByRole(role, { name: "Polski" })).toBeDefined();
+			fireEvent.change(search, { target: { value: "Polish" } });
+			const polish = screen.getByRole(role, { name: "Polski" });
+			expect(
+				within(polish.closest("label") ?? polish).getByText("\u{1f1f5}\u{1f1f1}"),
+			).toBeDefined();
+			if (compact) fireEvent.click(polish);
+			else {
+				fireEvent.keyDown(search, { key: "ArrowDown" });
+				expect(document.activeElement).toBe(polish);
+				fireEvent.keyDown(polish, { key: "Enter" });
+			}
+			await waitFor(() =>
+				expect(router.state.location.pathname).toBe("/pl/user/hasira"),
+			);
+			expect(router.state.location.searchStr).toContain("settings=profile");
+			expect(router.state.location.hash).toBe("portfolio");
+			expect(i18n.language).toBe("pl");
+			await waitFor(() =>
+				expect(screen.queryByRole(compact ? "dialog" : "menu")).toBeNull(),
+			);
+			expect(document.body.style.pointerEvents).not.toBe("none");
+		},
+	);
 });

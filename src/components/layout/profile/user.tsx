@@ -19,6 +19,7 @@ import {
 	DropdownMenuContent,
 	DropdownMenuGroup,
 	DropdownMenuItem,
+	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -28,6 +29,10 @@ import { getLocaleParam, localizePath } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth";
 import type { UserIdentity } from "@/types/user";
+import {
+	AccountPreferenceControls,
+	AccountPreferenceMenuItems,
+} from "../account-preferences";
 import UserAvatar from "./avatar";
 
 type UserButtonContentProps = {
@@ -260,6 +265,8 @@ export default function User({
 				<span>{t("ui.settings", "Settings")}</span>
 			</Button>
 			<Separator className="my-2" />
+			<AccountPreferenceControls onLanguageChange={() => setOpen(false)} />
+			<Separator className="my-2" />
 			<Button
 				type="button"
 				variant="ghost"
@@ -299,9 +306,17 @@ export default function User({
 				</DropdownMenuTrigger>
 
 				<DropdownMenuContent
-					className={cn("w-56", dropdownContentClassName)}
+					className={cn("w-64", dropdownContentClassName)}
 					align="end"
+					sideOffset={12}
+					collisionPadding={16}
 				>
+					<DropdownMenuLabel className="px-3 py-3 font-normal">
+						<div className="flex min-w-0 items-center gap-3 [&>div]:min-w-0">
+							<UserButtonContent user={resolvedUser} avatarSize="md" />
+						</div>
+					</DropdownMenuLabel>
+					<DropdownMenuSeparator />
 					<DropdownMenuGroup>
 						{menuItems.map((item) => (
 							<DropdownMenuItem key={item.label} asChild>
@@ -318,13 +333,13 @@ export default function User({
 						))}
 					</DropdownMenuGroup>
 
-					<DropdownMenuSeparator />
-
 					<DropdownMenuItem onSelect={handleOpenSettings}>
 						<OutlineSettings />
 						{t("ui.settings", "Settings")}
 					</DropdownMenuItem>
 
+					<DropdownMenuSeparator />
+					<AccountPreferenceMenuItems onLanguageChange={() => setOpen(false)} />
 					<DropdownMenuSeparator />
 
 					<DropdownMenuItem
@@ -352,11 +367,14 @@ export default function User({
 				</DrawerTrigger>
 
 				<DrawerContent
-					className="max-h-[calc(100dvh-2rem)]! overflow-hidden"
+					className="max-h-[calc(100dvh-2rem)]! overflow-hidden bg-popover text-popover-foreground"
 					aria-describedby={undefined}
 				>
 					<DrawerHeader className="px-6 pt-4 pb-3 text-left!">
-						<DrawerTitle>{menuTitle}</DrawerTitle>
+						<DrawerTitle className="sr-only">{menuTitle}</DrawerTitle>
+						<div className="flex min-w-0 items-center gap-3 [&>div]:min-w-0">
+							<UserButtonContent user={resolvedUser} avatarSize="md" />
+						</div>
 					</DrawerHeader>
 					<div className="min-h-0 overflow-y-auto overscroll-contain">
 						{menuItemsContent}
