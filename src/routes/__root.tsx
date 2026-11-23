@@ -123,7 +123,7 @@ function RootDocument({ children }: { children: ReactNode }) {
 			<head>
 				<HeadContent />
 				<RouteFavicon />
-				{import.meta.env.DEV && (
+				{import.meta.env.DEV && import.meta.env.VITE_REACT_SCAN === "true" && (
 					<script
 						defer
 						crossOrigin="anonymous"
