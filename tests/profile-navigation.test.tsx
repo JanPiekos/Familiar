@@ -42,6 +42,7 @@ vi.mock("@/hooks/user/use-profile-content", () => ({
 }));
 vi.mock("@/hooks/user/use-user", () => ({
 	userByUsernameQueryOptions: () => ({ queryKey: ["user"] }),
+	useUserByUsername: () => ({ user: null }),
 }));
 vi.mock("@/lib/i18n", () => ({ default: { t: (key: string) => key } }));
 vi.mock("@/lib/seo", () => ({ seo: () => [], getSeoLinks: () => [] }));
