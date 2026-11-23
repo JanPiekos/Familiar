@@ -9,6 +9,12 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import {
+	ProfileImageSizeHint,
+	useProfileImageCrop,
+} from "./profile-image-crop-dialog";
+import { PROFILE_COVER_CLASS_NAME } from "@/lib/image-crop";
+import { cn } from "@/lib/utils";
 import { profileSettingsSchema } from "@/schemas/user/profile";
 import { OutlineAt, OutlineUser } from "@/components/icons/icons";
 import type { ProfileEditorValues } from "@/components/layout/profile/profile-editor";
@@ -58,6 +64,7 @@ export function SettingsProfileEditor({
 	onSubmit,
 }: SettingsProfileEditorProps) {
 	const { t } = useTranslation();
+	const { requestCrop, cropDialog } = useProfileImageCrop();
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const submittingRef = useRef(false);
 	// Keep the edit baseline stable when background profile queries refresh.
@@ -147,11 +154,9 @@ export function SettingsProfileEditor({
 		const file = event.target.files?.[0];
 		if (!file) return;
 
-		const reader = new FileReader();
-		reader.onloadend = () => {
-			form.setFieldValue(field, reader.result as string);
-		};
-		reader.readAsDataURL(file);
+		requestCrop(file, field === "avatar_url" ? "avatar" : "cover", ({ dataUrl }) => {
+			form.setFieldValue(field, dataUrl);
+		});
 		event.target.value = "";
 	}
 
@@ -164,6 +169,7 @@ export function SettingsProfileEditor({
 				void form.handleSubmit();
 			}}
 		>
+			{cropDialog}
 			{submitError && (
 				<p role="alert" className="mb-4 text-sm text-destructive">
 					{submitError}
@@ -184,7 +190,12 @@ export function SettingsProfileEditor({
 								return (
 									<div className="flex flex-col gap-6">
 										<div className="relative -mx-4 -mt-4 w-[calc(100%+2rem)] sm:-mx-6 sm:-mt-6 sm:w-[calc(100%+3rem)] md:mx-0 md:mt-0 md:w-full">
-											<div className="relative h-40 w-full overflow-hidden bg-surface-3 sm:h-44 md:rounded-3xl lg:h-48">
+											<div
+												className={cn(
+													"relative w-full overflow-hidden bg-surface-3 md:rounded-3xl",
+													PROFILE_COVER_CLASS_NAME,
+												)}
+											>
 												{values.cover_url ? (
 													<img
 														src={values.cover_url}
@@ -246,6 +257,9 @@ export function SettingsProfileEditor({
 											</div>
 										</div>
 
+										<p className="flex flex-wrap gap-x-3 text-xs leading-5 text-muted-foreground">
+											<ProfileImageSizeHint />
+										</p>
 										<FieldGroup>
 											<form.Field
 												name="display_name"

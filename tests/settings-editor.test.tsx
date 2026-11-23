@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { SettingsProfileEditor } from "@/components/layout/profile/settings-profile-editor";
 import { toast } from "sonner";
 vi.mock("sonner", () => ({ toast: { loading: vi.fn(() => "save-toast"), success: vi.fn(), info: vi.fn(), error: vi.fn() } }));
-vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (_key: string, fallback: string) => fallback }) }));
+vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string, fallback?: string | Record<string, unknown>) => typeof fallback === "string" ? fallback : key }) }));
 vi.mock("@heroui/react", () => ({ Typography: { Paragraph: ({ size: _size, ...props }: any) => <p {...props} /> } }));
 vi.mock("@/components/layout/profile/avatar", () => ({ default: () => null }));
 vi.mock("@/components/icons/icons", () => ({ OutlineAt: () => null, OutlineEdit: () => null, OutlineTrash: () => null, OutlineUser: () => null }));
