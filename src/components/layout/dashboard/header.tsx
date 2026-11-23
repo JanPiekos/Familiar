@@ -1,38 +1,25 @@
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useAuth } from "@/providers/auth";
-import User from "@/components/layout/profile/user";
-import ThemeToggle from "@/components/layout/select/theme-toggle";
-import LanguageSelect from "@/components/layout/select/language";
-import CurrencySelect from "@/components/layout/select/currency";
+import { ChevronRight } from "lucide-react";
+import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
-interface DashboardHeaderProps {
+export function DashboardHeader({
+	title,
+	actions,
+}: {
 	title: string;
-	actions?: React.ReactNode;
-}
-
-export function DashboardHeader({ title, actions }: DashboardHeaderProps) {
-	const { user, isPending } = useAuth();
-
+	actions?: ReactNode;
+}) {
+	const { t } = useTranslation();
 	return (
-		<header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 border-b px-6 justify-between bg-background/90 backdrop-blur-md">
-			<div className="flex items-center gap-2">
-				<SidebarTrigger className="-ml-2 hidden lg:inline-flex" />
-			</div>
-
-			<div className="flex items-center gap-4">
-				{actions}
-				<div className="h-6 w-px bg-border hidden sm:block" />
-				<div className="flex items-center gap-2">
-					{/* <ThemeToggle /> */}
-					<CurrencySelect />
-					<LanguageSelect />
-					{!isPending && user && (
-						<div className="hidden lg:block">
-							<User user={user} showInfo={false} isDropdown />
-						</div>
-					)}
-				</div>
-			</div>
+		<header className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4 sm:px-6">
+			<p className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
+				<span>{t("dashboard_workspace.title")}</span>
+				<ChevronRight aria-hidden="true" className="size-3.5 shrink-0" />
+				<span className="font-medium text-foreground">{title}</span>
+			</p>
+			{actions && (
+				<div className="flex flex-wrap items-center gap-2">{actions}</div>
+			)}
 		</header>
 	);
 }

@@ -1,21 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { DashboardOverview } from "@/components/layout/dashboard/overview";
 
 export const Route = createFileRoute("/{-$locale}/dashboard/")({
-	component: DashboardIndexRedirect,
+	component: DashboardOverview,
 });
-
-function DashboardIndexRedirect() {
-	const navigate = useNavigate();
-	const { locale } = Route.useParams();
-
-	useEffect(() => {
-		navigate({
-			to: "/{-$locale}/dashboard/commissions_requests",
-			params: { locale },
-			replace: true,
-		});
-	}, [navigate, locale]);
-
-	return null;
-}
