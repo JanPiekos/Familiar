@@ -1,5 +1,4 @@
 import { Badge } from "@/components/ui/badge";
-import { MENU_SEARCH_HEIGHT_CLASS_NAME } from "@/components/ui/menu-styles";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { cn, createStaticList } from "@/lib/utils";
 import { FolderCardArtwork } from "./folder-artwork";
@@ -92,13 +91,13 @@ export function PortfolioContentSkeleton({
 			<div className="flex items-center gap-2 px-4 sm:gap-3 lg:px-0 xl:px-4">
 				<Skeleton
 					className={cn(
-						MENU_SEARCH_HEIGHT_CLASS_NAME,
+						"h-11 lg:h-10",
 						"min-w-0 flex-1 rounded-full",
 					)}
 				/>
 				<Skeleton
 					className={cn(
-						MENU_SEARCH_HEIGHT_CLASS_NAME,
+						"h-11 lg:h-10",
 						"w-10 shrink-0 rounded-full md:w-21.5",
 					)}
 				/>

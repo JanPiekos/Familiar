@@ -57,8 +57,8 @@ export function FilterOperator<TData, TType extends ColumnDataType>({
 			<PopoverTrigger asChild>
 				<Button
 					variant="ghost"
-					size={"xl"}
-					className="whitespace-nowrap rounded-none hover:text-foreground text-xs"
+					size="2xl"
+					className="h-full whitespace-nowrap rounded-none hover:text-foreground text-sm"
 				>
 					<FilterOperatorDisplay
 						filter={filter}
@@ -210,6 +210,7 @@ function FilterOperatorOptionController<TData>({
 					<CommandItem
 						key={r.value}
 						value={r.value}
+						keywords={[t(r.key, locale)]}
 						onSelect={changeOperator}
 						className="flex items-center justify-between"
 					>
@@ -252,7 +253,12 @@ function FilterOperatorMultiOptionController<TData>({
 		<CommandGroup heading={t("operators", locale)}>
 			{relatedFilters.map((r) => {
 				return (
-					<CommandItem onSelect={changeOperator} value={r.value} key={r.value}>
+					<CommandItem
+						onSelect={changeOperator}
+						value={r.value}
+						keywords={[t(r.key, locale)]}
+						key={r.value}
+					>
 						{t(r.key, locale)}
 					</CommandItem>
 				);
@@ -280,10 +286,15 @@ function FilterOperatorDateController<TData>({
 	};
 
 	return (
-		<CommandGroup>
+		<CommandGroup heading={t("operators", locale)}>
 			{relatedFilters.map((r) => {
 				return (
-					<CommandItem onSelect={changeOperator} value={r.value} key={r.value}>
+					<CommandItem
+						onSelect={changeOperator}
+						value={r.value}
+						keywords={[t(r.key, locale)]}
+						key={r.value}
+					>
 						{t(r.key, locale)}
 					</CommandItem>
 				);
@@ -314,7 +325,12 @@ export function FilterOperatorTextController<TData>({
 		<CommandGroup heading={t("operators", locale)}>
 			{relatedFilters.map((r) => {
 				return (
-					<CommandItem onSelect={changeOperator} value={r.value} key={r.value}>
+					<CommandItem
+						onSelect={changeOperator}
+						value={r.value}
+						keywords={[t(r.key, locale)]}
+						key={r.value}
+					>
 						{t(r.key, locale)}
 					</CommandItem>
 				);
@@ -348,6 +364,7 @@ function FilterOperatorNumberController<TData>({
 					<CommandItem
 						onSelect={() => changeOperator(r.value)}
 						value={r.value}
+						keywords={[t(r.key, locale)]}
 						key={r.value}
 					>
 						{t(r.key, locale)}
