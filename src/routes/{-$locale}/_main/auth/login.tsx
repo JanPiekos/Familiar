@@ -1,7 +1,5 @@
-import { Typography } from "@heroui/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { AuthLegalFooter } from "@/components/layout/auth/footer";
 import LoginForm from "@/components/layout/auth/form/login";
 
 export const Route = createFileRoute("/{-$locale}/_main/auth/login")({
@@ -16,12 +14,15 @@ function LoginPage() {
 	return (
 		<article className="flex min-h-0 min-w-0 flex-1 flex-col">
 			<header className="flex flex-col py-3">
-				<Typography.Heading id="auth-page-title" level={3}>
+				<h1
+					id="auth-page-title"
+					className="text-3xl font-semibold tracking-tight text-foreground"
+				>
 					{t("auth.login.title", "Login")}
-				</Typography.Heading>
-				<Typography.Paragraph size="sm" className="text-muted-foreground">
+				</h1>
+				<p className="mt-2 text-sm leading-relaxed text-muted-foreground">
 					{t("auth.login.description", "Login to Familiar")}
-				</Typography.Paragraph>
+				</p>
 			</header>
 
 			<section
@@ -39,7 +40,6 @@ function LoginPage() {
 				/>
 			</section>
 
-			<AuthLegalFooter />
 		</article>
 	);
 }
