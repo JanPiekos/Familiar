@@ -281,12 +281,12 @@ export function ChatSidebar({
 									value={tab.value}
 									title={tab.title}
 									aria-label={`${tab.title} (${count})`}
-									className="h-11 min-w-0 gap-1.5 rounded-lg px-2 text-sm whitespace-nowrap"
+									className="group/chat-tab h-11 min-w-0 gap-1.5 rounded-lg px-2 text-sm whitespace-nowrap"
 								>
 									<span className="min-w-0 truncate">{tab.label}</span>
 									<span
 										aria-hidden="true"
-										className="shrink-0 rounded-full bg-background/60 px-1.5 text-[11px] leading-5 text-muted-foreground tabular-nums"
+										className="shrink-0 rounded-full bg-background/60 px-1.5 text-[11px] leading-5 text-muted-foreground tabular-nums group-data-[state=active]/chat-tab:bg-primary-foreground/15 group-data-[state=active]/chat-tab:text-primary-foreground"
 									>
 										{count}
 									</span>
