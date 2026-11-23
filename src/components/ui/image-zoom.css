@@ -1,0 +1,51 @@
+.image-zoom-content {
+	left: var(--zoom-x);
+	top: var(--zoom-y);
+	width: var(--zoom-width);
+	height: var(--zoom-height);
+	border-radius: var(--zoom-radius);
+}
+.image-zoom-media {
+	transform-origin: center;
+	will-change: transform;
+}
+.image-zoom-content[data-state="open"] .image-zoom-media {
+	animation: image-zoom-enter 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.image-zoom-content[data-state="closed"] {
+	/* Keep Radix mounted until the media's return animation finishes. */
+	animation: image-zoom-fade-out 180ms ease-in-out;
+}
+.image-zoom-content[data-state="closed"] .image-zoom-media {
+	animation: image-zoom-leave 180ms ease-in-out forwards;
+}
+.image-zoom-close {
+	transition: opacity 150ms;
+}
+.image-zoom-content[data-state="closed"] .image-zoom-close {
+	opacity: 0;
+}
+@keyframes image-zoom-enter {
+	from {
+		transform: translate3d(var(--zoom-translate-x), var(--zoom-translate-y), 0)
+			scale(var(--zoom-scale));
+		opacity: 0;
+	}
+}
+@keyframes image-zoom-leave {
+	to {
+		transform: translate3d(var(--zoom-translate-x), var(--zoom-translate-y), 0)
+			scale(var(--zoom-scale));
+	}
+}
+@keyframes image-zoom-fade-out {
+	to {
+		opacity: 0;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.image-zoom-content,
+	.image-zoom-media {
+		animation-duration: 0.01ms !important;
+	}
+}

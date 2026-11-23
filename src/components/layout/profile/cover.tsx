@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { ImageZoom } from "@/components/ui/image-zoom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getUserAccentStylesFromHex } from "@/lib/colors";
 import type { TUserResponse } from "@/types/user";
@@ -43,19 +44,23 @@ function ProfileCover({ user }: { user: TUserResponse }) {
 		() => getUserAccentStylesFromHex(user.accentColor),
 		[user.accentColor, t],
 	);
+	const alt = t("ui.value0_cover", { value0: user.username });
 
 	return (
 		<div className={PROFILE_COVER_CLASS_NAME} style={coverBgStyle}>
 			{/* TODO: add webm (animated) support */}
 			{user.coverPath && (
-				<img
+				<ImageZoom
 					src={user.coverPath}
-					alt={t("ui.value0_cover", {
-						defaultValue: "{{value0}} cover",
-						value0: user.username,
-					})}
-					className="h-full w-full object-cover"
-				/>
+					alt={alt}
+					className="block size-full rounded-[inherit]"
+				>
+					<img
+						src={user.coverPath}
+						alt={alt}
+						className="h-full w-full object-cover"
+					/>
+				</ImageZoom>
 			)}
 		</div>
 	);

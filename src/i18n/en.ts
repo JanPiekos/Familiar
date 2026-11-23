@@ -1833,6 +1833,12 @@ const en = {
 		},
 	},
 	ui: {
+		image_zoom: {
+			open: "Enlarge {{image}}",
+			close_image: "Close enlarged image",
+			avatar: "{{name}}'s profile picture",
+			unavailable: "This image couldn't be loaded.",
+		},
 		add_to_portfolio: "Add to portfolio",
 		empty_portfolio_owner_description:
 			"Share your first artwork or organize your portfolio with a folder.",
