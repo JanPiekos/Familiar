@@ -14,6 +14,7 @@ import {
 	RouteErrorPage,
 	RouteNotFoundPage,
 } from "@/components/layout/error-page";
+import { ExternalLinkGuard } from "@/components/layout/external-link-guard";
 import { RoutedUserSettings } from "@/components/layout/modal/profile/settings/routed-user-settings";
 import { RouteFavicon } from "@/components/layout/route-favicon";
 import { Toaster } from "@/components/ui/sonner";
@@ -133,7 +134,10 @@ function RootDocument({ children }: { children: ReactNode }) {
 			</head>
 			<body>
 				<AccessibilityEffects />
-				<ThemeProvider>{children}</ThemeProvider>
+				<ThemeProvider>
+					{children}
+					<ExternalLinkGuard />
+				</ThemeProvider>
 				<Analytics />
 				<Scripts />
 			</body>

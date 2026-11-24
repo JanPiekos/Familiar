@@ -1,4 +1,15 @@
 const en = {
+	external_link_guard: {
+		title: "You're leaving Familiar",
+		description:
+			"This website is outside Familiar and will open in a new tab. Check the address before continuing.",
+		destination: "Destination website",
+		safety_title: "Keep your account safe",
+		safety_description:
+			"Familiar staff will never ask you to contact them outside the app. Never share your password or verification codes, or send money to someone claiming to be our support team.",
+		stay: "Stay on Familiar",
+		continue: "Continue to website",
+	},
 	error_preview: {
 		title: "Error page preview",
 		description: "Choose an example to see the error screen.",

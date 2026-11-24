@@ -1,6 +1,17 @@
 import type en from "./en";
 
 const pl = {
+	external_link_guard: {
+		title: "Opuszczasz Familiar",
+		description:
+			"Ta strona znajduje się poza Familiar i otworzy się w nowej karcie. Sprawdź adres, zanim przejdziesz dalej.",
+		destination: "Strona docelowa",
+		safety_title: "Zadbaj o bezpieczeństwo konta",
+		safety_description:
+			"Zespół Familiar nigdy nie poprosi Cię o kontakt poza aplikacją. Nie udostępniaj hasła ani kodów weryfikacyjnych i nie wysyłaj pieniędzy osobom podszywającym się pod naszą pomoc techniczną.",
+		stay: "Zostań w Familiar",
+		continue: "Przejdź do strony",
+	},
 	error_preview: {
 		title: "Podgląd stron błędów",
 		description: "Wybierz przykład, aby zobaczyć stronę błędu.",
