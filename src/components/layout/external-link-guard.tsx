@@ -13,6 +13,28 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+function getTrustedOrigins() {
+	const origins = new Set(["https://secure.przelewy24.pl"]);
+	const configured: string =
+		import.meta.env.VITE_EXTERNAL_LINK_ALLOWED_ORIGINS ?? "";
+	for (const entry of configured.split(",")) {
+		if (!entry.trim()) continue;
+		try {
+			const url = new URL(entry.trim());
+			if (
+				url.protocol === "https:" &&
+				url.href === `${url.origin}/` &&
+				!url.hostname.includes("*")
+			) {
+				origins.add(url.origin);
+			}
+		} catch {
+			// An invalid entry leaves the warning enabled for that destination.
+		}
+	}
+	return origins;
+}
+
 /** One listener also covers links rendered in markdown, menus and dialog portals. */
 export function ExternalLinkGuard() {
 	const { t } = useTranslation();
@@ -21,6 +43,7 @@ export function ExternalLinkGuard() {
 	const source = useRef<HTMLAnchorElement | null>(null);
 
 	useEffect(() => {
+		const trustedOrigins = getTrustedOrigins();
 		const intercept = (event: MouseEvent) => {
 			if (event.defaultPrevented || event.button > 1) return;
 			if (event.type === "auxclick" && event.button !== 1) return;
@@ -37,7 +60,8 @@ export function ExternalLinkGuard() {
 			}
 			if (
 				!/^https?:$/.test(url.protocol) ||
-				url.origin === window.location.origin
+				url.origin === window.location.origin ||
+				(!url.username && !url.password && trustedOrigins.has(url.origin))
 			)
 				return;
 

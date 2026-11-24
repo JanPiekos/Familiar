@@ -25,6 +25,7 @@ beforeEach(() => {
 afterEach(() => {
 	cleanup();
 	vi.restoreAllMocks();
+	vi.unstubAllEnvs();
 });
 
 async function mount(locale = "en", nested = false) {
@@ -123,6 +124,55 @@ it.each(["cancel", "Escape"])(
 		expect(window.open).not.toHaveBeenCalled();
 	},
 );
+
+it.each([
+	["https://secure.przelewy24.pl/trnRequest/test", "click", {}],
+	["https://checkout.example.test/pay/order?a=1", "click", { ctrlKey: true }],
+	["https://checkout.example.test/pay/order", "auxclick", { button: 1 }],
+] as const)("preserves checkout navigation to %s on %s", async (href, type, options) => {
+	vi.stubEnv(
+		"VITE_EXTERNAL_LINK_ALLOWED_ORIGINS",
+		"invalid, https://CHECKOUT.example.test:443/",
+	);
+	await mount();
+	const link = screen.getByRole("link", { name: "External website" });
+	link.setAttribute("href", href);
+	const activated = vi.fn((event: Event) => {
+		expect(event.defaultPrevented).toBe(false);
+		event.preventDefault();
+	});
+	link.addEventListener(type, activated);
+	fireEvent(
+		link,
+		new MouseEvent(type, { bubbles: true, cancelable: true, ...options }),
+	);
+	expect(activated).toHaveBeenCalledOnce();
+	expect(screen.queryByRole("alertdialog")).toBeNull();
+	expect(window.open).not.toHaveBeenCalled();
+});
+
+it.each([
+	"https://secure.przelewy24.pl.example.test/pay",
+	"https://another.przelewy24.pl/pay",
+	"http://secure.przelewy24.pl/pay",
+	"https://secure.przelewy24.pl:8443/pay",
+	"https://user@secure.przelewy24.pl/pay",
+	"https://secure.przelewy24.pl@outside.example.test/pay",
+	"https://one.example.test/pay",
+	"https://path.example.test/pay",
+])("keeps the warning for an untrusted destination %s", async (href) => {
+	vi.stubEnv(
+		"VITE_EXTERNAL_LINK_ALLOWED_ORIGINS",
+		"https://*.example.test, https://path.example.test/pay",
+	);
+	await mount();
+	const link = screen.getByRole("link", { name: "External website" });
+	link.setAttribute("href", href);
+	fireEvent.click(link);
+	expect(screen.getByRole("alertdialog")).toBeTruthy();
+	expect(screen.getByText(href)).toBeTruthy();
+	expect(window.open).not.toHaveBeenCalled();
+});
 
 it("covers portal links and replaces a cancelled destination", async () => {
 	await mount();
