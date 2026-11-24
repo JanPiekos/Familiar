@@ -16,6 +16,7 @@ import {
 	COLOR_OPTIONS,
 	DEFAULT_ACCESSIBILITY,
 	FONT_OPTIONS,
+	GUIDE_HEIGHTS,
 	saveAccessibility,
 	TEXT_SIZES,
 	useAccessibility,
@@ -44,7 +45,7 @@ export function AccessibilitySettings({
 	return (
 		<form
 			id="accessibility-settings-form"
-			className="space-y-6"
+			className="space-y-6 [overflow-wrap:anywhere]"
 			onSubmit={async (event) => {
 				event.preventDefault();
 				const persisted = saveAccessibility(draft);
@@ -166,10 +167,51 @@ export function AccessibilitySettings({
 					</div>
 				))}
 			</section>
+			<section className="space-y-5 rounded-2xl border bg-card p-4 sm:p-5">
+				<div className="flex items-center justify-between gap-4">
+					<div>
+						<label
+							htmlFor={`${id}-guide`}
+							className="font-semibold text-foreground"
+						>
+							{t("accessibility.guide_title")}
+						</label>
+						<p
+							id={`${id}-guide-help`}
+							className="mt-1 text-sm text-muted-foreground"
+						>
+							{t("accessibility.guide_help")}
+						</p>
+					</div>
+					<div className="flex h-10 shrink-0 items-center">
+						<Switch
+							id={`${id}-guide`}
+							aria-describedby={`${id}-guide-help`}
+							checked={draft.readingGuide}
+							onCheckedChange={(value) => update("readingGuide", value)}
+						/>
+					</div>
+				</div>
+				<PreferenceSelect
+					id={`${id}-guide-height`}
+					label={t("accessibility.guide_height")}
+					value={String(draft.guideHeight)}
+					onChange={(value) =>
+						update(
+							"guideHeight",
+							Number(value) as AccessibilityPreferences["guideHeight"],
+						)
+					}
+					options={GUIDE_HEIGHTS.map((value) => ({
+						value: String(value),
+						label: t("accessibility.guide_pixels", { height: value }),
+					}))}
+				/>
+			</section>
 			<Button
 				type="button"
 				variant="outline"
-				className="h-10 lg:h-9"
+				className="h-auto min-h-10 max-w-full whitespace-normal lg:min-h-9"
 				onClick={() => setDraft({ ...DEFAULT_ACCESSIBILITY })}
 			>
 				{t("accessibility.reset")}
@@ -206,7 +248,7 @@ function PreferenceSelect({
 				<SelectTrigger
 					id={id}
 					aria-describedby={description ? `${id}-help` : undefined}
-					className="h-10! w-full min-w-0 lg:h-9!"
+					className="h-auto! min-h-10 w-full min-w-0 whitespace-normal text-left lg:min-h-9 [&_[data-slot=select-value]]:line-clamp-none"
 				>
 					<SelectValue />
 				</SelectTrigger>
