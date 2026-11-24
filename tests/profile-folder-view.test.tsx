@@ -41,7 +41,13 @@ vi.mock("@/hooks/portfolio/use-portfolio", () => ({
 		isPending: false,
 	}),
 	useUpdateCatalog: () => ({ mutateAsync: state.update, isPending: false }),
-	useDeleteCatalog: () => ({ mutateAsync: state.delete, isPending: false }),
+	useDeleteCatalog: (onDeleted?: () => void | Promise<void>) => ({
+		mutateAsync: async (id: string) => {
+			await state.delete(id);
+			await onDeleted?.();
+		},
+		isPending: false,
+	}),
 	useRemovePortfolioPostFromCatalog: () => ({
 		mutateAsync: state.remove,
 		isPending: false,
@@ -104,7 +110,11 @@ beforeEach(() => {
 	state.add.mockReset().mockResolvedValue(undefined);
 	window.scrollTo = vi.fn();
 });
-afterEach(cleanup);
+afterEach(() => {
+	cleanup();
+	vi.restoreAllMocks();
+	vi.unstubAllGlobals();
+});
 
 async function app(locale = "en") {
 	const i18n = createInstance();
@@ -171,6 +181,49 @@ const artwork = (
 ): PortfolioPostResponse => ({ id, title, catalogIds });
 
 describe("folder contents", () => {
+	it("waits for deletion exit before returning to the portfolio", async () => {
+		const getStyle = globalThis.getComputedStyle;
+		vi.stubGlobal("CSS", { escape: (value: string) => value });
+		vi.spyOn(globalThis, "getComputedStyle").mockImplementation(
+			(element, pseudo) => {
+				const style = getStyle(element, pseudo);
+				if (element.getAttribute("data-slot") !== "alert-dialog-content")
+					return style;
+				return new Proxy(style, {
+					get(target, property) {
+						return property === "animationName"
+							? element.getAttribute("data-state") === "closed"
+								? "exit"
+								: "enter"
+							: Reflect.get(target, property, target);
+					},
+				});
+			},
+		);
+		const router = await app();
+		fireEvent.keyDown(screen.getByRole("button", { name: "Manage folder" }), {
+			key: "Enter",
+		});
+		fireEvent.click(
+			await screen.findByRole("menuitem", { name: "Delete folder" }),
+		);
+		const dialog = screen.getByRole("alertdialog");
+		const remove = within(dialog).getByRole("button", { name: "Delete" });
+		fireEvent.click(remove);
+		await waitFor(() => expect(dialog.dataset.state).toBe("closed"));
+		expect(dialog.isConnected).toBe(true);
+		expect(router.state.location.pathname).toContain("folder/folder-1");
+		expect((remove as HTMLButtonElement).disabled).toBe(true);
+		fireEvent.click(remove);
+		expect(state.delete).toHaveBeenCalledExactlyOnceWith("folder-1");
+		const end = new Event("animationend", { bubbles: true });
+		Object.defineProperty(end, "animationName", { value: "exit" });
+		fireEvent(dialog, end);
+		await waitFor(() =>
+			expect(router.state.location.pathname).toBe("/user/artist/portfolio"),
+		);
+		await screen.findByRole("heading", { name: "Portfolio overview" });
+	});
 	it("explains an owner's empty folder and keeps its management actions accessible", async () => {
 		const router = await app();
 		expect(screen.getByText("0 posts")).toBeDefined();

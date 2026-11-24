@@ -795,6 +795,7 @@ const pl = {
 			folder: {
 				back: "Powrót do portfolio",
 				manage: {
+					options: "Zarządzaj folderem: {{name}}",
 					rename: "Zmień nazwę folderu",
 					delete: "Usuń folder",
 				},
@@ -804,6 +805,7 @@ const pl = {
 						"Czy na pewno chcesz usunąć ten folder? Posty w nim nie zostaną usunięte.",
 					cancel: "Anuluj",
 					deleting: "Usuwanie...",
+					error: "Nie udało się usunąć folderu. Spróbuj ponownie.",
 					confirm: "Usuń",
 				},
 				filters: {
