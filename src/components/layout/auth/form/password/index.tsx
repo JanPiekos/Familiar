@@ -10,16 +10,16 @@ import {
 } from "@/components/ui/input-group";
 import { passwordErrorKey } from "@/lib/password";
 import { localizePath } from "@/lib/i18n";
-import { supabase } from "@/lib/supabase";
+import { getPasswordRecoveryAuth, supabase } from "@/lib/supabase";
 
 const emptyValues = { current: "", password: "", confirm: "", nonce: "" };
 type PasswordField = "current" | "password" | "confirm";
 
 export function PasswordUpdateForm({
-	requireCurrentPassword = false,
+	recoveryUser,
 	onSuccess,
 }: {
-	requireCurrentPassword?: boolean;
+	recoveryUser?: { id: string; email: string };
 	onSuccess?: () => void;
 }) {
 	const { t, i18n } = useTranslation();
@@ -33,9 +33,7 @@ export function PasswordUpdateForm({
 	const [needsCode, setNeedsCode] = useState(false);
 	const [error, setError] = useState("");
 	const [saved, setSaved] = useState(false);
-	const fields: PasswordField[] = requireCurrentPassword
-		? ["current", "password", "confirm"]
-		: ["password", "confirm"];
+	const fields: PasswordField[] = ["current", "password", "confirm"];
 	const labels = {
 		current: t("auth.reset.current"),
 		password: t("auth.reset.new_password"),
@@ -46,13 +44,12 @@ export function PasswordUpdateForm({
 		event.preventDefault();
 		if (submitting.current) return;
 		setSaved(false);
-		if (requireCurrentPassword && !values.current)
-			return setError(t("auth.reset.current_required"));
+		if (!values.current) return setError(t("auth.reset.current_required"));
 		if (values.password.length < 6)
 			return setError(t("auth.reset.requirements"));
 		if (values.password !== values.confirm)
 			return setError(t("auth.reset.mismatch"));
-		if (requireCurrentPassword && values.password === values.current)
+		if (values.password === values.current)
 			return setError(t("auth.reset.same_password"));
 		if (needsCode && !values.nonce.trim())
 			return setError(t("auth.reset.enter_code"));
@@ -60,14 +57,29 @@ export function PasswordUpdateForm({
 		setBusy(true);
 		setError("");
 		try {
-			const { error: updateError } = await supabase.auth.updateUser({
+			const auth = recoveryUser ? getPasswordRecoveryAuth() : supabase.auth;
+			if (recoveryUser) {
+				const current = await auth.getUser();
+				if (current.error || current.data.user?.id !== recoveryUser.id)
+					return setError(t("auth.reset.invalid_description"));
+				if (!needsCode) {
+					// Recovery sessions can be exempt from the provider's current-password rule.
+					const checked = await auth.signInWithPassword({
+						email: recoveryUser.email,
+						password: values.current,
+					});
+					if (checked.error) throw checked.error;
+					if (checked.data.session?.user.id !== recoveryUser.id)
+						return setError(t("auth.reset.failed"));
+				}
+			}
+			const { error: updateError } = await auth.updateUser({
 				password: values.password,
-				...(requireCurrentPassword ? { current_password: values.current } : {}),
+				current_password: values.current,
 				...(needsCode ? { nonce: values.nonce.trim() } : {}),
 			});
 			if (updateError?.code === "reauthentication_needed" && !needsCode) {
-				const { error: verificationError } =
-					await supabase.auth.reauthenticate();
+				const { error: verificationError } = await auth.reauthenticate();
 				if (verificationError) throw verificationError;
 				setNeedsCode(true);
 				return;
@@ -78,6 +90,7 @@ export function PasswordUpdateForm({
 			setNeedsCode(false);
 			setSaved(true);
 			onSuccess?.();
+			if (recoveryUser) await auth.signOut({ scope: "local" });
 		} catch (failure) {
 			setError(t(passwordErrorKey(failure)));
 		} finally {
@@ -111,6 +124,7 @@ export function PasswordUpdateForm({
 									name === "current" ? "current-password" : "new-password"
 								}
 								required
+								readOnly={name === "current" && needsCode}
 								value={values[name]}
 								aria-describedby={error ? `${id}-error` : undefined}
 								onChange={(event) => {
@@ -191,7 +205,7 @@ export function PasswordUpdateForm({
 			>
 				{t(busy ? "auth.reset.saving" : "auth.reset.submit")}
 			</Button>
-			{requireCurrentPassword && (
+			{!recoveryUser && (
 				<Button asChild variant="link">
 					<a href={localizePath("/auth/forgot", i18n.language)}>
 						{t("auth.forgot.cta")}

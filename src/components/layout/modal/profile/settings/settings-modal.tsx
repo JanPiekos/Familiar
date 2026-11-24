@@ -601,7 +601,7 @@ function AccountSettings({ email }: { email: string }) {
 				title={t("settings.account.password.title")}
 				description={t("settings.account.password.description")}
 			>
-				<PasswordUpdateForm requireCurrentPassword />
+				<PasswordUpdateForm />
 			</SettingsCard>
 		</div>
 	);

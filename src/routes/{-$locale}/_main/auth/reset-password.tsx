@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2, KeyRound } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PasswordUpdateForm } from "@/components/layout/auth/form/password";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { supabase } from "@/lib/supabase";
+import { verifyRecoveryLink } from "@/lib/password";
+import { getPasswordRecoveryAuth } from "@/lib/supabase";
 
 export const Route = createFileRoute("/{-$locale}/_main/auth/reset-password")({
 	component: ResetPasswordPage,
@@ -15,50 +16,56 @@ export function ResetPasswordPage() {
 	const { locale } = Route.useParams();
 	const { t } = useTranslation();
 	const [state, setState] = useState<
-		"checking" | "ready" | "invalid" | "complete"
+		"checking" | "invalid" | "complete" | { id: string; email: string }
 	>("checking");
+	const verification = useRef<ReturnType<typeof verifyRecoveryLink> | null>(
+		null,
+	);
 	useEffect(() => {
 		let active = true;
 		let signedOut = false;
 		const url = new URL(window.location.href);
-		const fragment = new URLSearchParams(url.hash.slice(1));
-		const linkError =
-			url.searchParams.has("error") ||
-			url.searchParams.has("error_code") ||
-			fragment.has("error") ||
-			fragment.has("error_code");
+		// Effects can replay in Strict Mode. Redeem the one-time credential only once.
+		verification.current ??= verifyRecoveryLink(url);
+		const result = verification.current;
+		for (const key of [
+			"code",
+			"sb_flow_id",
+			"token_hash",
+			"type",
+			"access_token",
+			"refresh_token",
+			"error",
+			"error_code",
+			"error_description",
+		])
+			url.searchParams.delete(key);
+		window.history.replaceState(
+			window.history.state,
+			"",
+			url.pathname + url.search,
+		);
 		const {
 			data: { subscription },
-		} = supabase.auth.onAuthStateChange((event) => {
+		} = getPasswordRecoveryAuth().onAuthStateChange((event) => {
 			if (active && event === "SIGNED_OUT") {
 				signedOut = true;
-				setState("invalid");
+				setState((previous) =>
+					previous === "complete" ? previous : "invalid",
+				);
 			}
 		});
 		void (async () => {
 			try {
-				const { data, error } = await supabase.auth.getSession();
-				if (linkError || error || !data.session) {
-					if (active) setState("invalid");
-					return;
-				}
-				const verified = await supabase.auth.getUser();
+				const user = await result;
 				if (active && !signedOut)
-					setState(!verified.error && verified.data.user ? "ready" : "invalid");
+					setState(
+						user?.id && user.email
+							? { id: user.id, email: user.email }
+							: "invalid",
+					);
 			} catch {
 				if (active) setState("invalid");
-			} finally {
-				if (active) {
-					// The SDK consumes the session before credentials are removed from the address.
-					["code", "error", "error_code", "error_description"].forEach((key) =>
-						url.searchParams.delete(key),
-					);
-					window.history.replaceState(
-						window.history.state,
-						"",
-						url.pathname + url.search,
-					);
-				}
 			}
 		})();
 		return () => {
@@ -102,8 +109,11 @@ export function ResetPasswordPage() {
 					{t("auth.reset.checking")}
 				</div>
 			)}
-			{state === "ready" && (
-				<PasswordUpdateForm onSuccess={() => setState("complete")} />
+			{typeof state === "object" && (
+				<PasswordUpdateForm
+					recoveryUser={state}
+					onSuccess={() => setState("complete")}
+				/>
 			)}
 			{state === "invalid" && (
 				<Button asChild size="2xl" className="mt-auto">
