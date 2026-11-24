@@ -3,6 +3,7 @@ import { FolderPlus, ImagePlus, Plus } from "lucide-react";
 import {
 	createContext,
 	type ReactNode,
+	useCallback,
 	useContext,
 	useEffect,
 	useState,
@@ -26,9 +27,10 @@ export type PortfolioCreationActions = {
 	onCreatePost?: () => void;
 	onCreateFolder?: () => void;
 };
-const ActionsContext = createContext<PortfolioCreationActions | null>(null);
+type CreationRegistration = { actions: PortfolioCreationActions };
+const ActionsContext = createContext<CreationRegistration[]>([]);
 const PublishContext = createContext<
-	((actions: PortfolioCreationActions | null) => void) | null
+	((actions: PortfolioCreationActions) => () => void) | null
 >(null);
 
 export function PortfolioCreationProvider({
@@ -36,10 +38,21 @@ export function PortfolioCreationProvider({
 }: {
 	children: ReactNode;
 }) {
-	const [actions, setActions] = useState<PortfolioCreationActions | null>(null);
+	const [registrations, setRegistrations] = useState<CreationRegistration[]>(
+		[],
+	);
+	const publish = useCallback((actions: PortfolioCreationActions) => {
+		const registration = { actions };
+		setRegistrations((current) => [...current, registration]);
+		// A departing route must not clear another route's creation actions.
+		return () =>
+			setRegistrations((current) =>
+				current.filter((entry) => entry !== registration),
+			);
+	}, []);
 	return (
-		<PublishContext.Provider value={setActions}>
-			<ActionsContext.Provider value={actions}>
+		<PublishContext.Provider value={publish}>
+			<ActionsContext.Provider value={registrations}>
 				{children}
 			</ActionsContext.Provider>
 		</PublishContext.Provider>
@@ -52,15 +65,17 @@ export function usePublishPortfolioCreation(
 ) {
 	const publish = useContext(PublishContext);
 	useEffect(() => {
-		publish?.(actions);
-		return () => publish?.(null);
+		if (actions) return publish?.(actions);
 	}, [actions, publish]);
 }
 
 export function PortfolioCreationMenu() {
-	const actions = useContext(ActionsContext);
+	const registrations = useContext(ActionsContext);
 	const { user, isPending } = useAuth();
 	const pathname = useLocation({ select: (location) => location.pathname });
+	const actions = registrations.findLast(
+		(entry) => entry.actions.pathname === pathname,
+	)?.actions;
 	const compact = useIsTablet();
 	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
