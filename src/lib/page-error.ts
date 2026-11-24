@@ -17,6 +17,16 @@ export type PageError = {
 	retryable: boolean;
 };
 
+/** Only a failed user lookup should use the missing-profile view. */
+export function getMissingProfileUsername(data: unknown): string | undefined {
+	if (!data || typeof data !== "object") return undefined;
+	const value = data as { kind?: unknown; username?: unknown };
+	return value.kind === "profile_not_found" &&
+		typeof value.username === "string"
+		? value.username || undefined
+		: undefined;
+}
+
 function httpStatus(value: unknown): number | undefined {
 	const status =
 		typeof value === "string" && /^\d{3}$/.test(value) ? Number(value) : value;

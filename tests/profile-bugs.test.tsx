@@ -27,7 +27,6 @@ vi.mock("@/components/icons/icons", () => ({
 	OutlineChevronLeft: () => null, OutlineChevronRight: () => null,
 	OutlineHeart: () => null, OutlineSend: () => null, OutlineClose: () => null,
 }));
-vi.mock("@/components/layout/profile/user", () => ({ default: ({ user }: any) => <span>{user?.displayName}</span> }));
 vi.mock("@/components/layout/profile/avatar", () => ({ default: () => null }));
 vi.mock("@/components/layout/empty-page", () => ({ EmptyPage: ({ title }: any) => <div>{title}</div> }));
 vi.mock("@/components/layout/modal/universal-modal-layout", () => ({ UniversalModalLayout: () => null }));

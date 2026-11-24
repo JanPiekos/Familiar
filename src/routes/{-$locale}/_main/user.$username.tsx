@@ -8,7 +8,7 @@ import {
 	useNavigate,
 } from "@tanstack/react-router";
 
-import { RouteNotFoundPage } from "@/components/layout/error-page";
+import { ProfileNotFoundPage } from "@/components/layout/profile/profile-not-found";
 import { ProfileCommissions } from "@/components/layout/profile/feed/commissions";
 import { ProfilePortfolio } from "@/components/layout/profile/feed/portfolio";
 import {
@@ -22,7 +22,10 @@ import UserProfile, {
 import { useProfileCommissions } from "@/hooks/commissions/use-commissions";
 import { useIsMobile } from "@/hooks/ui/use-mobile";
 import { useProfileContent } from "@/hooks/user/use-profile-content";
-import { userByUsernameQueryOptions } from "@/hooks/user/use-user";
+import {
+	userByUsernameQueryOptions,
+	useUserByUsername,
+} from "@/hooks/user/use-user";
 import i18n from "@/lib/i18n";
 import { getErrorStatus } from "@/lib/page-error";
 
@@ -73,15 +76,19 @@ export const Route = createFileRoute("/{-$locale}/_main/user/$username")({
 		}
 	},
 	loader: async ({ params, context }) => {
+		const missingProfile = () =>
+			notFound({
+				data: { kind: "profile_not_found", username: params.username },
+			});
 		const user = await context.queryClient
 			.ensureQueryData(userByUsernameQueryOptions(params.username))
 			.catch((error: unknown) => {
-				if (getErrorStatus(error) === 404) throw notFound();
+				if (getErrorStatus(error) === 404) throw missingProfile();
 				throw error;
 			});
 
 		if (!user) {
-			throw notFound();
+			throw missingProfile();
 		}
 
 		const faviconUrl = getProfileFaviconUrl(user, params.username);
@@ -102,16 +109,23 @@ export const Route = createFileRoute("/{-$locale}/_main/user/$username")({
 	},
 
 	pendingComponent: UserProfileSkeleton,
-	notFoundComponent: RouteNotFoundPage,
+	notFoundComponent: ProfileNotFoundPage,
 	component: RouteComponent,
 });
+
+function useLiveProfile() {
+	const { user: loadedUser, username } = Route.useLoaderData();
+	// The loader validates the route; the query observes later profile saves.
+	const { user } = useUserByUsername(username);
+	return { user: user ?? loadedUser, username };
+}
 
 export function DefaultProfileTabContent({
 	username: _username,
 }: {
 	username: string;
 }) {
-	const { user: artist } = Route.useLoaderData();
+	const { user: artist } = useLiveProfile();
 	const artistId = artist.userId ?? "";
 	const { commissions, isPending: isCommissionsPending } =
 		useProfileCommissions(artistId, 0, 24);
@@ -124,7 +138,7 @@ export function DefaultProfileTabContent({
 }
 
 export function DefaultPortfolioTabContent({ username }: { username: string }) {
-	const { user: artist } = Route.useLoaderData();
+	const { user: artist } = useLiveProfile();
 	const artistId = artist.userId ?? "";
 	const hasPortfolio = hasArtistPortfolio(artist);
 	const { data: content, isPending: isContentPending } = useProfileContent(
@@ -158,7 +172,7 @@ export function DefaultPortfolioTabContent({ username }: { username: string }) {
 // FIXME: when user is not logged in and opens a portfolio detail page,
 // there is no creator information.
 function RouteComponent() {
-	const { user, username } = Route.useLoaderData();
+	const { user, username } = useLiveProfile();
 
 	const navigate = useNavigate();
 	const location = useLocation();

@@ -29,6 +29,11 @@ const en = {
 		home: "Back to home",
 		back: "Go back",
 		sign_in: "Sign in",
+		profile_not_found: {
+			title: "User not found",
+			description:
+				"We couldn't find an account with this username. The username may have changed, or the account may no longer be available.",
+		},
 		not_found: {
 			title: "This page couldn't be found",
 			description:
@@ -633,7 +638,10 @@ const en = {
 				title: "Please verify your email",
 				description: "We sent a confirmation link to the email address below.",
 				waiting:
-					"Open the link in the email. This page will update automatically, and you may also check again manually.",
+					"Open the email link, then return here. If it opened on another site or device, select Check again.",
+				sign_in: "Already confirmed? Sign in here",
+				sign_in_required: "Sign in here to finish setting up your account.",
+				check_failed: "We couldn't check your confirmation. Try again or sign in.",
 				verified_title: "Email confirmed",
 				verified_description:
 					"Your account is ready. You can safely close this page.",
@@ -661,7 +669,7 @@ const en = {
 		email_confirmed: {
 			title: "Your email has been confirmed",
 			description:
-				"You can close this tab and return to the registration page. It will update automatically.",
+				"Return to your registration page to finish signing in, or continue on this site.",
 			continue: "Continue to Familiar",
 		},
 		forgot: {

@@ -1,5 +1,5 @@
 import i18n, { resolveLocale } from "@/lib/i18n";
-import { getPageError } from "@/lib/page-error";
+import { getMissingProfileUsername, getPageError } from "@/lib/page-error";
 import { getSeoLinks, seo } from "@/lib/seo";
 import type { Meta } from "@/types/seo";
 
@@ -119,11 +119,18 @@ export function getRouteSeo(matches: readonly SeoMatch[]) {
 		const issue = getPageError(
 			failed.status === "error" ? failed.error : { status: 404 },
 		);
+		const missingProfile =
+			issue.kind === "not_found" &&
+			failed.error &&
+			typeof failed.error === "object" &&
+			"data" in failed.error &&
+			getMissingProfileUsername(failed.error.data);
+		const kind = missingProfile ? "profile_not_found" : issue.kind;
 		const path = leaf?.pathname ?? "/";
 		return {
 			meta: seo({
-				title: t(`error_pages.${issue.kind}.title`),
-				description: t(`error_pages.${issue.kind}.description`),
+				title: t(`error_pages.${kind}.title`),
+				description: t(`error_pages.${kind}.description`),
 				pathname: path,
 				locale,
 				noIndex: true,

@@ -31,6 +31,11 @@ const pl = {
 		home: "Strona główna",
 		back: "Wróć",
 		sign_in: "Zaloguj się",
+		profile_not_found: {
+			title: "Nie znaleziono użytkownika",
+			description:
+				"Nie znaleźliśmy konta o tej nazwie. Nazwa mogła się zmienić lub konto nie jest już dostępne.",
+		},
 		not_found: {
 			title: "Nie udało się znaleźć tej strony",
 			description:
@@ -641,7 +646,10 @@ const pl = {
 				title: "Potwierdź swój adres e-mail",
 				description: "Wysłaliśmy link potwierdzający na poniższy adres e-mail.",
 				waiting:
-					"Otwórz link z wiadomości. Ta strona zaktualizuje się automatycznie, możesz też sprawdzić ponownie ręcznie.",
+					"Otwórz link z wiadomości i wróć tutaj. Jeśli otworzył się na innej stronie lub urządzeniu, wybierz Sprawdź ponownie.",
+				sign_in: "E-mail potwierdzony? Zaloguj się tutaj",
+				sign_in_required: "Zaloguj się tutaj, aby dokończyć konfigurację konta.",
+				check_failed: "Nie udało się sprawdzić potwierdzenia. Spróbuj ponownie lub zaloguj się.",
 				verified_title: "Adres e-mail potwierdzony",
 				verified_description:
 					"Twoje konto jest gotowe. Możesz bezpiecznie zamknąć tę stronę.",
@@ -669,7 +677,7 @@ const pl = {
 		email_confirmed: {
 			title: "Twój adres e-mail został potwierdzony",
 			description:
-				"Możesz zamknąć tę kartę i wrócić do strony rejestracji. Zaktualizuje się ona automatycznie.",
+				"Wróć do strony rejestracji, aby dokończyć logowanie, lub przejdź dalej na tej stronie.",
 			continue: "Przejdź do Familiar",
 		},
 		forgot: {

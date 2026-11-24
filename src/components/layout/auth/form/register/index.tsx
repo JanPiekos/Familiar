@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import useFormValidation from "@/hooks/form/use-form-validation";
 import { normalizeInviteKey } from "@/lib/invite-key";
+import { checkRegistrationVerification } from "@/lib/registration-verification";
 import { cn } from "@/lib/utils";
 import { RegistrationError, useAuth } from "@/providers/auth";
 import { register } from "@/schemas/auth/register";
@@ -97,20 +98,26 @@ function getFirstFocusableError(
 	return undefined;
 }
 
-function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
+function RegisterForm({
+	onSuccess,
+	onStageChange,
+	onModeChange,
+}: RegisterFormProps) {
 	const [step, setStep] = useState<FormStep>(0);
 	const [furthestFormStep, setFurthestFormStep] = useState<FormStep>(0);
 	const [isChangingStep, setIsChangingStep] = useState(false);
 	const [isAwaitingVerification, setIsAwaitingVerification] = useState(false);
 	const [registeredEmail, setRegisteredEmail] = useState("");
 	const [responseEmailVerified, setResponseEmailVerified] = useState(false);
+	const [isCheckingVerification, setIsCheckingVerification] = useState(false);
+	const [verificationError, setVerificationError] = useState("");
+	const verificationPending = useRef(false);
 
 	const { t } = useTranslation();
 	const {
 		authEmail,
 		isEmailVerified,
 		isPending: isAuthPending,
-		refreshSession,
 		register: authRegister,
 	} = useAuth();
 
@@ -137,6 +144,7 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 		isPending,
 		handleSubmit,
 		control,
+		getValues,
 		setValue,
 		trigger,
 		setError,
@@ -290,6 +298,11 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 
 				setRegisteredEmail(data.email.trim().toLowerCase());
 				setResponseEmailVerified(Boolean(response.user.email_confirmed_at));
+				setVerificationError("");
+				if (response.user.email_confirmed_at) {
+					setValue("password", "");
+					setValue("confirm_password", "");
+				}
 				setIsAwaitingVerification(true);
 			} catch (error) {
 				if (error instanceof RegistrationError && error.field) {
@@ -314,7 +327,7 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 				}
 			}
 		},
-		[authRegister, setError, setFocus, t],
+		[authRegister, setError, setFocus, setValue, t],
 	);
 
 	const handleInvalidSubmit = useCallback(
@@ -360,9 +373,54 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 		t,
 	]);
 
-	const checkVerification = useCallback(() => {
-		void refreshSession();
-	}, [refreshSession, t]);
+	const checkVerification = useCallback(
+		async (completeSignIn = false) => {
+			if (
+				!normalizedRegisteredEmail ||
+				registeredEmailVerified ||
+				verificationPending.current
+			)
+				return;
+			verificationPending.current = true;
+			setIsCheckingVerification(true);
+			if (completeSignIn) setVerificationError("");
+			try {
+				const status = await checkRegistrationVerification({
+					email: normalizedRegisteredEmail,
+					password: completeSignIn ? getValues("password") : undefined,
+				});
+				if (status === "verified" || status === "sign_in_required") {
+					setValue("password", "");
+					setValue("confirm_password", "");
+				}
+				if (status === "verified") {
+					setResponseEmailVerified(true);
+					setVerificationError("");
+				} else if (status === "sign_in_required" && completeSignIn) {
+					setVerificationError(t("auth.register.verify.sign_in_required"));
+				}
+			} catch (error) {
+				if (completeSignIn)
+					setVerificationError(
+						t(
+							(error as { status?: number })?.status === 429
+								? "auth.errors.rate_limit"
+								: "auth.register.verify.check_failed",
+						),
+					);
+			} finally {
+				verificationPending.current = false;
+				setIsCheckingVerification(false);
+			}
+		},
+		[
+			getValues,
+			normalizedRegisteredEmail,
+			registeredEmailVerified,
+			setValue,
+			t,
+		],
+	);
 
 	useEffect(() => {
 		if (!isAwaitingVerification || registeredEmailVerified) {
@@ -371,19 +429,20 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 
 		const checkWhenVisible = () => {
 			if (document.visibilityState === "visible") {
-				checkVerification();
+				void checkVerification();
 			}
 		};
 
-		const intervalId = window.setInterval(checkVerification, 5_000);
-		window.addEventListener("focus", checkVerification);
-		window.addEventListener("storage", checkVerification);
+		const checkSession = () => void checkVerification();
+		const intervalId = window.setInterval(checkSession, 5_000);
+		window.addEventListener("focus", checkSession);
+		window.addEventListener("storage", checkSession);
 		document.addEventListener("visibilitychange", checkWhenVisible);
 
 		return () => {
 			window.clearInterval(intervalId);
-			window.removeEventListener("focus", checkVerification);
-			window.removeEventListener("storage", checkVerification);
+			window.removeEventListener("focus", checkSession);
+			window.removeEventListener("storage", checkSession);
 			document.removeEventListener("visibilitychange", checkWhenVisible);
 		};
 	}, [checkVerification, isAwaitingVerification, registeredEmailVerified]);
@@ -447,9 +506,11 @@ function RegisterForm({ onSuccess, onStageChange }: RegisterFormProps) {
 			<div className="flex h-full min-h-112.5 min-w-0 flex-col gap-6 overflow-x-hidden px-1">
 				<RegisterStepVerifyEmail
 					email={registeredEmail}
-					isChecking={isAuthPending}
+					isChecking={isAuthPending || isCheckingVerification}
 					isVerified={registeredEmailVerified}
-					onCheck={checkVerification}
+					onCheck={() => void checkVerification(true)}
+					onSignIn={() => onModeChange("login")}
+					error={verificationError}
 				/>
 
 				<Button

@@ -25,6 +25,7 @@ import pl from "@/i18n/pl";
 const state = vi.hoisted(() => ({
 	user: null as TUserResponse | null,
 	pending: false,
+	compact: true,
 	logout: vi.fn(),
 }));
 vi.mock("@/providers/auth", () => ({
@@ -35,8 +36,8 @@ vi.mock("@/providers/auth", () => ({
 	}),
 }));
 vi.mock("@/hooks/ui/use-mobile", () => ({
-	useIsMobile: () => true,
-	useIsTablet: () => true,
+	useIsMobile: () => state.compact,
+	useIsTablet: () => state.compact,
 }));
 vi.mock("@/components/layout/profile/avatar", () => ({
 	default: ({ user }: { user: TUserResponse }) => (
@@ -110,6 +111,7 @@ beforeEach(() => {
 		createdAt: "2026-10-26",
 	};
 	state.pending = false;
+	state.compact = true;
 	window.scrollTo = vi.fn();
 	window.matchMedia = vi.fn().mockImplementation(() => ({
 		matches: false,
@@ -229,26 +231,36 @@ describe("mobile account dock", () => {
 		).toBeNull();
 	});
 
-	it("offers login and registration to guests", async () => {
-		state.user = null;
-		const { navigation } = await renderNavigation();
-		expect(
-			within(navigation)
-				.getByRole("link", { name: "Zaloguj" })
-				.getAttribute("href"),
-		).toBe("/pl/auth/login");
-		expect(
-			within(navigation)
-				.getByRole("link", { name: "Zarejestruj" })
-				.getAttribute("href"),
-		).toBe("/pl/auth/register");
-	});
+	it.each([false, true])(
+		"offers guests login without chat on mobile=%s",
+		async (compact) => {
+			state.compact = compact;
+			state.user = null;
+			const { navigation } = await renderNavigation();
+			expect(
+				within(navigation).queryByRole("link", { name: "Wiadomości" }),
+			).toBeNull();
+			expect(
+				within(navigation)
+					.getByRole("link", { name: "Zaloguj" })
+					.getAttribute("href"),
+			).toBe("/pl/auth/login");
+			expect(
+				within(navigation)
+					.getByRole("link", { name: "Zarejestruj" })
+					.getAttribute("href"),
+			).toBe("/pl/auth/register");
+		},
+	);
 
 	it("shows a loading state before account information is ready", async () => {
 		state.user = null;
 		state.pending = true;
 		const { navigation } = await renderNavigation();
 		expect(navigation.getAttribute("aria-busy")).toBe("true");
+		expect(
+			within(navigation).queryByRole("link", { name: "Wiadomości" }),
+		).toBeNull();
 		expect(
 			within(navigation).queryByRole("link", { name: "Zaloguj" }),
 		).toBeNull();
