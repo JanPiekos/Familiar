@@ -18,6 +18,11 @@ const en = {
 		home: "Back to home",
 		back: "Go back",
 		sign_in: "Sign in",
+		profile_not_found: {
+			title: "User not found",
+			description:
+				"We couldn't find an account with this username. The username may have changed, or the account may no longer be available.",
+		},
 		not_found: {
 			title: "This page couldn't be found",
 			description:
