@@ -13,6 +13,8 @@ interface RegisterStepVerifyEmailProps {
 	isChecking: boolean;
 	isVerified: boolean;
 	onCheck: () => void;
+	onSignIn: () => void;
+	error?: string;
 }
 
 export function RegisterStepVerifyEmail({
@@ -20,6 +22,8 @@ export function RegisterStepVerifyEmail({
 	isChecking,
 	isVerified,
 	onCheck,
+	onSignIn,
+	error,
 }: RegisterStepVerifyEmailProps) {
 	const { t } = useTranslation();
 
@@ -55,7 +59,7 @@ export function RegisterStepVerifyEmail({
 					<p className="text-center text-xs text-muted-foreground">
 						{t(
 							"auth.register.verify.waiting",
-							"Open the link in the email. This page will update automatically, and you may also check again manually.",
+							"Open the email link, then return here. If it opened on another site or device, select Check again.",
 						)}
 					</p>
 
@@ -63,6 +67,7 @@ export function RegisterStepVerifyEmail({
 						type="button"
 						variant="outline"
 						size="xl"
+						aria-label={t("auth.register.verify.check_again")}
 						onClick={onCheck}
 						disabled={isChecking}
 					>
@@ -70,6 +75,14 @@ export function RegisterStepVerifyEmail({
 							className={isChecking ? "animate-spin" : undefined}
 						/>
 						{t("auth.register.verify.check_again", "Check again")}
+					</Button>
+					{error && (
+						<p role="alert" className="text-sm text-destructive">
+							{error}
+						</p>
+					)}
+					<Button type="button" variant="link" onClick={onSignIn}>
+						{t("auth.register.verify.sign_in")}
 					</Button>
 				</>
 			) : null}
