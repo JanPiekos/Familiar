@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+import { MailCheck } from "lucide-react";
+import { useId, useRef, useState } from "react";
 import { OutlineMail } from "@/components/icons/icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,13 +17,17 @@ import {
 	InputGroupInput,
 } from "@/components/ui/input-group";
 import useFormValidation from "@/hooks/form/use-form-validation";
-import { supabase } from "@/lib/supabase";
+import { requestPasswordReset } from "@/lib/password";
 import { forgotPassword } from "@/schemas/auth/forgot-password";
 import type { ForgotFormProps } from "@/types/auth/form/forgot";
 import type { ForgotPasswordData } from "@/types/auth/schema/forgot-password";
 
-function ForgotForm({ onSuccess, onModeChange }: ForgotFormProps) {
-	const { t } = useTranslation();
+function ForgotForm({ onModeChange }: ForgotFormProps) {
+	const { t, i18n } = useTranslation();
+	const emailId = useId();
+	const [sentTo, setSentTo] = useState("");
+	const [error, setError] = useState("");
+	const pending = useRef(false);
 
 	const form = useFormValidation({
 		schema: forgotPassword,
@@ -38,34 +43,49 @@ function ForgotForm({ onSuccess, onModeChange }: ForgotFormProps) {
 	} = form;
 
 	const submitPasswordResetRequest = async (data: ForgotPasswordData) => {
-		const resetPasswordPromise = (async () => {
-			const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-				redirectTo: `${window.location.origin}/auth/reset-password`,
-			});
-
-			if (error) {
-				throw error;
-			}
-		})();
-
-		toast.promise(resetPasswordPromise, {
-			loading: "Sending reset email...",
-			success: () => {
-				onSuccess?.();
-
-				return "If an account exists with this email, you will receive a password reset link shortly.";
-			},
-			error: () => {
-				return "If an account exists with this email, you will receive a password reset link shortly.";
-			},
-		});
-
+		if (pending.current) return;
+		pending.current = true;
+		setError("");
 		try {
-			await resetPasswordPromise;
-		} catch {
-			// Intentionally hidden to avoid account enumeration.
+			await requestPasswordReset(data.email, i18n.language);
+			setSentTo(data.email.trim().toLowerCase());
+		} catch (failure) {
+			setError(
+				t(
+					(failure as { status?: number })?.status === 429
+						? "auth.errors.rate_limit"
+						: "auth.forgot.send_failed",
+				),
+			);
+		} finally {
+			pending.current = false;
 		}
 	};
+	if (sentTo)
+		return (
+			<div className="space-y-5 py-4">
+				<MailCheck className="size-12 text-foreground" aria-hidden="true" />
+				<div role="status" className="space-y-3">
+					<h2 className="text-xl font-semibold">
+						{t("auth.forgot.sent_title")}
+					</h2>
+					<p className="text-sm leading-relaxed text-muted-foreground">
+						{t("auth.forgot.sent_description")}
+					</p>
+					<p className="break-all font-medium">{sentTo}</p>
+				</div>
+				<Button type="button" variant="outline" onClick={() => setSentTo("")}>
+					{t("auth.forgot.try_another")}
+				</Button>
+				<Button
+					type="button"
+					variant="link"
+					onClick={() => onModeChange("login")}
+				>
+					{t("auth.forgot.back_to_login")}
+				</Button>
+			</div>
+		);
 
 	return (
 		<Form {...form}>
@@ -85,7 +105,7 @@ function ForgotForm({ onSuccess, onModeChange }: ForgotFormProps) {
 						name="email"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>{t("auth.email.label")}</FormLabel>
+								<FormLabel htmlFor={emailId}>{t("auth.email.label")}</FormLabel>
 
 								<FormControl>
 									<InputGroup>
@@ -94,6 +114,7 @@ function ForgotForm({ onSuccess, onModeChange }: ForgotFormProps) {
 										</InputGroupAddon>
 
 										<InputGroupInput
+											id={emailId}
 											placeholder={t("auth.email.placeholder")}
 											type="email"
 											autoComplete="email"
@@ -108,6 +129,11 @@ function ForgotForm({ onSuccess, onModeChange }: ForgotFormProps) {
 						)}
 					/>
 				</fieldset>
+				{error && (
+					<p role="alert" className="my-4 text-sm text-destructive">
+						{error}
+					</p>
+				)}
 
 				<footer className="mt-auto flex shrink-0 flex-col gap-2 px-1">
 					<Button
@@ -116,7 +142,7 @@ function ForgotForm({ onSuccess, onModeChange }: ForgotFormProps) {
 						className="w-full"
 						size="2xl"
 					>
-						{t("auth.forgot.reset_password")}
+						{t(isSubmitting ? "auth.forgot.sending" : "auth.forgot.submit")}
 					</Button>
 
 					<Button

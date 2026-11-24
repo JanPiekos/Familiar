@@ -11,6 +11,7 @@ export const ROUTE_SEO = {
 	"/{-$locale}/_main/auth/login": { key: "login", private: true },
 	"/{-$locale}/_main/auth/register": { key: "register", private: true },
 	"/{-$locale}/_main/auth/forgot": { key: "forgot", private: true },
+	"/{-$locale}/_main/auth/reset-password": { key: "reset_password", private: true },
 	"/{-$locale}/_main/auth/email-confirmed": {
 		key: "email_confirmed",
 		private: true,

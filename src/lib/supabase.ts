@@ -15,10 +15,43 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 	auth: {
 		autoRefreshToken: true,
 		persistSession: true,
-		// Consume the session returned in the URL after email confirmation.
-		detectSessionInUrl: true,
+		// The reset page verifies its own callback without replacing the signed-in account.
+		detectSessionInUrl:
+			typeof window === "undefined" ||
+			!/\/auth\/reset-password\/?$/.test(window.location.pathname),
 	},
 });
+
+let recoveryAuth: typeof supabase.auth | undefined;
+
+export function getPasswordRecoveryAuth() {
+	if (recoveryAuth) return recoveryAuth;
+	const storageKey = `sb-${new URL(supabaseUrl as string).host}-password-recovery`;
+	// The email can open in a new tab. Share the PKCE verifier, but keep the
+	// resulting session in the tab that redeemed the link.
+	const storageFor = (key: string) =>
+		key.endsWith("-code-verifier")
+			? window.localStorage
+			: window.sessionStorage;
+	recoveryAuth = createClient(
+		supabaseUrl as string,
+		supabaseAnonKey as string,
+		{
+			auth: {
+				flowType: "pkce",
+				storageKey,
+				autoRefreshToken: false,
+				detectSessionInUrl: false,
+				storage: {
+					getItem: (key) => storageFor(key).getItem(key),
+					setItem: (key, value) => storageFor(key).setItem(key, value),
+					removeItem: (key) => storageFor(key).removeItem(key),
+				},
+			},
+		},
+	).auth;
+	return recoveryAuth;
+}
 
 export function getSupabaseStorageKey() {
 	try {
