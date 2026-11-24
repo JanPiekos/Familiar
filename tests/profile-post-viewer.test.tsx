@@ -43,7 +43,10 @@ vi.mock("@/hooks/user/use-user", () => ({
 vi.mock("@/providers/auth", () => ({
 	useAuth: () => ({ user: { userId: "artist", username: "artist" } }),
 }));
-vi.mock("@/components/layout/profile/user", () => ({
+vi.mock("@/components/layout/profile/user", async (importOriginal) => ({
+	...(await importOriginal<
+		typeof import("@/components/layout/profile/user")
+	>()),
 	default: () => (
 		<div>
 			Demo artist <span>@artist</span>
@@ -105,6 +108,12 @@ it("fits the first artwork and keeps the frame stable while navigating a mixed-r
 	imageLoaded(3000, 1000);
 	expect(dialog.style.getPropertyValue("--post-ratio")).toBe("3");
 	expect(screen.getAllByText("Demo artist", { exact: false })).toHaveLength(1);
+	expect(
+		screen.getByText("Demo artist").closest("button, a, [role=button]"),
+	).toBeNull();
+	expect(
+		screen.getByText("@artist").closest("button, a, [role=button]"),
+	).toBeNull();
 	expect(screen.getByText("October 27, 2026")).toBeTruthy();
 	expect(screen.queryByRole("link", { name: "View full size" })).toBeNull();
 	fireEvent.click(screen.getByRole("button", { name: "Next image" }));

@@ -6,6 +6,7 @@ const state = vi.hoisted(() => ({ mobile: false }));
 const user = { userId: "me", username: "hasira", displayName: "Hasira", bio: "Old bio", roles: [], socials: [], createdAt: "2026-01-01" };
 vi.mock("@/providers/auth", () => ({ useAuth: () => ({ user: { userId: "me", username: "hasira", roles: [] }, logout: vi.fn() }) }));
 vi.mock("@/hooks/ui/use-mobile", () => ({ useIsMobile: () => state.mobile, useIsTablet: () => state.mobile }));
+vi.mock("@/providers/theme", () => ({ useTheme: () => ({ userTheme: "system", setTheme: vi.fn() }) }));
 vi.mock("@/components/layout/modal/profile/settings/settings-modal", async () => {
 	const { Dialog } = await import("radix-ui");
 	return { UserSettingsModal: ({ open, onOpenChange }: any) => (
